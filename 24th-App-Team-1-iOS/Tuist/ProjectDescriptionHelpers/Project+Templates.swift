@@ -5,7 +5,7 @@
 //  Created by eunseou on 6/10/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 
 //additionalFiles : Xcode에서 자동으로 연결 해주지 않는 파일을 연결 하기 위해 사용하는 인스턴스 프로퍼티
 // options : Xcode > Setting에 대한 설정을 정의함

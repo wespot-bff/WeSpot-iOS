@@ -5,7 +5,7 @@
 //  Created by Kim dohyun on 7/22/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import ProjectDescriptionHelpers
 
 let voteDomain = Project.makeProject(

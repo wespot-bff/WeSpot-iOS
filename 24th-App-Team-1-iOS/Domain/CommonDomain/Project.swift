@@ -5,7 +5,7 @@
 //  Created by eunseou on 8/3/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import ProjectDescriptionHelpers
 
 let commonDomain = Project.makeProject(

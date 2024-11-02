@@ -5,7 +5,7 @@
 //  Created by Kim dohyun on 6/10/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 
 extension TargetDependency {
     public struct SPM { }

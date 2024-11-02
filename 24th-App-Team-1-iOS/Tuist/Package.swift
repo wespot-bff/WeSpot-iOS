@@ -1,11 +1,10 @@
-// swift-tools-version: 5.9
-import PackageDescription
+// swift-tools-version: 6.0
+@preconcurrency import PackageDescription
 
 
 #if TUIST
-    import ProjectDescription
-
-    let packageSettings = PackageSettings(
+@preconcurrency import ProjectDescription
+ let packageSettings = PackageSettings(
         // Customize the product types for specific package product
         // Default is .staticFramework
         // productTypes: ["Alamofire": .framework,] 
@@ -17,7 +16,8 @@ import PackageDescription
             "KakaoSDKCommon": .framework,
             "RxKakaoSDKCommon": .framework,
             "RxKakaoSDKAuth": .framework,
-            "RxKakaoSDKUser": .framework
+            "RxKakaoSDKUser": .framework,
+            "Then": .framework
         ],
         baseSettings: .settings(configurations: [
             .debug(name: .configuration("DEV")),
