@@ -21,7 +21,7 @@ public final class SignUpGradeViewController: BaseViewController<SignUpGradeView
     
     //MARK: - Properties
     private let titleLabel = WSLabel(wsFont: .Header01, text: "학년")
-    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 이름을 변경할 수 없어요")
+    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 학교 변경이 어려워요")
     private let gradeTextField = WSTextField(state: .default)
     private let nextButton = WSButton(wsButtonType: .default(12))
     private let gradeTextFieldtapGesture = UITapGestureRecognizer()
@@ -143,7 +143,7 @@ public final class SignUpGradeViewController: BaseViewController<SignUpGradeView
         bottomSheetView.firstGradeButton.checkButton.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                owner.showWSToast(image: .warning, message: "만 14세 미만은 가입이 어려워요")
+                owner.showWSToast(image: .warning, message: "회원가입 이후에는 변경이 어려워요")
             }
             .disposed(by: disposeBag)
         

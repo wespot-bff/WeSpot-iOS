@@ -29,7 +29,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
     private let userNameTextField: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "김선희", title: "이름")
     private let userGenderTextFiled: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "여", title: "성별")
     private let userClassInfoTextField: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "역삼중학교 1학년 6반", title: "학적 정보")
-    private let userIntroduceTextField: WSTextField = WSTextField(state: .default, placeholder: "안녕 난 선희다", title: "한줄 소개")
+    private let userIntroduceTextField: WSTextField = WSTextField(state: .default, placeholder: "안녕 난 선희다", title: "MBTI")
     private let privacyButton: WSButton = WSButton(wsButtonType: .default(12))
     private let editButton: WSButton = WSButton(wsButtonType: .default(12))
     private let errorLabel: WSLabel = WSLabel(wsFont: .Body07)

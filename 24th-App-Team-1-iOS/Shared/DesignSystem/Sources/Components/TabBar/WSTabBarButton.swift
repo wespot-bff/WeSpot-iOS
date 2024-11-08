@@ -20,7 +20,7 @@ public final class WSTabBarButton: UIButton {
         var text: String {
             switch self {
             case .vote:
-                "투표"
+                "비밀 투표"
             case .message:
                 "쪽지"
             case .all:

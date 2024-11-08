@@ -21,8 +21,8 @@ public final class SignUpClassViewController: BaseViewController<SignUpClassView
 
     //MARK: - Properties
     private let titleLabel = WSLabel(wsFont: .Header01, text: "반")
-    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 이름을 변경할 수 없어요")
-    private let classTextField = WSTextField(state: .default, placeholder: "숫자로 입력해 주세요")
+    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 학년 변경이 어려워요")
+    private let classTextField = WSTextField(state: .default, placeholder: "현재 반을 입력해 주세요")
     private let warningLabel = WSLabel(wsFont: .Body07, text: "정확한 반을 입력해 주세요")
     private let nextButton = WSButton(wsButtonType: .default(12))
     private let accountInjector: Injector = DependencyInjector(container: Container())

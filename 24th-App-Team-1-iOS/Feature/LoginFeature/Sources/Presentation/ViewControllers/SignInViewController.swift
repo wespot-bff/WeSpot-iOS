@@ -150,7 +150,7 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
         }
         
         lottieLabel.do {
-            $0.text = "위스팟 행성에 오신 것을 환영해요!\n오래 전부터 기다리고 있었어요"
+            $0.text = "위스팟 행성에 오신 것을 환영해요!\n기다리고 있었어요"
             $0.textColor = DesignSystemAsset.Colors.gray100.color
         }
         
@@ -224,6 +224,7 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
             .filter { $0 != nil }
             .withLatestFrom(reactor.state.map { $0.accountRequest })
             .bind(with: self) { owner, response in
+                
                 let signUpSchoolViewController = DependencyContainer.shared.injector.resolve(SignUpSchoolViewController.self, arguments: response, "")
                 owner.navigationController?.setViewControllers([signUpSchoolViewController], animated: true)
             }
@@ -263,7 +264,7 @@ extension SignInViewController: UIScrollViewDelegate {
             firstBackgroundView.isHidden = false
             DispatchQueue.global().async {
                 OperationQueue.main.addOperation {
-                    self.lottieLabel.text = "위스팟 행성에 오신 것을 환영해요!\n오래 전부터 기다리고 있었어요"
+                    self.lottieLabel.text = "위스팟 행성에 오신 것을 환영해요!\n 기다리고 있었어요"
                 }
             }
             firstLottieView.toggleAnimation(isStatus: true)
@@ -271,14 +272,15 @@ extension SignInViewController: UIScrollViewDelegate {
             firstBackgroundView.isHidden = true
             DispatchQueue.global().async {
                 OperationQueue.main.addOperation {
-                    self.lottieLabel.text = "친구들과 함께 투표에 참여하고\n서로에 대해 알아가 볼까요?"
+                    self.lottieLabel.text = "우리 반 비밀 투표에 참여하고\n서로에 대해 알아가고 볼까요?"
                 }
             }
+            
             secondLottieView.toggleAnimation(isStatus: true)
         } else {
             DispatchQueue.global().async {
                 OperationQueue.main.addOperation {
-                    self.lottieLabel.text = "매일 저녁 딱 세 통만 보낼 수 있는\n비밀 쪽지로 마음을 표현해 볼까요?"
+                    self.lottieLabel.text = "매일 저녁, 딱 세 통만 보낼 수 있는\n비밀 쪽지로 마음을 표현해 보세요!"
                 }
             }
             thirdLottieView.toggleAnimation(isStatus: true)

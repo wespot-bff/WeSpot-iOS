@@ -21,8 +21,8 @@ public final class SignUpNameViewController: BaseViewController<SignUpNameViewRe
     
     //MARK: - Properties
     private let titleLabel = WSLabel(wsFont: .Header01, text: "이름")
-    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 이름을 변경할 수 없어요")
-    private let nameTextField = WSTextField(state: .default, placeholder: "실명을 입력해 주세요")
+    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 이름 변경이 어려워요")
+    private let nameTextField = WSTextField(state: .default, placeholder: "실명을 입력해 주세요 (ex. 홍길동)")
     private let warningLabel = WSLabel(wsFont: .Body07)
     private let textLengthLabel = WSLabel(wsFont: .Body07)
     private let nextButton = WSButton(wsButtonType: .default(12))

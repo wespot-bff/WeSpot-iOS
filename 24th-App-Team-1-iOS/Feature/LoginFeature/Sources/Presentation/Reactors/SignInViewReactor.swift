@@ -111,7 +111,7 @@ public final class SignInViewReactor: Reactor {
                                             fcmToken: fcmToken)
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
-        if (accessToken?.isEmpty ?? true) {
+        if accessToken == nil {
             return createNewMemberUseCase
                 .execute(body: body)
                 .asObservable()
