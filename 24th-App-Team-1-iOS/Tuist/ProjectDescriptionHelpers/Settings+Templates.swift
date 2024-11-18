@@ -5,7 +5,7 @@
 //  Created by Kim dohyun on 6/27/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 
 
 extension Settings {

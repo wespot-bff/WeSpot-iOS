@@ -15,4 +15,5 @@ public protocol ProfileRepositoryProtocol {
     func fetchUserBlockItems(query: UserBlockRequestQuery) -> Single<UserBlockEntity?>
     func updateUserBlockItem(path: String) -> Single<Bool>
     func createUserResignItem() -> Single<Bool>
+    func updateUserProfileImage(query: UpdateUserProfileImageRequestQuery) -> Single<UpdateUserProfileImageEntity?>
 }

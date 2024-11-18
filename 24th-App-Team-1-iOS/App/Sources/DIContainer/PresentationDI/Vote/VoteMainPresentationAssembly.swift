@@ -27,12 +27,12 @@ struct VoteMainPresentationAssembly: Assembly {
             return VoteMainViewController(reactor: reactor)
         }
         
-        container.register(VoteMainViewReactor.self) { (resolver, isProfileChanged: Bool)  in
-            return VoteMainViewReactor(isProfileChanged: isProfileChanged)
+        container.register(VoteMainViewReactor.self) { resolver  in
+            return VoteMainViewReactor()
         }
         
-        container.register(VoteMainViewController.self) { (resolver, isProfileChanged: Bool) in
-            let reactor = resolver.resolve(VoteMainViewReactor.self, argument: isProfileChanged)!
+        container.register(VoteMainViewController.self) { resolver in
+            let reactor = resolver.resolve(VoteMainViewReactor.self)!
             return VoteMainViewController(reactor: reactor)
         }
     }

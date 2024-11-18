@@ -52,4 +52,28 @@ public final class WSNetworkService: WSNetworkServiceProtocol {
             return Disposables.create()
         }
     }
+    
+    public func upload(endPoint: URLRequestConvertible, binaryData: Data) -> Single<(HTTPURLResponse?)> {
+        return Single<(HTTPURLResponse?)>.create { single in
+       WSNetworkService.session.upload(binaryData, with: endPoint)
+                .response { response in
+                    switch response.result {
+                    case .success(_):
+                        single(.success(response.response))
+                    case let .failure(error):
+                        switch response.response?.statusCode {
+                        case 400:
+                            single(.failure(WSNetworkError.badRequest(message: response.request?.url?.absoluteString ?? "")))
+                        case 401:
+                            single(.failure(WSNetworkError.unauthorized))
+                        case 404:
+                            single(.failure(WSNetworkError.notFound))
+                        default:
+                            single(.failure(WSNetworkError.default(message: error.localizedDescription)))
+                        }
+                    }
+                }
+            return Disposables.create()
+        }
+    }
 }

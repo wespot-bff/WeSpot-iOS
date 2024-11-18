@@ -5,7 +5,7 @@
 //  Created by Kim dohyun on 6/9/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 
 struct TargetConfig {
     var name: String

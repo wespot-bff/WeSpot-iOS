@@ -23,7 +23,7 @@ public struct UserProfileResponseDTO: Decodable {
 extension UserProfileResponseDTO {
     public struct UserProfileResponseItemDTO: Decodable {
         public let backgroundColor: String
-        public let iconUrl: String
+        public let iconUrl: String?
     }
 }
 
@@ -43,6 +43,9 @@ extension UserProfileResponseDTO {
 
 extension UserProfileResponseDTO.UserProfileResponseItemDTO {
     func toDomain() -> UserProfileResponseEntity {
-        return .init(backgroundColor: backgroundColor, iconUrl: URL(string: iconUrl) ?? URL(fileURLWithPath: ""))
+        return .init(
+            backgroundColor: backgroundColor,
+            iconUrl: iconUrl
+        )
     }
 }

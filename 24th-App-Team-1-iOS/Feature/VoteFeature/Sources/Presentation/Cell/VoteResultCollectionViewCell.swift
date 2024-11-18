@@ -39,14 +39,14 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
     private func setupUI() {
         resultContainerView.addSubview(resultDescriptionLabel)
         faceView.addSubview(faceImageView)
-        addSubviews(rankView, descriptionLabel, faceView, nameLabel, introduceLabel, resultContainerView)
+        contentView.addSubviews(rankView, descriptionLabel, faceView, nameLabel, introduceLabel, resultContainerView)
     }
     
     //MARK: - Configure
     private func setupAutoLayout() {
         rankView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(18)
-            $0.left.equalToSuperview().offset(20)
+            $0.top.equalToSuperview().inset(18)
+            $0.left.equalToSuperview().inset(20)
             $0.width.equalTo(98)
             $0.height.equalTo(36)
         }

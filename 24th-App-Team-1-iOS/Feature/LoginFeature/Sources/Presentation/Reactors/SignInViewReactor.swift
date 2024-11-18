@@ -20,16 +20,14 @@ import KeychainSwift
 public final class SignInViewReactor: Reactor {
     
     private let createNewMemberUseCase: CreateNewMemberUseCaseProtocol
-    private let createExistingUseCase: CreateExistingMemberUseCaseProtocol
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     public var initialState: State
     
     public struct State {
-        @Pulse var signUpTokenResponse: CreateSignUpTokenResponseEntity?
-        @Pulse var existingAccountResponse: CreateExistingTokenEntity?
-        @Pulse var isLoading: Bool
-        var accountResponse: CreateAccountResponseEntity?
         var accountRequest: CreateAccountRequest
+        @Pulse var signUpTokenResponse: CreateSignUpTokenResponseEntity?
+        @Pulse var isLoading: Bool
+        @Pulse var isShow: Bool
     }
     
     public enum Action {
@@ -39,17 +37,16 @@ public final class SignInViewReactor: Reactor {
     
     public enum Mutation {
         case setSignUpTokenResponse(CreateSignUpTokenResponseEntity)
-        case setAccountExisting(CreateExistingTokenEntity)
         case setLoading(Bool)
+        case setTransitionFlag(Bool)
     }
     
-    public init(createNewMemberUseCase: CreateNewMemberUseCaseProtocol,
-                createExistingUseCase: CreateExistingMemberUseCaseProtocol) {
+    public init(createNewMemberUseCase: CreateNewMemberUseCaseProtocol) {
         self.createNewMemberUseCase = createNewMemberUseCase
-        self.createExistingUseCase = createExistingUseCase
         self.initialState = State(
+            accountRequest: CreateAccountRequest(),
             isLoading: false,
-            accountRequest: CreateAccountRequest()
+            isShow: false
         )
     }
     
@@ -111,7 +108,8 @@ public final class SignInViewReactor: Reactor {
                                             fcmToken: fcmToken)
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
-        if (accessToken?.isEmpty ?? true) {
+        
+        if accessToken == nil {
             return createNewMemberUseCase
                 .execute(body: body)
                 .asObservable()
@@ -123,21 +121,8 @@ public final class SignInViewReactor: Reactor {
                         .just(.setLoading(true))
                     )
                 }
-            
         } else {
-            return createExistingUseCase
-                .execute(body: body)
-                .asObservable()
-                .flatMap { response -> Observable<Mutation> in
-                    guard let response else {
-                        return .empty()
-                    }
-                    return .concat(
-                        .just(.setLoading(false)),
-                        .just(.setAccountExisting(response)),
-                        .just(.setLoading(true))
-                    )
-                }
+            return .just(.setTransitionFlag(true))
         }
     }
     
@@ -151,15 +136,10 @@ public final class SignInViewReactor: Reactor {
                 .toFormatLocaleString(with: .dashYyyyMMddhhmmss)
                 .toLocalDate(with: .dashYyyyMMddhhmmss)
             UserDefaultsManager.shared.expiredDate = expiredDate
-        case let .setAccountExisting(existingAccountResponse):
-            let refreshToken = existingAccountResponse.refreshToken
-            let accessToken = existingAccountResponse.accessToken
-            
-            newState.existingAccountResponse = existingAccountResponse
-            KeychainManager.shared.set(value: refreshToken, type: .refreshToken)
-            KeychainManager.shared.set(value: accessToken, type: .accessToken)
         case .setLoading(let isLoading):
             newState.isLoading = isLoading
+        case let .setTransitionFlag(isShow):
+            newState.isShow = isShow
         }
         return newState
     }

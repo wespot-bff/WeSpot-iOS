@@ -13,4 +13,5 @@ import RxSwift
 
 public protocol WSNetworkServiceProtocol {
     func request(endPoint: URLRequestConvertible) -> Single<Data>
+    func upload(endPoint: URLRequestConvertible, binaryData: Data) -> Single<(HTTPURLResponse?)>
 }

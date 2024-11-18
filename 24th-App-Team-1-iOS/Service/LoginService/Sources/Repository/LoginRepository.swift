@@ -33,23 +33,11 @@ public final class LoginRepository: LoginRepositoryProtocol {
             .asSingle()
     }
     
-    public func createExistingMember(body: CreateSignUpTokenRequest) -> Single<CreateExistingTokenEntity?> {
-        let body = CreateSignUpTokenRequestDTO(socialType: body.socialType, authorizationCode: body.authorizationCode, identityToken: body.identityToken, fcmToken: body.fcmToken)
-        let endPoint = LoginEndPoint.createSocialLogin(body)
-        
-        return networkService.request(endPoint: endPoint)
-            .asObservable()
-            .decodeMap(CreateExistingTokenResponseDTO.self)
-            .logErrorIfDetected(category: Network.error)
-            .map { $0.toDomain() }
-            .asSingle()
-    }
-    
     
     
     public func createAccount(body: CreateAccountRequest) -> Single<CreateAccountResponseEntity?> {
         let consents = ConsentsRequestDTO(marketing: body.consents.marketing)
-        let body = CreateAccountRequestDTO(name: body.name, gender: body.gender.uppercased(), schoolId: body.schoolId, grade: body.grade, classNumber: body.classNumber, consents: consents, signUpToken: body.signUpToken)
+        let body = CreateAccountRequestDTO(name: body.name, gender: body.gender.uppercased(), schoolId: body.schoolId, grade: body.grade, classNumber: body.classNumber, consents: consents, signUpToken: body.signUpToken, profileUrl: body.profileUrl, introduction: body.introduction)
         let endPoint = LoginEndPoint.createAccount(body)
         return networkService.request(endPoint: endPoint)
             .asObservable()

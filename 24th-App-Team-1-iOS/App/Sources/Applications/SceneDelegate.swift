@@ -36,7 +36,6 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         DependencyContainer.shared.injector.assemble([
             SignInPresentationAssembly(),
             SignUpNamePresentationAssembly(),
-            SetUpProfilePresntationAssembly(),
             SignUpClassPresentationAssembly(),
             SignUpGenderPresentationAssembly(),
             SignUpResultPresentationAssembly(),
@@ -57,7 +56,6 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
             MessageHomePresentationAssembly(),
             AllMainPresentationAssembly(),
             AllMainProfilePresentationAssembly(),
-            AllMainProfileEditPresentationAssembly(),
             AllMainProfileWebPresentationAssembly(),
             AllMainProfileSettingPresentationAssembly(),
             AllMainProfileAlarmSettingPresentationAssembly(),
@@ -84,7 +82,6 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         } else { // accessToken 값이 있으면 (회원가입이 됨)
             setupMainViewController()
         }
-        setupViewControllers()
         window?.makeKeyAndVisible()
     }
     
@@ -104,12 +101,6 @@ extension SceneDelegate {
     //TODO: Coordinator 패턴으로 수정
     private func setupViewControllers() {
         
-        NotificationCenter.default.addObserver(forName: .showProfileImageViewController, object: nil, queue: .main) { [weak self] _ in
-            guard let self else { return }
-            let setupProfileViewController = DependencyContainer.shared.injector.resolve(SetUpProfileImageViewController.self)
-            self.window?.rootViewController = UINavigationController(rootViewController: setupProfileViewController)
-        }
-        
         NotificationCenter.default.addObserver(forName: .showVoteMainViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             setupMainViewController()
@@ -118,7 +109,7 @@ extension SceneDelegate {
         NotificationCenter.default.addObserver(forName: .showSignUpMainViewController, object: nil, queue: .main) { [weak self] notification in
             guard let self = self,
                   let userInfo = notification.userInfo?["isProfileChanged"] as? Bool else { return }
-            setupSignUpViewController(isProfileChanged: userInfo)
+            setupSignUpViewController()
         }
         
         NotificationCenter.default.addObserver(forName: .showSignInViewController, object: nil, queue: .main) { [weak self] _ in
@@ -175,10 +166,10 @@ extension SceneDelegate {
 
 
 extension SceneDelegate {
-    private func setupSignUpViewController(isProfileChanged: Bool) {
+    private func setupSignUpViewController() {
         
         
-        let signUpMainViewController = DependencyContainer.shared.injector.resolve(VoteMainViewController.self, argument: isProfileChanged)
+        let signUpMainViewController = DependencyContainer.shared.injector.resolve(VoteMainViewController.self)
         let voteNavigationContoller = UINavigationController(rootViewController: signUpMainViewController)
         
         let messageMainViewController = DependencyContainer.shared.injector.resolve(MessageMainViewController.self)

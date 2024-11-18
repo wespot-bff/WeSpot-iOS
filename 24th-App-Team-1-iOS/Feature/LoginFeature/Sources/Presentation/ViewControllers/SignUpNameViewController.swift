@@ -158,9 +158,10 @@ public final class SignUpNameViewController: BaseViewController<SignUpNameViewRe
         
         reactor.pulse(\.$isConfirm)
             .filter { $0 == true }
-            .bind(with: self) { owner, _ in
-                let signUpResultViewController = DependencyContainer.shared.injector.resolve(SignUpResultViewController.self, arguments: reactor.currentState.accountRequest, reactor.currentState.schoolName )
-                owner.navigationController?.pushViewController(signUpResultViewController, animated: true)
+            .withLatestFrom(reactor.state.map { $0.accountRequest})
+            .bind(with: self) { owner, arg in
+                let signupIntroduceViewController = DependencyContainer.shared.injector.resolve(SignUpIntroduceViewController.self, arguments: arg, reactor.currentState.schoolName )
+                owner.navigationController?.pushViewController(signupIntroduceViewController, animated: true)
             }
             .disposed(by: disposeBag)
     }

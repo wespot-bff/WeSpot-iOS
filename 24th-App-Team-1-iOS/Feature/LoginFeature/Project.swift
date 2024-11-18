@@ -5,7 +5,7 @@
 //  Created by eunseou on 6/11/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import ProjectDescriptionHelpers
 
 let loginFeature = Project.makeProject(

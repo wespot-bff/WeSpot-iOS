@@ -20,45 +20,33 @@ public enum LoginEndPoint: WSNetworkEndPoint {
     // 학교 정보 검색 API
     case fetchSchoolList(Encodable)
     
-    public var path: String {
+    public var spec: WSNetworkSpec {
         switch self {
-        case .createSocialLogin:
-            return "/auth/login"
         case .createAccount:
-            return "/auth/signup"
-        case .createRefreshToken:
-            return "/auth/reissue"
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/signup")
+        case .createSocialLogin:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/login")
         case .fetchSchoolList:
-            return "/schools/search"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/schools/search")
+        case .createRefreshToken:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/reissue"))")
         }
     }
     
-    public var method: HTTPMethod {
+    
+    public var parameters: WSRequestParameters {
         switch self {
-        case .createSocialLogin:
-            return .post
-        case .createAccount:
-            return .post
-        case .createRefreshToken:
-            return .post
-        case .fetchSchoolList:
-            return .get
+        case .createSocialLogin(let body):
+            return .requestBody(body)
+        case .createAccount(let body):
+            return .requestBody(body)
+        case .createRefreshToken(let body):
+            return .requestBody(body)
+        case .fetchSchoolList(let name):
+            return .requestQuery(name)
         }
     }
     
-        public var parameters: WSRequestParameters {
-            switch self {
-            case .createSocialLogin(let body):
-                return .requestBody(body)
-            case .createAccount(let body):
-                return .requestBody(body)
-            case .createRefreshToken(let body):
-                return .requestBody(body)
-            case .fetchSchoolList(let name):
-                return .requestQuery(name)
-            }
-        }
-        
     
     public var headers: HTTPHeaders {
         return [

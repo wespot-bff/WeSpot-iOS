@@ -5,7 +5,7 @@
 //  Created by Kim dohyun on 7/10/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 
 
 public extension Path {

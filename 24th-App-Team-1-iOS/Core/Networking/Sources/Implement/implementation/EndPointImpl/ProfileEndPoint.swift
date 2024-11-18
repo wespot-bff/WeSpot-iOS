@@ -31,38 +31,25 @@ public enum ProfileEndPoint: WSNetworkEndPoint {
     case updateUserBlock(String)
     /// 사용자 회원 탈퇴 API
     case updateUserResign
+    /// 사용자 프로필 이미지 수정 API
+    case editProfileImage(Encodable)
     
-    public var path: String {
+    public var spec: WSNetworkSpec {
         switch self {
         case .fetchUserProfile:
-            return "/users/me"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/me")
         case .updateNotification:
-            return "/users/settings"
+            return WSNetworkSpec(method: .put, url: "\(WSNetworkConfigure.baseURL)/users/settings")
         case .fetchNotification:
-            return "/users/settings"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/settings")
         case .fetchUserBlock:
-            return "/messages/blocked"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/messages/blocked")
         case let .updateUserBlock(messageId):
-            return "/messages/\(messageId)/unblock"
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/messages/\(messageId)/unblock")
         case .updateUserResign:
-            return "/auth/revoke"
-        }
-    }
-    
-    public var method: HTTPMethod {
-        switch self {
-        case .fetchUserProfile:
-            return .get
-        case .updateNotification:
-            return .put
-        case .fetchNotification:
-            return .get
-        case .fetchUserBlock:
-            return .get
-        case .updateUserBlock:
-            return .post
-        case .updateUserResign:
-            return .post
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/users/revoke")
+        case .editProfileImage:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/image/update-profile")
         }
     }
     
@@ -71,6 +58,8 @@ public enum ProfileEndPoint: WSNetworkEndPoint {
         case let .updateNotification(body):
             return .requestBody(body)
         case let .fetchUserBlock(query):
+            return .requestQuery(query)
+        case let .editProfileImage(query):
             return .requestQuery(query)
         default:
             return .none

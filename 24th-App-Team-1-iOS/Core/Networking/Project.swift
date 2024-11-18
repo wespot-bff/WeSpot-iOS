@@ -5,7 +5,7 @@
 //  Created by eunseou on 6/12/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project

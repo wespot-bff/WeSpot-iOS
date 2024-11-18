@@ -130,6 +130,7 @@ public final class WSTextField: UITextField {
         titleLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(10)
             make.trailing.equalToSuperview()
+            make.height.equalTo(24)
             make.bottom.equalTo(self.snp.top).offset(-12)
         }
     }

@@ -15,13 +15,20 @@ public final class ProfileSettingViewReactor: Reactor {
     private let createCheckProfanityUseCase: CreateCheckProfanityUseCaseProtocol
     private let updateUserProfileUseCase: UpdateUserProfileUseCaseProtocol
     private let fetchUserProfileUseCase: FetchUserProfileUseCaseProtocol
+    private let updateUserProfileImageUseCase: UpdateUserProfileImageUseCaseProtocol
+    private let updateUserProfileUploadUseCase :UpdateUserProfileUploadUseCaseProtocol
+    private let createPresignedURLUseCase: CreatePresigendURLUseCaseProtocol
+    
+    
     
     
     public struct State {
         @Pulse var isProfanity: Bool
+        @Pulse var userProfileImageEntity: UpdateUserProfileImageEntity?
         @Pulse var userProfileEntity: UserProfileEntity?
         @Pulse var isUpdate: Bool
         @Pulse var isLoading: Bool
+        @Pulse var imageData: Data?
         var errorMessage: String
         @Pulse var isEnabled: Bool
         var introudce: String
@@ -29,15 +36,18 @@ public final class ProfileSettingViewReactor: Reactor {
     
     public enum Action {
         case didUpdateIntroduceProfile(String)
+        case didTappedProfileEditButton(Data)
         case didTapUpdateUserButton
         case viewWillAppear
     }
     
     public enum Mutation {
         case setCheckProfanityValidation(Bool)
+        case setProfileImage(Data)
         case setButtonEnabled(Bool)
         case setErrorDescriptionMessage(String)
         case setUpdateUserProfileItem(UserProfileEntity)
+        case setUserProfileImageItem(UpdateUserProfileImageEntity)
         case setUpdateIntroduce(String)
         case setUpdateUserProfile(Bool)
         case setLoading(Bool)
@@ -48,11 +58,17 @@ public final class ProfileSettingViewReactor: Reactor {
     public init(
         createCheckProfanityUseCase: CreateCheckProfanityUseCaseProtocol,
         updateUserProfileUseCase: UpdateUserProfileUseCaseProtocol,
-        fetchUserProfileUseCase: FetchUserProfileUseCaseProtocol
+        fetchUserProfileUseCase: FetchUserProfileUseCaseProtocol,
+        updateUserProfileImageUseCase: UpdateUserProfileImageUseCaseProtocol,
+        createPresignedURLUseCase: CreatePresigendURLUseCaseProtocol,
+        updateUserProfileUploadUseCase: UpdateUserProfileUploadUseCaseProtocol
     ) {
         self.createCheckProfanityUseCase = createCheckProfanityUseCase
         self.updateUserProfileUseCase = updateUserProfileUseCase
         self.fetchUserProfileUseCase = fetchUserProfileUseCase
+        self.updateUserProfileImageUseCase = updateUserProfileImageUseCase
+        self.createPresignedURLUseCase = createPresignedURLUseCase
+        self.updateUserProfileUploadUseCase = updateUserProfileUploadUseCase
         self.initialState = State(
             isProfanity: false,
             isUpdate: false,
@@ -97,7 +113,7 @@ public final class ProfileSettingViewReactor: Reactor {
                         
                         let isDisabled = !isChanged || !isValid
                         let errorMessage = isValid ? "" : "20자 이내로 입력 가능해요"
-                                
+                        
                         return .concat(
                             .just(.setCheckProfanityValidation(!isValid)),
                             .just(.setErrorDescriptionMessage(errorMessage)),
@@ -107,21 +123,36 @@ public final class ProfileSettingViewReactor: Reactor {
                     }
                 }
         case .didTapUpdateUserButton:
+            let query = CreateProfilePresignedURLQuery(imageExtension: "jpeg")
             
-            //TODO: UserDefaults 로 데이터를 저장해야함
-            guard let iconURL = currentState.userProfileEntity?.profile.iconUrl.absoluteString,
-                  let backgroundColor = currentState.userProfileEntity?.profile.backgroundColor else { return .empty() }
-            
-            let updateUserProfileBody = UpdateUserProfileRequest(introduction: currentState.introudce, backgroundColor: backgroundColor, iconUrl: iconURL)
-            return updateUserProfileUseCase.execute(body: updateUserProfileBody)
+            return createPresignedURLUseCase.execute(query: query)
                 .asObservable()
-                .flatMap { isUpdate -> Observable<Mutation> in
-                    return .concat(
-                        .just(.setLoading(false)),
-                        .just(.setUpdateUserProfile(isUpdate)),
-                        .just(.setLoading(true))
-                    )
+                .withUnretained(self)
+                .flatMap { owner, presignedInfo -> Observable<Mutation> in
+                    guard let entity = presignedInfo else {
+                        return .empty()
+                    }
+                    
+                    return owner.updateUserProfileUploadUseCase.execute(owner.currentState.imageData ?? .empty, presigendURL: entity.presignedURL)
+                        .asObservable()
+                        .flatMap { isUpload -> Observable<Mutation> in
+                            let profileQuery = UpdateUserProfileImageRequestQuery(url: entity.imageURL)
+                            return owner.updateUserProfileImageUseCase.execute(query: profileQuery)
+                                .asObservable()
+                                .flatMap { entity -> Observable<Mutation> in
+                                    guard let entity else{
+                                        return .empty()
+                                    }
+                                    return .concat(
+                                        .just(.setLoading(false)),
+                                        .just(.setUserProfileImageItem(entity)),
+                                        .just(.setLoading(true))
+                                    )
+                                }
+                        }
                 }
+        case let .didTappedProfileEditButton(binaryData):
+            return .just(.setProfileImage(binaryData))
         }
     }
     
@@ -142,6 +173,11 @@ public final class ProfileSettingViewReactor: Reactor {
             newState.isEnabled = isEnabled
         case let .setLoading(isLoading):
             newState.isLoading = isLoading
+        case let .setProfileImage(imageData):
+            newState.imageData = imageData
+        case let .setUserProfileImageItem(userProfileImageEntity):
+            print("set profile URL: \(userProfileImageEntity)")
+            newState.userProfileImageEntity = userProfileImageEntity
         }
         
         return newState

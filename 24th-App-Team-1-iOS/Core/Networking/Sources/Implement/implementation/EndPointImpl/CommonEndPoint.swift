@@ -10,6 +10,7 @@ import Storage
 
 import Alamofire
 
+
 public enum CommonEndPoint: WSNetworkEndPoint {
     private var accessToken: String {
         guard let accessToken = KeychainManager.shared.get(type: .accessToken) else {
@@ -21,16 +22,35 @@ public enum CommonEndPoint: WSNetworkEndPoint {
     case fetchUserProfile
     // 비속어 검색 API
     case createProfanityCheck(Encodable)
-    // 프로필 캐릭터 정보 API
-    case fetchCharacters
-    // 프로필 배경색 정보 API
-    case fetchBackgrounds
     // 유저 신고 API
     case createUserReport(Encodable)
     /// 사용자 프로필 수정 API
     case updateUserProfile(Encodable)
     /// 질문지 조회 API
     case fetchVoteOptions
+    /// 사용자 프로필 이미지 Presigned URL 요청 API
+    case fetchProfilePresignedURL(Encodable)
+    
+    case uploadProfileImage(String)
+    
+    public var spec: WSNetworkSpec {
+        switch self {
+        case .fetchUserProfile:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/me")
+        case .createProfanityCheck:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/check-profanity")
+        case .createUserReport:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/reports")
+        case .updateUserProfile:
+            return WSNetworkSpec(method: .put, url: "\(WSNetworkConfigure.baseURL)/users/me")
+        case .fetchVoteOptions:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes/options")
+        case .fetchProfilePresignedURL:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/image/presigned-url")
+        case let .uploadProfileImage(presignedURL):
+            return WSNetworkSpec(method: .put, url: presignedURL)
+        }
+    }
     
     public var path: String {
         switch self {
@@ -38,16 +58,16 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return "/users/me"
         case .createProfanityCheck:
             return "/check-profanity"
-        case .fetchCharacters:
-            return "/users/characters"
-        case .fetchBackgrounds:
-            return "/users/backgrounds"
         case .createUserReport:
             return "/reports"
         case .updateUserProfile:
             return "/users/me"
         case .fetchVoteOptions:
-            return "votes/options"
+            return "/votes/options"
+        case .fetchProfilePresignedURL:
+            return "/image/presigned-url"
+        case .uploadProfileImage:
+            return ""
         }
     }
     
@@ -57,16 +77,16 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return .get
         case .createProfanityCheck:
             return .post
-        case .fetchCharacters:
-            return .get
-        case .fetchBackgrounds:
-            return .get
         case .createUserReport:
             return .post
         case .updateUserProfile:
             return .put
         case .fetchVoteOptions:
             return .get
+        case .fetchProfilePresignedURL:
+            return .get
+        case .uploadProfileImage:
+            return .put
         }
     }
     
@@ -74,23 +94,28 @@ public enum CommonEndPoint: WSNetworkEndPoint {
         switch self {
         case .createProfanityCheck(let messsage):
             return .requestBody(messsage)
-        case .fetchCharacters:
-            return .none
-        case .fetchBackgrounds:
-            return .none
         case let .createUserReport(body):
             return .requestBody(body)
         case let .updateUserProfile(body):
             return .requestBody(body)
+        case let .fetchProfilePresignedURL(query):
+            return .requestQuery(query)
         default:
             return .none
         }
     }
     
     public var headers: HTTPHeaders {
-        return [
-            "Content-Type": "application/json",
-            "Authorization": "Bearer \(accessToken)"
-        ]
+        switch self {
+        case .uploadProfileImage:
+            return [
+                "Content-Type": "image/jpeg",
+            ]
+        default:
+            return [
+                "Content-Type": "application/json",
+                "Authorization": "Bearer \(accessToken)"
+            ]
+        }
     }
 }
