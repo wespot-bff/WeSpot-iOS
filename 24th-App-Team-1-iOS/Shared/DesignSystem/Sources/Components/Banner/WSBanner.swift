@@ -81,7 +81,7 @@ public final class WSBanner: UIView {
     private func setupAutoLayout() {
         
         stackView.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(18)
+            $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.greaterThanOrEqualTo(arrowButton.snp.leading).offset(-5)
         }
@@ -121,5 +121,13 @@ public final class WSBanner: UIView {
     // image 업데이트 함수
     public func setImageView(_ image: UIImage) {
         imageView.image = image
+    }
+    
+    public func setTitleFont(_ font: WSFont) {
+        titleLabel.font = font.font()
+    }
+    
+    public func setSubTitleFont(_ font: WSFont) {
+        subLabel.font = font.font()
     }
 }

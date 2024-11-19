@@ -6,12 +6,13 @@
 //
 
 import UIKit
-
+import Extensions
 
 typealias WSTabbarConstraint = Const
 
 
 enum Const {
-    static let tabarHeight: CGFloat = UIScreen.main.isWideScreen ? 98 : 49
-    static let tabbarButtonSize: CGFloat = UIScreen.main.isWideScreen ? 40 : 20
+    static let tabarHeight: CGFloat = Device.isTouchIDCapableDevice ? 80 : 98
+    static let tabbarButtonSize: CGFloat = Device.isTouchIDCapableDevice ? 32 : 40
+    static let tabbarButtonSpacing: CGFloat = Device.isTouchIDCapableDevice ? 60 : 30
 }

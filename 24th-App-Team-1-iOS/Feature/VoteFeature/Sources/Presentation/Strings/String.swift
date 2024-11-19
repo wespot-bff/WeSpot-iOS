@@ -20,7 +20,7 @@ extension String.VoteResult {
     static let voteText: String = "비밀 투표하기"
     static let voteDescrptionText: String = "지금 우리 반 비밀 투표 진행 중!\n반 친구들에 대해 알려주세요"
     static let voteBannerSubText: String = "다양한 친구들과 더 재밌게 사용해 보세요"
-    static let voteBannerMainText: String = "같이 할 친구 데려오기"
+    static let voteBannerMainText: String = "위스팟에 친구 초대하기"
     static let voteHomeButtonText: String = "투표 홈"
     static let voteResultButtonText: String = "투표 결과"
     static let voteMyResultButtonText: String = "내가 받은 투표 보기"

@@ -26,8 +26,8 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
     )
     private let voteContainerView: UIView = UIView()
     private let voteConfirmButton: WSButton = WSButton(wsButtonType: .default(12))
-    private let voteDateLabel: WSLabel = WSLabel(wsFont: .Body06, text: Date().toFormatString(with: .MddEEE))
-    private let voteDescriptionLabel: WSLabel = WSLabel(wsFont: .Body01, text: VoteHomeStr.voteDescrptionText)
+    private let voteDateLabel: WSLabel = WSLabel(wsFont: VoteConstraint.voteDateLabelFont, text: Date().toFormatString(with: .MddEEE))
+    private let voteDescriptionLabel: WSLabel = WSLabel(wsFont: VoteConstraint.voteDescriptionLabelFont, text: VoteHomeStr.voteDescrptionText)
     private let voteImageView: UIImageView = UIImageView()
     private let voteLottieView: WSLottieView = WSLottieView()
     
@@ -49,39 +49,37 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
         super.setupAutoLayout()
         
         voteBannerView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(20)
+            $0.top.equalToSuperview().inset(VoteConstraint.voteBannerViewTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(80)
+            $0.height.equalTo(VoteConstraint.voteBannerViewHeight)
         }
         
         voteContainerView.snp.makeConstraints {
-            $0.top.equalTo(voteBannerView.snp.bottom).offset(16)
+            $0.top.equalTo(voteBannerView.snp.bottom).offset(VoteConstraint.voteContainerViewTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(400)
+            $0.height.equalTo(VoteConstraint.voteContainerViewHeight)
         }
         
         voteDateLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(24)
+            $0.top.equalToSuperview().offset(VoteConstraint.voteDateLabelTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(28)
             $0.height.equalTo(21)
         }
         
         voteDescriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(voteDateLabel.snp.bottom).offset(8)
+            $0.top.equalTo(voteDateLabel.snp.bottom).offset(VoteConstraint.voteDescriptionLabelTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(28)
-            $0.height.equalTo(54)
+            $0.height.equalTo(VoteConstraint.voteDescriptionLabelHeight)
         }
         
         voteLottieView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(20)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(335)
+            $0.edges.equalToSuperview()
         }
         
         voteConfirmButton.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(28)
-            $0.height.equalTo(52)
-            $0.bottom.equalToSuperview().offset(-28)
+            $0.horizontalEdges.equalToSuperview().inset(VoteConstraint.voteConfirmButtonHorizontalSpacing)
+            $0.height.equalTo(VoteConstraint.voteConfirmButtonHeight)
+            $0.bottom.equalToSuperview().offset(VoteConstraint.voteConfirmButtonBottomSpacing)
         }
         
     }
@@ -92,6 +90,11 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
             $0.backgroundColor = DesignSystemAsset.Colors.gray700.color
             $0.clipsToBounds = true
             $0.layer.cornerRadius = 18
+        }
+        
+        voteBannerView.do {
+            $0.setTitleFont(VoteConstraint.voteBannerMainFont)
+            $0.setSubTitleFont(VoteConstraint.voteBannerSubFont)
         }
         
         voteConfirmButton.do {
