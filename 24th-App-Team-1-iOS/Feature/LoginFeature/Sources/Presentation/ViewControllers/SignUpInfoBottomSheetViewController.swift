@@ -115,6 +115,9 @@ public final class SignUpInfoBottomSheetViewController: BaseViewController<SignU
         
         profileImageView.do {
             $0.image = DesignSystemAsset.Images.imgSignupProfileClear.image
+            $0.clipsToBounds = true
+            $0.layer.cornerRadius = 56 / 2
+            $0.contentMode = .scaleAspectFill
         }
         
         titleLabel.do {
@@ -155,7 +158,9 @@ public final class SignUpInfoBottomSheetViewController: BaseViewController<SignU
         reactor.state
             .filter { $0.profileImage != nil }
             .compactMap { $0.profileImage }
+            .observe(on: MainScheduler.asyncInstance)
             .map { UIImage(data: $0)}
+            .distinctUntilChanged()
             .bind(to: profileImageView.rx.image)
             .disposed(by: disposeBag)
         

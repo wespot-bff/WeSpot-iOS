@@ -36,7 +36,7 @@ public final class CommonRepository: CommonRepositoryProtocol {
     
     public func updateUserProfileItem(body: UpdateUserProfileRequest) -> Single<Bool> {
         
-        let body = UpdateUserProfileRequestDTO(introduction: body.introduction, backgroundColor: body.backgroundColor, iconUrl: body.iconUrl)
+        let body = UpdateUserProfileRequestDTO(introduction: body.introduction)
         let endPoint = CommonEndPoint.updateUserProfile(body)
         return networkService.request(endPoint: endPoint)
             .asObservable()

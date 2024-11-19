@@ -29,8 +29,9 @@ public final class ProfileSettingViewReactor: Reactor {
         @Pulse var isUpdate: Bool
         @Pulse var isLoading: Bool
         @Pulse var imageData: Data?
-        var errorMessage: String
         @Pulse var isEnabled: Bool
+        var isSelected: Bool
+        var errorMessage: String
         var introudce: String
     }
     
@@ -51,6 +52,7 @@ public final class ProfileSettingViewReactor: Reactor {
         case setUpdateIntroduce(String)
         case setUpdateUserProfile(Bool)
         case setLoading(Bool)
+        case setSelectedImage(Bool)
     }
     
     public let initialState: State
@@ -73,8 +75,9 @@ public final class ProfileSettingViewReactor: Reactor {
             isProfanity: false,
             isUpdate: false,
             isLoading: false,
-            errorMessage: "",
             isEnabled: false,
+            isSelected: false,
+            errorMessage: "",
             introudce: ""
         )
     }
@@ -123,36 +126,56 @@ public final class ProfileSettingViewReactor: Reactor {
                     }
                 }
         case .didTapUpdateUserButton:
-            let query = CreateProfilePresignedURLQuery(imageExtension: "jpeg")
-            
-            return createPresignedURLUseCase.execute(query: query)
-                .asObservable()
-                .withUnretained(self)
-                .flatMap { owner, presignedInfo -> Observable<Mutation> in
-                    guard let entity = presignedInfo else {
-                        return .empty()
+            if currentState.isSelected == false {
+                let body = UpdateUserProfileRequest(introduction: currentState.introudce)
+                return updateUserProfileUseCase.execute(body: body)
+                    .asObservable()
+                    .flatMap { isProfileUpdate -> Observable<Mutation> in
+                        return .concat(
+                            .just(.setLoading(false)),
+                            .just(.setUpdateUserProfile(isProfileUpdate)),
+                            .just(.setLoading(true))
+                        )
                     }
-                    
-                    return owner.updateUserProfileUploadUseCase.execute(owner.currentState.imageData ?? .empty, presigendURL: entity.presignedURL)
-                        .asObservable()
-                        .flatMap { isUpload -> Observable<Mutation> in
-                            let profileQuery = UpdateUserProfileImageRequestQuery(url: entity.imageURL)
-                            return owner.updateUserProfileImageUseCase.execute(query: profileQuery)
-                                .asObservable()
-                                .flatMap { entity -> Observable<Mutation> in
-                                    guard let entity else{
-                                        return .empty()
-                                    }
-                                    return .concat(
-                                        .just(.setLoading(false)),
-                                        .just(.setUserProfileImageItem(entity)),
-                                        .just(.setLoading(true))
-                                    )
-                                }
+
+            } else {
+                let query = CreateProfilePresignedURLQuery(imageExtension: "jpeg")
+                
+                return createPresignedURLUseCase.execute(query: query)
+                    .asObservable()
+                    .withUnretained(self)
+                    .flatMap { owner, presignedInfo -> Observable<Mutation> in
+                        guard let entity = presignedInfo else {
+                            return .empty()
                         }
-                }
+                        
+                        return owner.updateUserProfileUploadUseCase.execute(owner.currentState.imageData ?? .empty, presigendURL: entity.presignedURL)
+                            .asObservable()
+                            .flatMap { isUpload -> Observable<Mutation> in
+                                let profileQuery = UpdateUserProfileImageRequestQuery(url: entity.imageURL)
+                                return owner.updateUserProfileImageUseCase.execute(query: profileQuery)
+                                    .asObservable()
+                                    .flatMap { entity -> Observable<Mutation> in
+                                        guard let entity else{
+                                            return .empty()
+                                        }
+                                        return .concat(
+                                            .just(.setLoading(false)),
+                                            .just(.setUserProfileImageItem(entity)),
+                                            .just(.setUpdateUserProfile(true)),
+                                            .just(.setLoading(true))
+                                        )
+                                    }
+                            }
+                    }
+            }
+            
         case let .didTappedProfileEditButton(binaryData):
-            return .just(.setProfileImage(binaryData))
+            return .concat(
+                .just(.setProfileImage(binaryData)),
+                .just(.setSelectedImage(true)),
+                .just(.setButtonEnabled(true))
+            )
         }
     }
     
@@ -176,8 +199,9 @@ public final class ProfileSettingViewReactor: Reactor {
         case let .setProfileImage(imageData):
             newState.imageData = imageData
         case let .setUserProfileImageItem(userProfileImageEntity):
-            print("set profile URL: \(userProfileImageEntity)")
             newState.userProfileImageEntity = userProfileImageEntity
+        case let .setSelectedImage(isSelected):
+            newState.isSelected = isSelected
         }
         
         return newState

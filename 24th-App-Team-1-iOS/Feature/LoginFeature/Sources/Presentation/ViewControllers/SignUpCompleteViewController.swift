@@ -118,7 +118,7 @@ public final class SignUpCompleteViewController: BaseViewController<SignUpComple
         startButton.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind { _ in
-                NotificationCenter.default.post(name: .showSignUpMainViewController, object: nil)
+                NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
             }
             .disposed(by: disposeBag)
     }

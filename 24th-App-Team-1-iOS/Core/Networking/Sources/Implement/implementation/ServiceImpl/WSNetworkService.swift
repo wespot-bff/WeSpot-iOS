@@ -53,13 +53,14 @@ public final class WSNetworkService: WSNetworkServiceProtocol {
         }
     }
     
-    public func upload(endPoint: URLRequestConvertible, binaryData: Data) -> Single<(HTTPURLResponse?)> {
-        return Single<(HTTPURLResponse?)>.create { single in
+    public func upload(endPoint: URLRequestConvertible, binaryData: Data) -> Single<Bool> {
+        return Single<Bool>.create { single in
        WSNetworkService.session.upload(binaryData, with: endPoint)
+                .validate(statusCode: 200..<300)
                 .response { response in
                     switch response.result {
                     case .success(_):
-                        single(.success(response.response))
+                        single(.success(true))
                     case let .failure(error):
                         switch response.response?.statusCode {
                         case 400:

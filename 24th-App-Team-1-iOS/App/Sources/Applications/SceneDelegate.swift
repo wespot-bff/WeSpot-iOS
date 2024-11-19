@@ -82,6 +82,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         } else { // accessToken 값이 있으면 (회원가입이 됨)
             setupMainViewController()
         }
+        setupViewControllers()
         window?.makeKeyAndVisible()
     }
     
@@ -104,12 +105,6 @@ extension SceneDelegate {
         NotificationCenter.default.addObserver(forName: .showVoteMainViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             setupMainViewController()
-        }
-        
-        NotificationCenter.default.addObserver(forName: .showSignUpMainViewController, object: nil, queue: .main) { [weak self] notification in
-            guard let self = self,
-                  let userInfo = notification.userInfo?["isProfileChanged"] as? Bool else { return }
-            setupSignUpViewController()
         }
         
         NotificationCenter.default.addObserver(forName: .showSignInViewController, object: nil, queue: .main) { [weak self] _ in
@@ -166,25 +161,6 @@ extension SceneDelegate {
 
 
 extension SceneDelegate {
-    private func setupSignUpViewController() {
-        
-        
-        let signUpMainViewController = DependencyContainer.shared.injector.resolve(VoteMainViewController.self)
-        let voteNavigationContoller = UINavigationController(rootViewController: signUpMainViewController)
-        
-        let messageMainViewController = DependencyContainer.shared.injector.resolve(MessageMainViewController.self)
-        let messageNavigationContoller = UINavigationController(rootViewController: messageMainViewController)
-        
-        let allMainViewController = DependencyContainer.shared.injector.resolve(AllMainViewController.self)
-        let allNavigationContoller = UINavigationController(rootViewController: allMainViewController)
-        
-        
-        let tabbarcontroller = WSTabBarViewController()
-        tabbarcontroller.viewControllers = [voteNavigationContoller, messageNavigationContoller, allNavigationContoller]
-        window?.rootViewController = tabbarcontroller
-        
-    }
-    
     private func setupMainViewController() {
         let voteMainViewController = DependencyContainer.shared.injector.resolve(VoteMainViewController.self)
         let voteNavigationContoller = UINavigationController(rootViewController: voteMainViewController)

@@ -245,6 +245,7 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
         reactor.pulse(\.$imageData)
             .compactMap { $0 }
             .map { UIImage(data: $0)}
+            .observe(on: MainScheduler.asyncInstance)
             .bind(to: profileImageView.rx.image)
             .disposed(by: disposeBag)
         
