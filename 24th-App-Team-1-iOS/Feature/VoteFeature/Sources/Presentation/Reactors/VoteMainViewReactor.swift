@@ -24,24 +24,19 @@ public final class VoteMainViewReactor: Reactor {
         @Pulse var isShowEffectView: Bool
         @Pulse var isSelected: Bool
         @Pulse var voteResponseEntity: VoteResponseEntity?
-        @Pulse var isProfileChanged: Bool
-        @Pulse var isProfileUpdate: Bool
     }
     
     public enum Mutation {
         case setVoteTypes(VoteTypes)
         case setSelectedVoteButton(Bool, VoteResponseEntity?)
         case setShowEffectView(Bool)
-        case setUserProfileUpdate(Bool)
     }
     
-    public init(isProfileChanged: Bool = true) {
+    public init() {
         self.initialState = State(
             voteTypes: .main,
             isShowEffectView: false,
-            isSelected: false,
-            isProfileChanged: isProfileChanged,
-            isProfileUpdate: false
+            isSelected: false
         )
     }
     
@@ -53,8 +48,6 @@ public final class VoteMainViewReactor: Reactor {
                     return .just(.setSelectedVoteButton(isSelected, response))
                 case .didTappedResultButton:
                     return .just(.setShowEffectView(true))
-                case let .didTappedIntroduceButton(isUpdate):
-                    return .just(.setUserProfileUpdate(isUpdate))
                 default:
                     return .empty()
                 }
@@ -80,8 +73,6 @@ public final class VoteMainViewReactor: Reactor {
             newState.voteTypes = voteTypes
         case let .setShowEffectView(isShowEffectView):
             newState.isShowEffectView = isShowEffectView
-        case let .setUserProfileUpdate(isUpdate):
-            newState.isProfileUpdate = isUpdate
         }
         
         return newState

@@ -5,7 +5,7 @@
 //  Created by eunseou on 7/20/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import ProjectDescriptionHelpers
 
 let messageService = Project.makeProject(

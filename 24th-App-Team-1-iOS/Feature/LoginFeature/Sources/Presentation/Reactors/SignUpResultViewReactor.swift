@@ -13,7 +13,6 @@ import LoginDomain
 
 public final class SignUpResultViewReactor: Reactor {
     
-    private let createAccountUseCase: CreateAccountUseCaseProtocol
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     public var initialState: State
     
@@ -21,6 +20,7 @@ public final class SignUpResultViewReactor: Reactor {
         @Pulse var accountRequest: CreateAccountRequest
         var isAccountCreationCompleted: Bool = false
         @Pulse var schoolName: String
+        @Pulse var profileImage: Data?
         @Pulse var isMarketingAgreed: Bool = false
         @Pulse var isShowBottomSheet: Bool = false
         @Pulse var isShowPolicyBottomSheet: Bool = false
@@ -30,7 +30,6 @@ public final class SignUpResultViewReactor: Reactor {
     
     public enum Action {
         case viewDidLoad
-        case createAccount
     }
     
     public enum Mutation {
@@ -49,11 +48,10 @@ public final class SignUpResultViewReactor: Reactor {
     
     public init(
         accountRequest: CreateAccountRequest,
-        createAccountUseCase: CreateAccountUseCaseProtocol,
-        schoolName: String
+        schoolName: String,
+        profileImage: Data?
     ) {
-        self.initialState = State(accountRequest: accountRequest, schoolName: schoolName)
-        self.createAccountUseCase = createAccountUseCase
+        self.initialState = State(accountRequest: accountRequest, schoolName: schoolName, profileImage: profileImage)
     }
     
     public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
@@ -90,14 +88,6 @@ public final class SignUpResultViewReactor: Reactor {
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .createAccount:
-            return createAccountUseCase
-                .execute(body: initialState.accountRequest)
-                .asObservable()
-                .flatMap { entity -> Observable<Mutation> in
-                    return .just(.isCompletedAccount(true))
-                }
-                .catchAndReturn(.isCompletedAccount(false))
         case .viewDidLoad:
             return .just(.setAccountEditBottomSheet(true))
         }

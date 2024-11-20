@@ -5,7 +5,7 @@
 //  Created by Kim dohyun on 7/11/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import ProjectDescriptionHelpers
 
 

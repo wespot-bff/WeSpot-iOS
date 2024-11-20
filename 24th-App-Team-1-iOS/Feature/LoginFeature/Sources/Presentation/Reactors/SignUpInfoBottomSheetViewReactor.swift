@@ -26,12 +26,14 @@ public final class SignUpInfoBottomSheetViewReactor: Reactor {
     public struct State {
         var accountRequest: CreateAccountRequest
         var schoolName: String
+        var profileImage: Data?
     }
     
-    public init(accountRequest: CreateAccountRequest, schoolName: String) {
+    public init(accountRequest: CreateAccountRequest, schoolName: String, profileImage: Data?) {
         self.initialState = State(
-            accountRequest: accountRequest
-            , schoolName: schoolName
+            accountRequest: accountRequest,
+            schoolName: schoolName,
+            profileImage: profileImage
         )
     }
     
@@ -47,8 +49,4 @@ public final class SignUpInfoBottomSheetViewReactor: Reactor {
         return .empty()
     }
     
-    public func reduce(state: State, mutation: Mutation) -> State {
-        
-        return state
-    }
 }

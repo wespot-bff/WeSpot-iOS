@@ -25,19 +25,19 @@ struct DomainAssembly: Assembly {
             return createCheckProfanityUseCase(commonRepository: repository)
         }
         
-        container.register(FetchProfileImagesUseCaseProtocol.self) { resolver in
-            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
-            return FetchProfileImagesUseCase(commonRepository: repository)
-        }
-        
-        container.register(FetchProfileBackgroundsUseCaseProtocol.self) { resolver in
-            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
-            return FetchProfileBackgroundsUseCase(commonRepository: repository)
-        }
-        
         container.register(CreateReportUserUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
             return CreateReportUserUseCase(commonRepositroy: repository)
+        }
+        
+        container.register(CreatePresigendURLUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return CreatePresigendURLUseCase(commonRepository: repository)
+        }
+        
+        container.register(UpdateUserProfileUploadUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return UpdateUserProfileUploadUseCase(commonRepository: repository)
         }
         
         // login
@@ -50,11 +50,6 @@ struct DomainAssembly: Assembly {
         container.register(CreateNewMemberUseCaseProtocol.self) { resovler in
             let repository = resovler.resolve(LoginRepositoryProtocol.self)!
             return CreateSignUpTokenUseCase(loginRepository: repository)
-        }
-        
-        container.register(CreateExistingMemberUseCaseProtocol.self) { resovler in
-            let repository = resovler.resolve(LoginRepositoryProtocol.self)!
-            return CreateExistingMemberTokenUseCase(loginRepository: repository)
         }
         
         container.register(FetchSchoolListUseCaseProtocol.self) { resovler in
@@ -118,6 +113,11 @@ struct DomainAssembly: Assembly {
         container.register(FetchUserProfileUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
             return FetchUserProfileUseCase(commonRepository: repository)
+        }
+        
+        container.register(UpdateUserProfileImageUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(ProfileRepositoryProtocol.self)!
+            return UpdateUserProfileImageUseCase(profileRepository: repository)
         }
         
         container.register(UpdateUserProfileUseCaseProtocol.self) { resolver in

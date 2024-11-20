@@ -36,7 +36,7 @@ public final class CommonRepository: CommonRepositoryProtocol {
     
     public func updateUserProfileItem(body: UpdateUserProfileRequest) -> Single<Bool> {
         
-        let body = UpdateUserProfileRequestDTO(introduction: body.introduction, backgroundColor: body.backgroundColor, iconUrl: body.iconUrl)
+        let body = UpdateUserProfileRequestDTO(introduction: body.introduction)
         let endPoint = CommonEndPoint.updateUserProfile(body)
         return networkService.request(endPoint: endPoint)
             .asObservable()
@@ -59,28 +59,6 @@ public final class CommonRepository: CommonRepositoryProtocol {
             .asSingle()
     }
     
-    public func fetchProfileImages() -> Single<FetchProfileImageResponseEntity?> {
-        let endPoint = CommonEndPoint.fetchCharacters
-        
-        return networkService.request(endPoint: endPoint)
-            .asObservable()
-            .logErrorIfDetected(category: Network.error)
-            .decodeMap(FetchProfileImagesResponseDTO.self)
-            .map { $0.toDomain() }
-            .asSingle()
-    }
-    
-    public func fetchProfileBackgrounds() -> Single<FetchProfileBackgroundsResponseEntity?> {
-        let endPoint = CommonEndPoint.fetchBackgrounds
-        
-        return networkService.request(endPoint: endPoint)
-            .asObservable()
-            .logErrorIfDetected(category: Network.error)
-            .decodeMap(FetchProfileBackgroundsResponseDTO.self)
-            .map { $0.toDomain() }
-            .asSingle()
-    }
-    
     public func createReportUserItem(body: CreateUserReportRequest) -> Single<CreateReportUserEntity?> {
         let body = CreateUserReportRequestDTO(reportType: body.type, targetId: body.targetId)
         let endPoint = CommonEndPoint.createUserReport(body)
@@ -100,6 +78,27 @@ public final class CommonRepository: CommonRepositoryProtocol {
             .logErrorIfDetected(category: Network.error)
             .decodeMap(VoteResponseDTO.self)
             .map { $0.toDomain() }
+            .asSingle()
+    }
+    
+    public func createProfilePresignedURL(query: CreateProfilePresignedURLQuery) -> Single<CreateProfilePresignedURLEntity?> {
+        let query = CreateProfilePresignedURLRequestDTO(imageExtension: query.imageExtension)
+        let endpoint = CommonEndPoint.fetchProfilePresignedURL(query)
+        return networkService.request(endPoint: endpoint)
+            .asObservable()
+            .decodeMap(CreateProfilePresignedURLResponseDTO.self)
+            .logErrorIfDetected(category: Network.error)
+            .map { $0.toDomain() }
+            .asSingle()
+    }
+    
+    public func uploadUserProfileImage(_ image: Data, presigendURL: String) -> Single<Bool> {
+        let endpoint = CommonEndPoint.uploadProfileImage(presigendURL)
+        return networkService.upload(endPoint: endpoint, binaryData: image)
+            .asObservable()
+            .map { _ in true }
+            .catchAndReturn(false)
+            .logErrorIfDetected(category: Network.error)
             .asSingle()
     }
 }

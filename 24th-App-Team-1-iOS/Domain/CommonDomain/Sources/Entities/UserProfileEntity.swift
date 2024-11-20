@@ -40,9 +40,9 @@ public struct UserProfileEntity: Identifiable {
 
 public struct UserProfileResponseEntity {
     public let backgroundColor: String
-    public let iconUrl: URL
+    public let iconUrl: String?
     
-    public init(backgroundColor: String, iconUrl: URL) {
+    public init(backgroundColor: String, iconUrl: String?) {
         self.backgroundColor = backgroundColor
         self.iconUrl = iconUrl
     }

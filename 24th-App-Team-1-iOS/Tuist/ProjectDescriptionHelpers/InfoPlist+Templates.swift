@@ -5,11 +5,11 @@
 //  Created by eunseou on 6/11/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 
 extension InfoPlist {
     
-    public static var `default`: Self = {
+    public static let `default`: Self = {
         return .extendingDefault(with: [
             "BASE_URL": .string("https://7b99aa13-6125-4dea-b4e0-2c99c33e5c51.mock.pstmn.io/api/v1")
         ])

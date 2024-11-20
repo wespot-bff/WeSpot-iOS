@@ -10,8 +10,7 @@ import Foundation
 import Alamofire
 
 public protocol WSNetworkEndPoint: URLRequestConvertible {
-    var path: String { get }
-    var method: HTTPMethod { get }
+    var spec: WSNetworkSpec { get }
     var parameters: WSRequestParameters { get }
     var headers: HTTPHeaders { get }
 }
@@ -20,8 +19,11 @@ public protocol WSNetworkEndPoint: URLRequestConvertible {
 public extension WSNetworkEndPoint {
     
     func asURLRequest() throws -> URLRequest {
-        let url = try WSNetworkConfigure.baseURL.asURL()
-        var urlRequest = try URLRequest(url: url.appendingPathComponent(path), method: method)
+        guard let url = URL(string: spec.url) else {
+            throw URLError(.badURL)
+        }
+        let method = spec.method
+        var urlRequest = try URLRequest(url: url, method: method)
         
         switch parameters {
         case let .requestBody(body):
@@ -42,7 +44,8 @@ public extension WSNetworkEndPoint {
     private func setupRequestQuery(_ url: URL, paramters: Encodable?) throws -> URL {
         let params = paramters?.toDictionary() ?? [:]
         let queryParams = params.map { URLQueryItem(name: $0.key, value: "\($0.value)") }
-        var components = URLComponents(string: url.appendingPathComponent(path).absoluteString)
+        var components = URLComponents(string: url.absoluteString)
+        
         components?.queryItems = queryParams
         guard let originURL = components?.url else {
             throw URLError(.badURL)

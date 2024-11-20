@@ -20,10 +20,16 @@ struct AllMainProfilePresentationAssembly: Assembly {
             let createCheckProfanityUseCase = resolver.resolve(CreateCheckProfanityUseCaseProtocol.self)!
             let fetchUserProfileUseCase = resolver.resolve(FetchUserProfileUseCaseProtocol.self)!
             let updateUserProfileUseCase = resolver.resolve(UpdateUserProfileUseCaseProtocol.self)!
+            let updateUserImageProfileUseCase = resolver.resolve(UpdateUserProfileImageUseCaseProtocol.self)!
+            let createPresignedURLUseCase = resolver.resolve(CreatePresigendURLUseCaseProtocol.self)!
+            let updateUserProfileUploadUseCase = resolver.resolve(UpdateUserProfileUploadUseCaseProtocol.self)!
             return ProfileSettingViewReactor(
                 createCheckProfanityUseCase: createCheckProfanityUseCase,
                 updateUserProfileUseCase: updateUserProfileUseCase,
-                fetchUserProfileUseCase: fetchUserProfileUseCase
+                fetchUserProfileUseCase: fetchUserProfileUseCase,
+                updateUserProfileImageUseCase: updateUserImageProfileUseCase,
+                createPresignedURLUseCase: createPresignedURLUseCase,
+                updateUserProfileUploadUseCase: updateUserProfileUploadUseCase
             )
         }
         

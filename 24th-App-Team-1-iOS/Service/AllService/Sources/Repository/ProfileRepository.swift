@@ -79,4 +79,15 @@ public final class ProfileRepository: ProfileRepositoryProtocol {
             .asSingle()
     }
     
+    public func updateUserProfileImage(query: UpdateUserProfileImageRequestQuery) -> Single<UpdateUserProfileImageEntity?> {
+        let query = UpdateUserProfileImageRequestDTO(url: query.url)
+        let endPoint = ProfileEndPoint.editProfileImage(query)
+        
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .decodeMap(UpdateUserProfileImageResponseDTO.self)
+            .logErrorIfDetected(category: Network.error)
+            .map { $0.toDomain() }
+            .asSingle()
+    }
 }

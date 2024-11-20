@@ -20,18 +20,8 @@ public enum ReissueEndPoint: WSNetworkEndPoint {
     
     case createReissueToken(body: Encodable)
     
-    public var path: String {
-        switch self {
-        case .createReissueToken:
-            return "/auth/reissue"
-        }
-    }
-    
-    public var method: HTTPMethod {
-        switch self {
-        case .createReissueToken:
-            return .post
-        }
+    public var spec: WSNetworkSpec {
+        return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/reissue")
     }
     
     public var parameters: WSRequestParameters {
