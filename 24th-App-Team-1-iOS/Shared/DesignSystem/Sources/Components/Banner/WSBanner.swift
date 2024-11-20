@@ -122,12 +122,4 @@ public final class WSBanner: UIView {
     public func setImageView(_ image: UIImage) {
         imageView.image = image
     }
-    
-    public func setTitleFont(_ font: WSFont) {
-        titleLabel.font = font.font()
-    }
-    
-    public func setSubTitleFont(_ font: WSFont) {
-        subLabel.font = font.font()
-    }
 }

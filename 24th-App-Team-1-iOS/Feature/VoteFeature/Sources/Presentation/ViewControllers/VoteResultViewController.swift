@@ -48,7 +48,7 @@ public final class VoteResultViewController: BaseViewController<VoteResultViewRe
         super.setupAutoLayout()
         
         voteResultCollectionView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(32)
+            $0.top.equalToSuperview().offset(VoteConstraint.voteResultTopSpacing)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(resultPageControl.snp.top).offset(-16)
         }
@@ -56,7 +56,7 @@ public final class VoteResultViewController: BaseViewController<VoteResultViewRe
         confirmButton.snp.makeConstraints {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(12)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(52)
+            $0.height.equalTo(VoteConstraint.voteResultButtonHeight)
         }
         
         backgrounImageView.snp.makeConstraints {
@@ -159,12 +159,11 @@ public final class VoteResultViewController: BaseViewController<VoteResultViewRe
     }
     
     private func createVoteResultSection() -> NSCollectionLayoutSection {
-        let verticalInset = (voteResultCollectionView.frame.height - 392) / 2
-        
+        let verticalInset = (voteResultCollectionView.frame.height - VoteConstraint.voteResultItemHeight) / 2
         
         let voteResultItemSize: NSCollectionLayoutSize = .init(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(392)
+            heightDimension: .absolute(VoteConstraint.voteResultItemHeight)
         )
         
         let voteResultItem: NSCollectionLayoutItem = NSCollectionLayoutItem(layoutSize: voteResultItemSize)
@@ -173,7 +172,7 @@ public final class VoteResultViewController: BaseViewController<VoteResultViewRe
         
         let voteResultGroupSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(0.8),
-            heightDimension: .absolute(voteResultCollectionView.frame.height)
+            heightDimension: .absolute(VoteConstraint.voteResultItemHeight)
         )
         
         let voteResultGroup: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(

@@ -19,7 +19,7 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
     private let descriptionLabel: WSLabel = WSLabel(wsFont: .Body03)
     private let faceView: UIView = UIView()
     private let faceImageView: UIImageView = UIImageView()
-    private let nameLabel: WSLabel = WSLabel(wsFont: .Header01)
+    private let nameLabel: WSLabel = WSLabel(wsFont: VoteConstraint.voteResultNameLableFont)
     private let introduceLabel: WSLabel = WSLabel(wsFont: .Body07)
     private let resultContainerView: UIView = UIView()
     private let resultDescriptionLabel: WSLabel = WSLabel(wsFont: .Body06)
@@ -45,22 +45,22 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
     //MARK: - Configure
     private func setupAutoLayout() {
         rankView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(18)
-            $0.left.equalToSuperview().offset(20)
-            $0.width.equalTo(98)
-            $0.height.equalTo(36)
+            $0.top.equalToSuperview().offset(VoteConstraint.voteResultRankViewTopSpacing)
+            $0.left.equalToSuperview().offset(VoteConstraint.voteResultRankViewLeftSpacing)
+            $0.width.equalTo(VoteConstraint.voteResultRankViewWidth)
+            $0.height.equalTo(VoteConstraint.voteResultRankViewHeight)
         }
         
         descriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(rankView.snp.bottom).offset(12)
+            $0.top.equalTo(rankView.snp.bottom).offset(VoteConstraint.voteResultDescriptionLabelTopSpacing)
             $0.left.equalToSuperview().offset(20)
             $0.height.equalTo(48)
             $0.width.equalTo(207)
         }
         
         faceView.snp.makeConstraints {
-            $0.top.equalTo(descriptionLabel.snp.bottom).offset(11)
-            $0.width.height.equalTo(120)
+            $0.top.equalTo(descriptionLabel.snp.bottom).offset(VoteConstraint.voteResultFaceImageViewTopSpacing)
+            $0.size.equalTo(VoteConstraint.voteResultFaceImageViewSize)
             $0.centerX.equalToSuperview()
         }
         
@@ -69,20 +69,20 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
         }
         
         nameLabel.snp.makeConstraints {
-            $0.top.equalTo(faceImageView.snp.bottom).offset(11)
-            $0.height.equalTo(30)
+            $0.top.equalTo(faceImageView.snp.bottom).offset(VoteConstraint.voteResultNameLabelTopSpacing)
+            $0.height.equalTo(VoteConstraint.voteResultNameLabelHeight)
             $0.centerX.equalToSuperview()
         }
         
         introduceLabel.snp.makeConstraints {
-            $0.top.equalTo(nameLabel.snp.bottom).offset(4)
-            $0.height.equalTo(20)
+            $0.top.equalTo(nameLabel.snp.bottom).offset(VoteConstraint.voteResultIntroduceLabelTopSpacing)
+            $0.height.equalTo(VoteConstraint.voteResultIntroduceLabelHeight)
             $0.centerX.equalToSuperview()
         }
         
         resultContainerView.snp.makeConstraints {
-            $0.top.equalTo(introduceLabel.snp.bottom).offset(24)
-            $0.height.equalTo(33)
+            $0.top.equalTo(introduceLabel.snp.bottom).offset(VoteConstraint.voteResultContainerViewTopSpacing)
+            $0.height.equalTo(32)
             $0.centerX.equalToSuperview()
         }
         
@@ -90,7 +90,6 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
             $0.horizontalEdges.equalToSuperview().inset(12)
             $0.verticalEdges.equalToSuperview().inset(5)
         }
-            
     }
     
     private func setupAttributes() {
@@ -125,7 +124,7 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
         rankView.do {
             $0.rankLabel.text = "10표"
             $0.rankImageView.image = DesignSystemAsset.Images.icResultCrwonFiled.image
-            $0.layer.cornerRadius = 18
+            $0.layer.cornerRadius = VoteConstraint.voteResultRankViewRadius
             $0.layer.masksToBounds = true
             $0.clipsToBounds = true
             $0.layer.borderColor = DesignSystemAsset.Colors.gray300.color.cgColor
@@ -133,7 +132,7 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
         }
         
         faceView.do {
-            $0.layer.cornerRadius = 120 / 2
+            $0.layer.cornerRadius = VoteConstraint.voteResultFaceImageViewSize / 2
             $0.clipsToBounds = true
             $0.backgroundColor = .clear
         }
