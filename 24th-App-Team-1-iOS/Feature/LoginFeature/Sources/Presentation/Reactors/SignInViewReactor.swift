@@ -111,34 +111,19 @@ public final class SignInViewReactor: Reactor {
                                             fcmToken: fcmToken)
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
-        if accessToken == nil {
-            return createNewMemberUseCase
-                .execute(body: body)
-                .asObservable()
-                .compactMap { $0 }
-                .flatMap { response -> Observable<Mutation> in
-                    return .concat(
-                        .just(.setLoading(false)),
-                        .just(.setSignUpTokenResponse(response)),
-                        .just(.setLoading(true))
-                    )
+        return createExistingUseCase
+            .execute(body: body)
+            .asObservable()
+            .flatMap { response -> Observable<Mutation> in
+                guard let response else {
+                    return .empty()
                 }
-            
-        } else {
-            return createExistingUseCase
-                .execute(body: body)
-                .asObservable()
-                .flatMap { response -> Observable<Mutation> in
-                    guard let response else {
-                        return .empty()
-                    }
-                    return .concat(
-                        .just(.setLoading(false)),
-                        .just(.setAccountExisting(response)),
-                        .just(.setLoading(true))
-                    )
-                }
-        }
+                return .concat(
+                    .just(.setLoading(false)),
+                    .just(.setAccountExisting(response)),
+                    .just(.setLoading(true))
+                )
+            }
     }
     
     public func reduce(state: State, mutation: Mutation) -> State {

@@ -26,8 +26,8 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
     )
     private let voteContainerView: UIView = UIView()
     private let voteConfirmButton: WSButton = WSButton(wsButtonType: .default(12))
-    private let voteDateLabel: WSLabel = WSLabel(wsFont: VoteConstraint.voteDateLabelFont, text: Date().toFormatString(with: .MddEEE))
-    private let voteDescriptionLabel: WSLabel = WSLabel(wsFont: VoteConstraint.voteDescriptionLabelFont, text: VoteHomeStr.voteDescrptionText)
+    private let voteDateLabel: WSLabel = WSLabel(wsFont: .Body06, text: Date().toFormatString(with: .MddEEE))
+    private let voteDescriptionLabel: WSLabel = WSLabel(wsFont: .Body01, text: VoteHomeStr.voteDescrptionText)
     private let voteImageView: UIImageView = UIImageView()
     private let voteLottieView: WSLottieView = WSLottieView()
     
@@ -67,13 +67,15 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
         }
         
         voteDescriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(voteDateLabel.snp.bottom).offset(VoteConstraint.voteDescriptionLabelTopSpacing)
+            $0.top.equalTo(voteDateLabel.snp.bottom).offset(8)
             $0.horizontalEdges.equalToSuperview().inset(28)
-            $0.height.equalTo(VoteConstraint.voteDescriptionLabelHeight)
+            $0.height.equalTo(54)
         }
         
         voteLottieView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(VoteConstraint.voteLottieHorizontalSpacing)
+            $0.top.equalToSuperview().inset(VoteConstraint.voteLottieTopSpacing)
+            $0.bottom.equalToSuperview().inset(VoteConstraint.voteLottieBottomSpacing)
         }
         
         voteConfirmButton.snp.makeConstraints {
@@ -87,14 +89,9 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
     public override func setupAttributes() {
         super.setupAttributes()
         voteContainerView.do {
-            $0.backgroundColor = DesignSystemAsset.Colors.gray700.color
+            $0.backgroundColor = DesignSystemAsset.Colors.gray600.color
             $0.clipsToBounds = true
             $0.layer.cornerRadius = 18
-        }
-        
-        voteBannerView.do {
-            $0.setTitleFont(VoteConstraint.voteBannerMainFont)
-            $0.setSubTitleFont(VoteConstraint.voteBannerSubFont)
         }
         
         voteConfirmButton.do {

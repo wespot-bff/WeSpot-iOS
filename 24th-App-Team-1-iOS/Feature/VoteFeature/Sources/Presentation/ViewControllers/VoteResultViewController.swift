@@ -56,7 +56,7 @@ public final class VoteResultViewController: BaseViewController<VoteResultViewRe
         confirmButton.snp.makeConstraints {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(12)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(VoteConstraint.voteResultButtonHeight)
+            $0.height.equalTo(52)
         }
         
         backgrounImageView.snp.makeConstraints {
@@ -179,11 +179,11 @@ public final class VoteResultViewController: BaseViewController<VoteResultViewRe
             layoutSize: voteResultGroupSize,
             subitems: [voteResultItem]
         )
-        voteResultGroup.contentInsets = .init(top: verticalInset, leading: 0, bottom: verticalInset, trailing: 0)
+        voteResultGroup.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
         
         let voteResultSection: NSCollectionLayoutSection = NSCollectionLayoutSection(group: voteResultGroup)
         voteResultSection.orthogonalScrollingBehavior = .groupPagingCentered
-        voteResultSection.contentInsets = .init(top: 0, leading: 40, bottom: 0, trailing: 40)
+        voteResultSection.contentInsets = .init(top: verticalInset, leading: 40, bottom: 0, trailing: 40)
 
         voteResultSection.visibleItemsInvalidationHandler = { [weak self] visibleItems, offset, env in
             visibleItems.forEach { item in

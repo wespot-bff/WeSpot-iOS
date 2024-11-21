@@ -105,11 +105,11 @@ public final class AllMainViewController: BaseViewController<AllMainViewReactor>
         voteAddBanner.snp.makeConstraints {
             $0.top.equalTo(profileClassLabel.snp.bottom).offset(24)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(80)
+            $0.height.equalTo(ProfileConstraint.profileBannerViewHeight)
         }
         
         mainTableView.snp.makeConstraints {
-            $0.top.equalTo(voteAddBanner.snp.bottom).offset(30)
+            $0.top.equalTo(voteAddBanner.snp.bottom).offset(ProfileConstraint.profileTableViewTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.bottom.equalToSuperview()
         }

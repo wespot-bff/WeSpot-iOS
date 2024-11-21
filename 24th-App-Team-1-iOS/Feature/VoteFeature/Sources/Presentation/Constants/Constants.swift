@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 import Extensions
 import DesignSystem
 
@@ -31,7 +32,6 @@ enum Const {
     /// **VoteResultViewController** Constraint 값
     static let voteResultTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 0 : 32
     static let voteResultItemHeight: CGFloat = Device.isTouchIDCapableDevice ? 330 : 392
-    static let voteResultButtonHeight: CGFloat = Device.isTouchIDCapableDevice ? 50 : 52
     
     static let voteResultRankViewWidth: CGFloat = Device.isTouchIDCapableDevice ? 86 : 98
     static let voteResultRankViewHeight: CGFloat = Device.isTouchIDCapableDevice ? 31 : 36
@@ -57,10 +57,17 @@ enum Const {
     
     
     /// **VoteProcessViewController** Constraint 값
-    static let voteProfileViewTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 12 : 39
-    static let voteProcessTableViewTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 16 : 32
-    static let voteProcessCellHeight: CGFloat = Device.isTouchIDCapableDevice ? 64 : 72
+    static let voteProfileViewTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 14 : 39
+    static let voteProcessTableViewTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 14 : 32
+    static let voteProcessCellHeight: CGFloat = Device.isTouchIDCapableDevice ? 66 : 72
     static let voteProfileViewHeight: CGFloat = Device.isTouchIDCapableDevice ? 100 : 120
     static let voteProcessTableHeight: CGFloat = Device.isTouchIDCapableDevice ? 330 : 364
-    static let voteProcessButtonHeight: CGFloat = Device.isTouchIDCapableDevice ? 50 : 52
+    
+    
+    /// **VoteEffectViewController** Constraint 값
+    static let voteCompleteCollectionViewTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 0 : 25
+    static let voteEffectCollectionViewHeight: CGFloat = Device.isTouchIDCapableDevice ? 416 : 480
+    static let voteRankerCellHorizontalTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 60 : 55
+    static let voteRankerCellVerticalItemHeight: CGFloat = Device.isTouchIDCapableDevice ? 68 : 78
+    static let voteRankerCellVeticalSectionTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? -20 : 0
 }

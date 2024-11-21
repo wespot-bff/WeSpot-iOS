@@ -87,21 +87,25 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         userNameTextField.snp.makeConstraints {
             $0.top.equalTo(userContainerView.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
         }
         
         userGenderTextFiled.snp.makeConstraints {
             $0.top.equalTo(userNameTextField.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
         }
         
         userClassInfoTextField.snp.makeConstraints {
             $0.top.equalTo(userGenderTextFiled.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
         }
         
         userIntroduceTextField.snp.makeConstraints {
             $0.top.equalTo(userClassInfoTextField.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
             $0.bottom.equalToSuperview()
         }
         

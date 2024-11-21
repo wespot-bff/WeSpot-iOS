@@ -69,15 +69,15 @@ public final class VoteProcessViewController: BaseViewController<VoteProcessView
         }
         
         profileView.snp.makeConstraints {
-            $0.size.equalTo(120)
-            $0.top.equalTo(questionLabel.snp.bottom).offset(39)
+            $0.size.equalTo(VoteConstraint.voteProfileViewHeight)
+            $0.top.equalTo(questionLabel.snp.bottom).offset(VoteConstraint.voteProfileViewTopSpacing)
             $0.centerX.equalToSuperview()
         }
         
         questionTableView.snp.makeConstraints {
-            $0.top.equalTo(profileView.snp.bottom).offset(32)
+            $0.top.equalTo(profileView.snp.bottom).offset(VoteConstraint.voteProcessTableViewTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(364)
+            $0.height.equalTo(VoteConstraint.voteProcessTableHeight)
         }
         
         faceImageView.snp.makeConstraints {
@@ -111,7 +111,7 @@ public final class VoteProcessViewController: BaseViewController<VoteProcessView
         }
         
         profileView.do {
-            $0.layer.cornerRadius = 120 / 2
+            $0.layer.cornerRadius = VoteConstraint.voteProfileViewHeight / 2
             $0.clipsToBounds = true
         }
         
@@ -121,7 +121,7 @@ public final class VoteProcessViewController: BaseViewController<VoteProcessView
         
         questionTableView.do {
             $0.register(VoteProcessTableViewCell.self, forCellReuseIdentifier: VoteProcessId.voteProcessCell)
-            $0.rowHeight = 72
+            $0.rowHeight = VoteConstraint.voteProcessCellHeight
             $0.backgroundColor = .clear
             $0.separatorStyle = .none
             $0.isScrollEnabled = false
