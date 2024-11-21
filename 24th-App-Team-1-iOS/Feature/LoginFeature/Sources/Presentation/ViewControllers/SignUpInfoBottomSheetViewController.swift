@@ -21,9 +21,9 @@ public final class SignUpInfoBottomSheetViewController: BaseViewController<SignU
     private let containerView = UIView()
     private let titleLabel = WSLabel(wsFont: .Body01, text: "해당 정보로 가입하시겠습니까?")
     private let subTitleLabel = WSLabel(wsFont: .Body06, text: "가입 이후 개인 정보 변경은 1:1 문의로 요청해주세요")
-    private let profileImageView = UIImageView()
     private let infoLabel = WSLabel(wsFont: .Header01)
     private let subInfoLabel = WSLabel(wsFont: .Body02)
+    public let profileImageView = UIImageView()
     public let editButton = WSButton(wsButtonType: .secondaryButton)
     public let confirmButton = WSButton(wsButtonType: .default(10))
     
@@ -114,7 +114,10 @@ public final class SignUpInfoBottomSheetViewController: BaseViewController<SignU
         }
         
         profileImageView.do {
-            $0.image = DesignSystemAsset.Images.icDefaultProfile.image
+            $0.image = DesignSystemAsset.Images.imgSignupProfileClear.image
+            $0.clipsToBounds = true
+            $0.layer.cornerRadius = 56 / 2
+            $0.contentMode = .scaleAspectFill
         }
         
         titleLabel.do {
@@ -150,6 +153,15 @@ public final class SignUpInfoBottomSheetViewController: BaseViewController<SignU
             )
             .compactMap { "\($1) \($0.grade)학년 \($0.classNumber)반"}
             .bind(to: subInfoLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.profileImage != nil }
+            .compactMap { $0.profileImage }
+            .observe(on: MainScheduler.asyncInstance)
+            .map { UIImage(data: $0)}
+            .distinctUntilChanged()
+            .bind(to: profileImageView.rx.image)
             .disposed(by: disposeBag)
         
         reactor.state

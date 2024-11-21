@@ -182,15 +182,25 @@ public final class AllMainViewController: BaseViewController<AllMainViewReactor>
             .drive(mainTableView.rx.items(dataSource: mainDataSources))
             .disposed(by: disposeBag)
         
+        reactor.pulse(\.$accountProfileEntity)
+            .map { $0?.profile.iconUrl }
+            .filter { $0 == nil }
+            .map { _ in DesignSystemAsset.Images.profile.image }
+            .distinctUntilChanged()
+            .bind(to: profileImageView.rx.image)
+            .disposed(by: disposeBag)
         
         reactor.pulse(\.$accountProfileEntity)
-            .compactMap { $0?.profile }
-            .map { $0.iconUrl }
+            .map { $0?.profile.iconUrl }
+            .filter { $0 != nil }
+            .compactMap { URL(string: $0 ?? "")}
             .observe(on: MainScheduler.asyncInstance)
+            .distinctUntilChanged()
             .bind(with: self) { owner, imageURL in
                 owner.profileImageView.kf.setImage(with: imageURL)
             }
             .disposed(by: disposeBag)
+
         
         reactor.pulse(\.$isLoading)
             .bind(to: loadingIndicatorView.rx.isHidden)

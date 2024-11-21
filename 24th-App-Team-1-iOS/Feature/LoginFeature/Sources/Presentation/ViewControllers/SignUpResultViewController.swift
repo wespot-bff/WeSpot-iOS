@@ -111,12 +111,13 @@ public final class SignUpResultViewController: BaseViewController<SignUpResultVi
             .combineLatest(
                 reactor.pulse(\.$isShowBottomSheet),
                 reactor.pulse(\.$accountRequest),
-                reactor.pulse(\.$schoolName)
+                reactor.pulse(\.$schoolName),
+                reactor.pulse(\.$profileImage)
             )
             .filter { $0.0 == true }
             .observe(on: MainScheduler.asyncInstance)
             .bind(with: self) { owner, arg in
-                owner.showSignUpBottomSheet(argument: arg.1, schoolName: arg.2)
+                owner.showSignUpBottomSheet(argument: arg.1, schoolName: arg.2, profilimage: arg.3)
             }
             .disposed(by: disposeBag)
         
@@ -244,8 +245,8 @@ public final class SignUpResultViewController: BaseViewController<SignUpResultVi
         self.present(policyAgreementBottomSheetViewController, animated: true)
     }
     
-    private func showSignUpBottomSheet(argument: CreateAccountRequest, schoolName: String) {
-        let signUpInfoBottomSheetViewController = DependencyContainer.shared.injector.resolve(SignUpInfoBottomSheetViewController.self, arguments: argument, schoolName)
+    private func showSignUpBottomSheet(argument: CreateAccountRequest, schoolName: String, profilimage: Data?) {
+        let signUpInfoBottomSheetViewController = DependencyContainer.shared.injector.resolve(SignUpInfoBottomSheetViewController.self, arguments: argument, schoolName, profilimage)
         signUpInfoBottomSheetViewController.modalPresentationStyle = .overCurrentContext
         signUpInfoBottomSheetViewController.modalTransitionStyle = .crossDissolve
         self.present(signUpInfoBottomSheetViewController, animated: true)

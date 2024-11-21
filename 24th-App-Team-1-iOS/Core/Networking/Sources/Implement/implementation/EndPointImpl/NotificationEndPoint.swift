@@ -24,21 +24,12 @@ public enum NotificationEndPoint: WSNetworkEndPoint {
     /// 알림 읽음 API
     case updateNotification(String)
     
-    public var path: String {
+    public var spec: WSNetworkSpec {
         switch self {
         case .fetchNotificationItems:
-            return "/notifications"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/notifications")
         case let .updateNotification(id):
-            return "/notifications/\(id)"
-        }
-    }
-    
-    public var method: HTTPMethod {
-        switch self {
-        case .fetchNotificationItems:
-            return .get
-        case .updateNotification:
-            return .patch
+            return WSNetworkSpec(method: .patch, url: "\(WSNetworkConfigure.baseURL)/notifications/\(id)")
         }
     }
     

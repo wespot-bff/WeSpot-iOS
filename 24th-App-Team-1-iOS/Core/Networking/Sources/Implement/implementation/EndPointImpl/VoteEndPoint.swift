@@ -34,41 +34,22 @@ public enum VoteEndPoint: WSNetworkEndPoint {
     /// 내가 받은 투표 목록 조회
     case fetchVoteSent(Encodable)
     
-    public var path: String {
+    public var spec: WSNetworkSpec {
         switch self {
         case .fetchClassMates:
-            return "/users/classmates"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/classmates")
         case .addVotes:
-            return "/votes"
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/votes")
         case .fetchResultVotes:
-            return "/votes"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes")
         case .fetchWinnerVotes:
-            return "/votes/tops"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes/tops")
         case .fetchReceivedVotes:
-            return "/votes/received"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes/received")
         case let .fetchIndividualVotes(id, _):
-            return "/votes/received/options/\(id)"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes/received/options/\(id)")
         case .fetchVoteSent:
-            return "/votes/sent"
-        }
-    }
-    
-    public var method: HTTPMethod {
-        switch self {
-        case .fetchClassMates:
-            return .get
-        case .addVotes:
-            return .post
-        case .fetchResultVotes:
-            return .get
-        case .fetchWinnerVotes:
-            return .get
-        case .fetchReceivedVotes:
-            return .get
-        case .fetchIndividualVotes:
-            return .get
-        case .fetchVoteSent:
-            return .get
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes/sent")
         }
     }
     

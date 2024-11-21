@@ -27,6 +27,12 @@ public final class WSNetworkInterceptor: RequestInterceptor {
             return
         }
         
+        if let url = urlRequest.url?.absoluteString, url.contains("s3") {
+            urlRequest.headers.add(name: "Content-Type", value: "image/jpeg")
+            completion(.success(urlRequest))
+            return
+        }
+        
         urlRequest.headers.add(.authorization(bearerToken: accessToken))
         completion(.success(urlRequest))
     }

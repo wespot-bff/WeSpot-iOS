@@ -231,25 +231,16 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
             .disposed(by: disposeBag)
         
         
-        reactor.pulse(\.$existingAccountResponse)
-            .filter { $0 != nil }
-            .bind { _ in
-                NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
-            }
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .filter { $0.accountResponse != nil }
-            .bind(with: self) { owner, state in
-                NotificationCenter.default.post(name: .userDidLogin, object: nil)
-            }
-            .disposed(by: disposeBag)
+//        reactor.pulse(\.$isShow)
+//            .filter { $0 == true }
+//            .bind { _ in
+//                NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
+//            }
+//            .disposed(by: disposeBag)
     }
     
     private func setupCarousel() {
         onboardingCarouselView.delegate = self
-        
-        
     }
 }
 

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import PhotosUI
 import Util
 import Storage
 import DesignSystem
@@ -17,14 +18,30 @@ import RxCocoa
 import ReactorKit
 
 public final class SignUpIntroduceViewController: BaseViewController<SignUpIntroduceViewReactor> {
-
     //MARK: - Properties
+    private let scrollView: UIScrollView = UIScrollView()
+    private let containerView: UIView = UIView()
+    private let profileContainerView: UIView = UIView()
+    private let profileImageView: UIImageView = UIImageView()
+    private let profileEdtiButton: UIButton = UIButton(type: .custom)
     private let introduceLabel: WSLabel = WSLabel(wsFont: .Header01)
-    private let introduceTextField: WSTextField = WSTextField(placeholder: "안녕 나는 1반의 비타민")
+    private let introduceTextField: WSTextField = WSTextField(placeholder: "(ex. 귀염둥이 엥뿌삐 ENFP)", title: "한 줄 소개")
     private let loadingIndicatorView: WSLottieIndicatorView = WSLottieIndicatorView()
     private let confirmButton: WSButton = WSButton(wsButtonType: .default(12))
     private let introduceCountLabel: WSLabel = WSLabel(wsFont: .Body07)
     private let errorLabel: WSLabel = WSLabel(wsFont: .Body07)
+    private let pickerConfiguration: PHPickerConfiguration = {
+        var configuration: PHPickerConfiguration = PHPickerConfiguration(photoLibrary: .shared())
+        configuration.filter = .images
+        configuration.selectionLimit = 1
+        configuration.selection = .default
+        return configuration
+    }()
+    private lazy var pickerViewController: PHPickerViewController = PHPickerViewController(configuration: pickerConfiguration)
+    
+    deinit {
+        print(#function)
+    }
     
     //MARK: - LifeCycle
     public override func viewDidLoad() {
@@ -35,22 +52,49 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
     //MARK: - Configure
     public override func setupUI() {
         super.setupUI()
-        view.addSubviews(introduceLabel, introduceTextField, errorLabel, introduceCountLabel, confirmButton)
-        
+        scrollView.addSubview(containerView)
+        profileContainerView.addSubview(profileImageView)
+        containerView.addSubviews(introduceLabel, profileContainerView, profileEdtiButton ,introduceTextField, errorLabel, introduceCountLabel)
+        view.addSubviews(scrollView, confirmButton)
     }
     
     public override func setupAutoLayout() {
         super.setupAutoLayout()
-        introduceLabel.snp.makeConstraints {
+        scrollView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom)
+            $0.left.right.bottom.equalToSuperview()
+        }
+        
+        containerView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
+            $0.height.equalTo(scrollView.frameLayoutGuide).priority(.low)
+        }
+        introduceLabel.snp.makeConstraints {
+            $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(30)
             $0.height.equalTo(60)
         }
         
+        profileContainerView.snp.makeConstraints {
+            $0.top.equalTo(introduceLabel.snp.bottom).offset(28)
+            $0.centerX.equalTo(introduceLabel)
+            $0.size.equalTo(110)
+        }
+        
+        profileImageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        profileEdtiButton.snp.makeConstraints {
+            $0.bottom.equalTo(profileContainerView)
+            $0.size.equalTo(28)
+            $0.right.equalTo(profileContainerView)
+        }
+        
         introduceTextField.snp.makeConstraints {
-            $0.top.equalTo(introduceLabel.snp.bottom).offset(16)
+            $0.top.equalTo(profileContainerView.snp.bottom).offset(58)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(60)
         }
         
         errorLabel.snp.makeConstraints {
@@ -87,10 +131,33 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
             $0.setNavigationBarAutoLayout(property: .all)
         }
         
+        scrollView.do {
+            $0.canCancelContentTouches = true
+        }
+        
         introduceLabel.do {
             guard let name = UserDefaultsManager.shared.userName else { return }
             $0.text = "친구들에게 \(name)님을 소개하는\n한 줄을 작성해 주세요"
             $0.textColor = DesignSystemAsset.Colors.gray100.color
+        }
+        
+        profileEdtiButton.do {
+            $0.configuration = .filled()
+            $0.layer.cornerRadius = 28 / 2
+            $0.clipsToBounds = true
+            $0.configuration?.baseBackgroundColor = DesignSystemAsset.Colors.gray400.color
+            $0.configuration?.image = DesignSystemAsset.Images.icProfileEditOutline.image
+        }
+    
+        profileContainerView.do {
+            $0.layer.cornerRadius = 110 / 2
+            $0.clipsToBounds = true
+            $0.backgroundColor = DesignSystemAsset.Colors.gray700.color
+        }
+        
+        profileImageView.do {
+            $0.image = DesignSystemAsset.Images.imgSignupProfileClear.image
+            $0.contentMode = .scaleAspectFill
         }
         
         introduceCountLabel.do {
@@ -105,18 +172,33 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
         
         confirmButton.do {
             $0.setupFont(font: .Body03)
-            $0.setupButton(text: "작성 완료")
-            $0.isEnabled = false
+            $0.setupButton(text: "확인")
         }
     }
     
     public override func bind(reactor: Reactor) {
         super.bind(reactor: reactor)
         
+        NotificationCenter.default
+            .rx.notification(UIResponder.keyboardWillShowNotification)
+            .compactMap { $0.userInfo }
+            .map { userInfo -> CGFloat in
+                let keyboardHeight = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height ?? 0
+                return keyboardHeight
+            }
+            .bind(with: self) { owner, keyboardHeight in
+                let additionalOffset: CGFloat = 40
+                UIView.animate(withDuration: 0.3) {
+                    owner.scrollView.transform = CGAffineTransform(translationX: 0, y: -(additionalOffset))
+                }
+            }
+            .disposed(by: disposeBag)
         
-        self.rx.viewWillAppear
+        containerView
+            .rx.tap
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                owner.introduceTextField.becomeFirstResponder()
+                owner.containerView.endEditing(true)
             }
             .disposed(by: disposeBag)
         
@@ -133,17 +215,39 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
         
         confirmButton.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .map { Reactor.Action.didTappedConfirmButton }
-            .bind(to: reactor.action)
+            .withLatestFrom(reactor.state.map { $0.accountReqeust})
+            .bind(with: self) { owner , arg in
+                let signupResultViewController = DependencyContainer.shared.injector.resolve(SignUpResultViewController.self, arguments: arg, reactor.currentState.schoolName, reactor.currentState.imageData)
+                owner.navigationController?.pushViewController(signupResultViewController, animated: true)
+            }
             .disposed(by: disposeBag)
-        
         
         introduceTextField
             .rx.text.orEmpty
             .map { "\($0.count)/20"}
             .bind(to: introduceCountLabel.rx.text)
             .disposed(by: disposeBag)
+    
+        profileEdtiButton.rx.tap
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .bind(with: self) { owner, _ in
+                owner.pickerViewController.modalPresentationStyle = .fullScreen
+                owner.present(owner.pickerViewController, animated: true)
+            }
+            .disposed(by: disposeBag)
         
+        pickerViewController.rx
+            .didSelectImage
+            .map { Reactor.Action.didSelectedImage($0) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.pulse(\.$imageData)
+            .compactMap { $0 }
+            .map { UIImage(data: $0)}
+            .observe(on: MainScheduler.asyncInstance)
+            .bind(to: profileImageView.rx.image)
+            .disposed(by: disposeBag)
         
         reactor.state
             .map { $0.isValidation }
@@ -153,46 +257,21 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
             .disposed(by: disposeBag)
         
         reactor.state
+            .map { $0.isValidation }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(to: confirmButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        reactor.state
             .map { $0.errorMessage }
             .distinctUntilChanged()
             .observe(on: MainScheduler.asyncInstance)
             .bind(to: errorLabel.rx.text)
             .disposed(by: disposeBag)
         
-        reactor.pulse(\.$isEnabled)
-            .bind(to: confirmButton.rx.isEnabled)
-            .disposed(by: disposeBag)
-        
         reactor.pulse(\.$isLoading)
             .bind(to: loadingIndicatorView.rx.isHidden)
             .disposed(by: disposeBag)
-        
-        reactor.pulse(\.$isUpdate)
-            .filter { $0 == true }
-            .bind(with: self) { owner, _ in
-                NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    owner.reactor?.globalService.event.onNext(.didTappedIntroduceButton(true))
-                }
-            }
-            .disposed(by: disposeBag)
-        
-        navigationBar.rightBarButton
-            .rx.tap
-            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .bind(with: self) { owner, _ in
-                WSAlertBuilder(showViewController: owner)
-                    .setAlertType(type: .titleWithMeesage)
-                    .setTitle(title: "프로필 설정을 중단하시나요?", titleAlignment: .left)
-                    .setMessage(message: "선택하셨던 캐릭터와 배경색은 저장되지 않으며 \n기본 캐릭터와 배경색으로 자동 설정됩니다")
-                    .setCancel(text: "취소")
-                    .setConfirm(text: "네 그만할래요")
-                    .action(.confirm) {
-                        NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
-                    }
-                    .show()
-            }
-            .disposed(by: disposeBag)
-        
     }
 }

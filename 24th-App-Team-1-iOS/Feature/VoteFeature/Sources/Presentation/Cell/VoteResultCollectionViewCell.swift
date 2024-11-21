@@ -39,7 +39,7 @@ final class VoteResultCollectionViewCell: UICollectionViewCell {
     private func setupUI() {
         resultContainerView.addSubview(resultDescriptionLabel)
         faceView.addSubview(faceImageView)
-        addSubviews(rankView, descriptionLabel, faceView, nameLabel, introduceLabel, resultContainerView)
+        contentView.addSubviews(rankView, descriptionLabel, faceView, nameLabel, introduceLabel, resultContainerView)
     }
     
     //MARK: - Configure

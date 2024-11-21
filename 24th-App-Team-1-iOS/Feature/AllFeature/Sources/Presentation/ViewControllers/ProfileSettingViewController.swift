@@ -6,6 +6,7 @@
 //
 
 import DesignSystem
+import PhotosUI
 import UIKit
 import Util
 
@@ -34,6 +35,14 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
     private let editButton: WSButton = WSButton(wsButtonType: .default(12))
     private let errorLabel: WSLabel = WSLabel(wsFont: .Body07)
     private let introduceCountLabel: WSLabel = WSLabel(wsFont: .Body07)
+    private let pickerConfiguration: PHPickerConfiguration = {
+        var configuration: PHPickerConfiguration = PHPickerConfiguration(photoLibrary: .shared())
+        configuration.filter = .images
+        configuration.selectionLimit = 1
+        configuration.selection = .default
+        return configuration
+    }()
+    private lazy var pickerViewController: PHPickerViewController = PHPickerViewController(configuration: pickerConfiguration)
     
     //MARK: - LifeCycle
     public override func viewDidLoad() {
@@ -52,7 +61,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         userContainerView.addSubview(userImageView)
         containerView.addSubviews(userContainerView, userProfileEditButton, userNameTextField, userGenderTextFiled, userClassInfoTextField, userIntroduceTextField, errorLabel, introduceCountLabel)
         scrollView.addSubview(containerView)
-        view.addSubviews(scrollView, editButton, privacyButton)
+        view.addSubviews(scrollView, editButton)
     }
     
     public override func setupAutoLayout() {
@@ -75,7 +84,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         }
         
         userProfileEditButton.snp.makeConstraints {
-            $0.width.height.equalTo(24)
+            $0.width.height.equalTo(28)
             $0.bottom.equalTo(userContainerView)
             $0.right.equalTo(userContainerView)
         }
@@ -128,12 +137,6 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.height.equalTo(52)
         }
-        
-        privacyButton.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(52)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(12)
-        }
     }
     
     public override func setupAttributes() {
@@ -150,12 +153,6 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             $0.setupFont(font: .Body03)
             $0.setupButton(text: "수정 완료")
             $0.isEnabled = false
-            $0.isHidden = true
-        }
-        
-        privacyButton.do {
-            $0.setupFont(font: .Body03)
-            $0.setupButton(text: "개인정보 변경 신청")
         }
         
         userContainerView.do {
@@ -177,10 +174,10 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         
         userProfileEditButton.do {
             $0.configuration = .filled()
-            $0.layer.cornerRadius = 24 / 2
+            $0.layer.cornerRadius = 28 / 2
             $0.clipsToBounds = true
             $0.configuration?.baseBackgroundColor = DesignSystemAsset.Colors.gray400.color
-            $0.configuration?.image = DesignSystemAsset.Images.icProfileEditSelected.image
+            $0.configuration?.image = DesignSystemAsset.Images.icProfileEditOutline.image
         }
         
         userImageView.do {
@@ -224,22 +221,18 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         userProfileEditButton
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .withLatestFrom(reactor.state.compactMap { $0.userProfileEntity})
-            .bind(with: self) { owner, entity in
-                guard let backgroundcolor = UserDefaultsManager.shared.userBackgroundColor else { return }
-                let profileEditViewController = DependencyContainer.shared.injector.resolve(ProfileEditViewController.self, arguments: entity, backgroundcolor)
-                owner.navigationController?.pushViewController(profileEditViewController, animated: true)
+            .bind(with: self) { owner, _ in
+                owner.pickerViewController.modalPresentationStyle = .fullScreen
+                owner.present(owner.pickerViewController, animated: true)
             }
             .disposed(by: disposeBag)
         
-        privacyButton
-            .rx.tap
-            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .bind(with: self) { owner, _ in
-                let privacyWebViewController = DependencyContainer.shared.injector.resolve(WSWebViewController.self, argument: WSURLType.accountInfo.urlString)
-                owner.navigationController?.pushViewController(privacyWebViewController, animated: true)
-            }
+        pickerViewController
+            .rx.didSelectImage
+            .map { Reactor.Action.didTappedProfileEditButton($0) }
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
+        
         
         userNameTextField.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
@@ -281,7 +274,6 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
                        let spacing: CGFloat = keyboardHeight == 384 ? 140 : 130
                        owner.scrollView.contentInset.bottom = (keyboardHeight + spacing)
                        owner.scrollView.verticalScrollIndicatorInsets.bottom = (keyboardHeight + spacing)
-                       owner.didChangeButton(true)
                    }
                    .disposed(by: disposeBag)
         
@@ -292,7 +284,6 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .bind(with: self) { owner, _ in
                 owner.scrollView.contentInset.bottom = .zero
                 owner.scrollView.verticalScrollIndicatorInsets.bottom = .zero
-                owner.didChangeButton(false)
             }
             .disposed(by: disposeBag)
         
@@ -347,7 +338,24 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .disposed(by: disposeBag)
         
         reactor.state
-            .compactMap { $0.userProfileEntity?.profile.iconUrl }
+            .compactMap { $0.imageData }
+            .map { UIImage(data: $0) }
+            .distinctUntilChanged()
+            .bind(to: userImageView.rx.image)
+            .disposed(by: disposeBag)
+            
+        reactor.state
+            .map { $0.userProfileEntity?.profile.iconUrl }
+            .filter { $0 == nil }
+            .map { _ in DesignSystemAsset.Images.profile.image }
+            .distinctUntilChanged()
+            .bind(to: userImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.userProfileEntity?.profile.iconUrl }
+            .filter { $0 != nil }
+            .map { URL(string: $0 ?? "")}
             .distinctUntilChanged()
             .bind(with: self) { owner, iconURL in
                 owner.userImageView.kf.setImage(with: iconURL)
@@ -398,15 +406,5 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-    }
-}
-
-extension ProfileSettingViewController {
-    private func didChangeButton(_ isChange: Bool) {
-        self.privacyButton.isEnabled = !isChange
-        self.privacyButton.isHidden = isChange
-        
-        self.editButton.isHidden = !isChange
-        self.editButton.isEnabled = isChange
     }
 }

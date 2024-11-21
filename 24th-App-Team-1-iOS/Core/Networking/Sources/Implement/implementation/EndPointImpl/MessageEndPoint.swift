@@ -18,25 +18,14 @@ public enum MessageEndPoint: WSNetworkEndPoint {
     // 쪽지 조회 API
     case fetchMessages(Encodable)
     
-    public var path: String {
+    public var spec: WSNetworkSpec {
         switch self {
         case .messagesStatus:
-            return "messages/status/me"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/messages/status/me")
         case .fetchReservedMessages:
-            return "/messages/scheduled"
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/messages/scheduled")
         case .fetchMessages:
-            return "/messages"
-        }
-    }
-    
-    public var method: HTTPMethod {
-        switch self {
-        case .messagesStatus:
-            return .get
-        case .fetchReservedMessages:
-            return .get
-        case .fetchMessages:
-            return .get
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/messages")
         }
     }
     
