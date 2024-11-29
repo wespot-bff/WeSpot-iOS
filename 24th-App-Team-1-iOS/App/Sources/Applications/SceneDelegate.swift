@@ -15,13 +15,11 @@ import CommonDomain
 import LoginDomain
 import LoginService
 import VoteFeature
-import VoteDomain
+import Firebase
 import VoteService
 import AllFeature
 import NotificationFeature
 import Swinject
-import SnapKit
-import ReactorKit
 import RxKakaoSDKAuth
 import KakaoSDKAuth
 import MessageFeature
@@ -69,17 +67,31 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
             DomainAssembly()
         ])
         
+        Task { @MainActor in
+            do {
+                try await WSVersionManager.shared.versionCheck { isForceUpdate in
+                    if isForceUpdate {
+                        await MainActor.run {
+                            self.handleVersionCheckResult(isForceUpdate: isForceUpdate)
+                        }
+                    }
+                }
+            } catch {
+                assertionFailure("강제 업데이트 로직 에러 \(error.localizedDescription)")
+            }
+        }
+        
         window = UIWindow(windowScene: scene)
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
         let refreshToken = KeychainManager.shared.get(type: .refreshToken)
         
         
-        if accessToken == nil || refreshToken == nil { // accessToken 값이 없으면 (회원가입 안됨)
+        if accessToken == nil || refreshToken == nil {
             let signInViewController = DependencyContainer.shared.injector.resolve(SignInViewController.self)
             window?.rootViewController = UINavigationController(rootViewController: signInViewController)
             
-        } else { // accessToken 값이 있으면 (회원가입이 됨)
+        } else {
             setupMainViewController()
         }
         setupViewControllers()
@@ -161,6 +173,30 @@ extension SceneDelegate {
 
 
 extension SceneDelegate {
+    private func handleVersionCheckResult(isForceUpdate: Bool) {
+        if isForceUpdate {
+            showUpdateVersionAlert(true)
+        }
+    }
+    
+    private func showUpdateVersionAlert(_ isForceUpdate: Bool) {
+        guard let topViewController = self.window?.rootViewController?.topMostViewController() else {
+            return
+        }
+        
+        WSAlertBuilder(showViewController: topViewController)
+            .setAlertType(type: .titleWithMeesage)
+            .setTitle(title: "새로운 버전이 업데이트 되었어요!")
+            .setMessage(message: "유저의 의견을 반영하여 사용성을 개선했어요 \n지금 업데이트하고 더 나은 위스팟을 만나보세요")
+            .setCancel(text: "다음에 할래요")
+            .setConfirm(text: "업데이트")
+            .action(.confirm) {
+                UIApplication.shared.open(WSURLType.appStore.urlString)
+            }
+            .show()
+    }
+    
+    
     private func setupMainViewController() {
         let voteMainViewController = DependencyContainer.shared.injector.resolve(VoteMainViewController.self)
         let voteNavigationContoller = UINavigationController(rootViewController: voteMainViewController)
