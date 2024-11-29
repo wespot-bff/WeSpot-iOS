@@ -135,7 +135,7 @@ public final class ProfileResignNoteViewController: BaseViewController<ProfileRe
         }
         
         noteDescriptionLabel.do {
-            $0.text = "위스팟에서 친구들과 함께 했던 추억들 (투표, 쪽지 등 모든 활동 정보)이 \n영구적으로 사라져요해당 데이터는 탈퇴 후 복구할 수 없어요"
+            $0.text = "위스팟에서 친구들과 함께 했던 추억들이\n(투표, 쪽지 등 모든 활동 정보)이 영구적으로 사라져요\n해당 데이터는 탈퇴 후 복구할 수 없어요"
             $0.textAlignment = .left
             $0.textColor = DesignSystemAsset.Colors.gray100.color
         }

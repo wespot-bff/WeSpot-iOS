@@ -21,7 +21,7 @@ public final class SignUpGenderViewController: BaseViewController<SignUpGenderVi
 
     //MARK: - Properties
     private let titleLabel = WSLabel(wsFont: .Header01, text: "성별")
-    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 이름을 변경할 수 없어요")
+    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 성별 변경이 어려워요")
     private let boyCardButton = GenderCardButton(type: .boy)
     private let girlCardButton = GenderCardButton(type: .girl)
     

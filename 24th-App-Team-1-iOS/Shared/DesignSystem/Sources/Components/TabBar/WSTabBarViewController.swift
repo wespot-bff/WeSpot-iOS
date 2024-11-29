@@ -61,7 +61,7 @@ public final class WSTabBarViewController: UITabBarController {
         
         tabBarView.snp.makeConstraints {
             $0.bottom.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(98)
+            $0.height.equalTo(WSTabbarConstraint.tabarHeight)
         }
     }
     

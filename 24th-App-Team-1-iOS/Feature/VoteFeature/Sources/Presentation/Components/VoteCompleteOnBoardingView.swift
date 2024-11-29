@@ -11,7 +11,7 @@ import UIKit
 
 final class VoteCompleteOnBoardingView: UIView {
     
-    private let descrptionLabel: WSLabel = WSLabel(wsFont: .Header01, text: "우리 반 투표 결과를 분석하고 있어요")
+    private let descrptionLabel: WSLabel = WSLabel(wsFont: .Header01, text: "우리 반 비밀 투표 결과를\n 분석하고 있어요")
     private let onboardingLottieView: WSLottieView = WSLottieView()
     
     override init(frame: CGRect) {

@@ -45,7 +45,7 @@ public final class VoteMainViewController: BaseViewController<VoteMainViewReacto
         voteToggleView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(46)
+            $0.height.equalTo(VoteConstraint.voteToggleHeight)
         }
         
         votePageViewController.view.snp.makeConstraints {

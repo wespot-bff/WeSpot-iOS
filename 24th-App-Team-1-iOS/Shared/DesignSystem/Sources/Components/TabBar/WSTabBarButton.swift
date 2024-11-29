@@ -20,7 +20,7 @@ public final class WSTabBarButton: UIButton {
         var text: String {
             switch self {
             case .vote:
-                "투표"
+                "비밀 투표"
             case .message:
                 "쪽지"
             case .all:
@@ -90,12 +90,12 @@ public final class WSTabBarButton: UIButton {
         tabImageView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(4)
             $0.centerX.equalToSuperview()
-            $0.size.equalTo(40)
+            $0.size.equalTo(WSTabbarConstraint.tabbarButtonSize)
         }
         tabLabel.snp.makeConstraints {
             $0.top.equalTo(tabImageView.snp.bottom).offset(4)
             $0.centerX.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(14)
+            $0.height.equalTo(15)
         }
     }
     
