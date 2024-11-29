@@ -15,8 +15,8 @@ import SnapKit
 public final class ConfirmInfoBottomSheetView: UIView {
     
     //MARK: - Properties
-    private let titleLabel = WSLabel(wsFont: .Body01, text: "해당 정보로 가입하시겠습니까?")
-    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "가입 이후 개인 정보 변경은 1:1 문의로 요청해주세요")
+    private let titleLabel = WSLabel(wsFont: .Body01, text: "마지막으로 확인해 주세요")
+    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "가입 이후 개인 정보 변경은 1:1 문의로 요청해 주세요")
     private let profileImageView = UIImageView()
     private let infoLabel = WSLabel(wsFont: .Header01)
     private let subInfoLabel = WSLabel(wsFont: .Body02)
@@ -24,7 +24,7 @@ public final class ConfirmInfoBottomSheetView: UIView {
         $0.setupButton(text: "수정할래요")
     }
     public let confirmButton = WSButton(wsButtonType: .default(10)).then {
-        $0.setupButton(text: "네 좋아요")
+        $0.setupButton(text: "네 확인했어요")
     }
     
     //MARK: - Initializer
@@ -107,7 +107,7 @@ public final class ConfirmInfoBottomSheetView: UIView {
         }
         
         confirmButton.do {
-            $0.setupButton(text: "네 좋아요")
+            $0.setupButton(text: "네 확인했어요")
         }
         
         layer.cornerRadius = 25

@@ -71,7 +71,7 @@ final class VoteAllCollectionViewCell: UICollectionViewCell {
         }
         
         completeAllCollectionView.snp.makeConstraints {
-            $0.top.equalTo(descrptionLabel.snp.bottom).offset(25)
+            $0.top.equalTo(descrptionLabel.snp.bottom).offset(VoteConstraint.voteCompleteCollectionViewTopSpacing)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -146,7 +146,7 @@ extension VoteAllCollectionViewCell {
         let rankerHorizontalSection: NSCollectionLayoutSection = NSCollectionLayoutSection(group: rankerHorizontalGroup)
         
         
-        rankerHorizontalSection.contentInsets = .init(top: 55, leading: 0, bottom: 0, trailing: 0)
+        rankerHorizontalSection.contentInsets = .init(top: VoteConstraint.voteRankerCellHorizontalTopSpacing, leading: 0, bottom: 0, trailing: 0)
         rankerHorizontalSection.orthogonalScrollingBehavior = .none
         
         return rankerHorizontalSection
@@ -155,7 +155,7 @@ extension VoteAllCollectionViewCell {
     private func createRankerVerticalSection() -> NSCollectionLayoutSection {
         let rankerVerticalItemSize: NSCollectionLayoutSize = .init(
             widthDimension: .absolute(contentView.frame.width - 60),
-            heightDimension: .absolute(78)
+            heightDimension: .absolute(VoteConstraint.voteRankerCellVerticalItemHeight)
         )
         
         let rankerVerticalItem: NSCollectionLayoutItem = .init(layoutSize: rankerVerticalItemSize)
@@ -175,6 +175,7 @@ extension VoteAllCollectionViewCell {
         
         let rankerVerticalSection: NSCollectionLayoutSection = NSCollectionLayoutSection(group: rankerVerticalGroup)
         
+        rankerVerticalSection.contentInsets = .init(top: VoteConstraint.voteRankerCellVeticalSectionTopSpacing, leading: 0, bottom: 0, trailing: 0)
         rankerVerticalSection.orthogonalScrollingBehavior = .none
         
         return rankerVerticalSection
