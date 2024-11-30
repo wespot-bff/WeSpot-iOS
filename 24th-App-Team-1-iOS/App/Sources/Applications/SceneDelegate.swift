@@ -32,6 +32,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
         DependencyContainer.shared.injector.assemble([
+            SplashPresentationAssembly(),
             SignInPresentationAssembly(),
             SignUpNamePresentationAssembly(),
             SignUpClassPresentationAssembly(),
@@ -186,9 +187,9 @@ extension SceneDelegate {
         
         WSAlertBuilder(showViewController: topViewController)
             .setAlertType(type: .titleWithMeesage)
+            .setButtonType(type: .confirm)
             .setTitle(title: "새로운 버전이 업데이트 되었어요!")
             .setMessage(message: "유저의 의견을 반영하여 사용성을 개선했어요 \n지금 업데이트하고 더 나은 위스팟을 만나보세요")
-            .setCancel(text: "다음에 할래요")
             .setConfirm(text: "업데이트")
             .action(.confirm) {
                 UIApplication.shared.open(WSURLType.appStore.urlString)

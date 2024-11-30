@@ -26,15 +26,6 @@ struct VoteMainPresentationAssembly: Assembly {
         
             return VoteMainViewController(reactor: reactor)
         }
-        
-        container.register(VoteMainViewReactor.self) { resolver  in
-            return VoteMainViewReactor()
-        }
-        
-        container.register(VoteMainViewController.self) { resolver in
-            let reactor = resolver.resolve(VoteMainViewReactor.self)!
-            return VoteMainViewController(reactor: reactor)
-        }
     }
 }
 
