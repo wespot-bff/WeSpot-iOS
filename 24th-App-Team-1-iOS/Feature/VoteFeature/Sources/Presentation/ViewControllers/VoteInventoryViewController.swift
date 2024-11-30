@@ -133,7 +133,7 @@ public final class VoteInventoryViewController: BaseViewController<VoteInventory
         }
         
         inventoryConfirmButton.do {
-            $0.setupButton(text: "친구 초대하기")
+            $0.setupButton(text: "같이 할 친구 데려오기")
             $0.setupFont(font: .Body03)
             $0.isHidden = true
         }
@@ -149,7 +149,7 @@ public final class VoteInventoryViewController: BaseViewController<VoteInventory
         }
         
         inventorySubTitleLabel.do {
-            $0.text = "친구들이 초대하면 투표를 확률이 올라가요"
+            $0.text = "친구들을 초대하면 투표를 확률이 올라가요"
             $0.textColor = DesignSystemAsset.Colors.gray500.color
         }
         

@@ -49,19 +49,19 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
         super.setupAutoLayout()
         
         voteBannerView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(20)
+            $0.top.equalToSuperview().inset(VoteConstraint.voteBannerViewTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(80)
+            $0.height.equalTo(VoteConstraint.voteBannerViewHeight)
         }
         
         voteContainerView.snp.makeConstraints {
-            $0.top.equalTo(voteBannerView.snp.bottom).offset(16)
+            $0.top.equalTo(voteBannerView.snp.bottom).offset(VoteConstraint.voteContainerViewTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(400)
+            $0.height.equalTo(VoteConstraint.voteContainerViewHeight)
         }
         
         voteDateLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(24)
+            $0.top.equalToSuperview().offset(VoteConstraint.voteDateLabelTopSpacing)
             $0.horizontalEdges.equalToSuperview().inset(28)
             $0.height.equalTo(21)
         }
@@ -73,15 +73,15 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
         }
         
         voteLottieView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(20)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(335)
+            $0.horizontalEdges.equalToSuperview().inset(VoteConstraint.voteLottieHorizontalSpacing)
+            $0.top.equalToSuperview().inset(VoteConstraint.voteLottieTopSpacing)
+            $0.bottom.equalToSuperview().inset(VoteConstraint.voteLottieBottomSpacing)
         }
         
         voteConfirmButton.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(28)
-            $0.height.equalTo(52)
-            $0.bottom.equalToSuperview().offset(-28)
+            $0.horizontalEdges.equalToSuperview().inset(VoteConstraint.voteConfirmButtonHorizontalSpacing)
+            $0.height.equalTo(VoteConstraint.voteConfirmButtonHeight)
+            $0.bottom.equalToSuperview().offset(VoteConstraint.voteConfirmButtonBottomSpacing)
         }
         
     }
@@ -89,7 +89,7 @@ public final class VoteHomeViewController: BaseViewController<VoteHomeViewReacto
     public override func setupAttributes() {
         super.setupAttributes()
         voteContainerView.do {
-            $0.backgroundColor = DesignSystemAsset.Colors.gray700.color
+            $0.backgroundColor = DesignSystemAsset.Colors.gray600.color
             $0.clipsToBounds = true
             $0.layer.cornerRadius = 18
         }

@@ -88,7 +88,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         let refreshToken = KeychainManager.shared.get(type: .refreshToken)
         
         
-        if accessToken == nil || refreshToken == nil {
+        if accessToken == nil { // accessToken 값이 없으면 (회원가입 안됨)
             let signInViewController = DependencyContainer.shared.injector.resolve(SignInViewController.self)
             window?.rootViewController = UINavigationController(rootViewController: signInViewController)
             

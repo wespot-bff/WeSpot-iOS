@@ -48,7 +48,7 @@ final public class WSTabBar: UIView {
         
         stackView.do {
             $0.axis = .horizontal
-            $0.spacing = 30
+            $0.spacing = WSTabbarConstraint.tabbarButtonSpacing
             $0.alignment = .fill
             $0.distribution = .fillEqually
         }
