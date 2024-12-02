@@ -10,9 +10,9 @@ import Foundation
 
 
 public struct UpdateUserProfileImageRequestQuery {
-    public let url: String
+    public let url: String?
     
-    public init(url: String) {
+    public init(url: String?) {
         self.url = url
     }
 }
