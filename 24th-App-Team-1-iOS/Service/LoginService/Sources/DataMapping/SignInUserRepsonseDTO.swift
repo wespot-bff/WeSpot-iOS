@@ -1,5 +1,5 @@
 //
-//  SignInRepsonseDTO.swift
+//  SignInUserRepsonseDTO.swift
 //  LoginService
 //
 //  Updated by JiCheol on 12/5/24
@@ -9,7 +9,7 @@
 import Foundation
 import LoginDomain
 
-public struct SignInRepsonseDTO: Decodable {
+public struct SignInUserRepsonseDTO: Decodable {
     public let accessToken: String
     public let refreshToken: String
     public let refreshTokenExpiredAt: String
@@ -18,7 +18,7 @@ public struct SignInRepsonseDTO: Decodable {
     public let isProfileChanged: Bool
 }
 
-extension SignInRepsonseDTO {
+extension SignInUserRepsonseDTO {
     public struct UserSettingResponseDTO: Decodable {
         public let isVoteNotification: Bool
         public let isMessageNotification: Bool
@@ -26,7 +26,7 @@ extension SignInRepsonseDTO {
     }
 }
 
-extension SignInRepsonseDTO {
+extension SignInUserRepsonseDTO {
     func toDomain() -> CreateAccountResponseEntity {
         return .init(
             accessToken: accessToken,
@@ -39,7 +39,7 @@ extension SignInRepsonseDTO {
     }
 }
 
-extension SignInRepsonseDTO.UserSettingResponseDTO {
+extension SignInUserRepsonseDTO.UserSettingResponseDTO {
     func toDomain() -> CreateAccountSettingResponseEntity {
         return .init(
             isVoteNotification: isVoteNotification,
