@@ -12,7 +12,7 @@ public struct SignInUserEntity {
     public let accessToken: String
     public let refreshToken: String
     public let refreshTokenExpiredAt: String
-    public let setting: CreateAccountSettingResponseEntity
+    public let setting: UserSettingEntity
     public let name: String
     public let isProfileChanged: Bool
     
@@ -20,7 +20,7 @@ public struct SignInUserEntity {
         accessToken: String,
         refreshToken: String,
         refreshTokenExpiredAt: String,
-        setting: CreateAccountSettingResponseEntity,
+        setting: UserSettingEntity,
         name: String,
         isProfileChanged: Bool
     
@@ -35,7 +35,7 @@ public struct SignInUserEntity {
 }
 
 
-public struct CreateAccountSettingResponseEntity {
+public struct UserSettingEntity {
     public let isVoteNotification: Bool
     public let isMessageNotification: Bool
     public let isMarketingNotification: Bool
