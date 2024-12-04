@@ -12,23 +12,23 @@ import Alamofire
 public enum LoginEndPoint: WSNetworkEndPoint {
     
     // 소셜로그인 API
-    case createSocialLogin(Encodable)
+    case executeSocialLogin(Encodable)
     // 회원가입 API
-    case createAccount(Encodable)
+    case executeSingUp(Encodable)
     // 토큰 재발행 API
-    case createRefreshToken(Encodable)
+    case generateRefreshToken(Encodable)
     // 학교 정보 검색 API
     case fetchSchoolList(Encodable)
     
     public var spec: WSNetworkSpec {
         switch self {
-        case .createAccount:
+        case .executeSingUp:
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/signup")
-        case .createSocialLogin:
+        case .executeSocialLogin:
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/login")
         case .fetchSchoolList:
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/schools/search")
-        case .createRefreshToken:
+        case .generateRefreshToken:
             return WSNetworkSpec(method: .post, url: "\(WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/reissue"))")
         }
     }
@@ -36,11 +36,11 @@ public enum LoginEndPoint: WSNetworkEndPoint {
     
     public var parameters: WSRequestParameters {
         switch self {
-        case .createSocialLogin(let body):
+        case .executeSocialLogin(let body):
             return .requestBody(body)
-        case .createAccount(let body):
+        case .executeSingUp(let body):
             return .requestBody(body)
-        case .createRefreshToken(let body):
+        case .generateRefreshToken(let body):
             return .requestBody(body)
         case .fetchSchoolList(let name):
             return .requestQuery(name)
