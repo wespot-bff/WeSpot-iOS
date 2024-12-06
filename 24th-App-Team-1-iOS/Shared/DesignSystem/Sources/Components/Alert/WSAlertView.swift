@@ -98,7 +98,7 @@ public final class WSAlertView: UIViewController {
             }
             
             messageLabel.snp.makeConstraints {
-                $0.horizontalEdges.equalToSuperview().offset(20)
+                $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.top.equalTo(titleLabel.snp.bottom).offset(8)
             }
             

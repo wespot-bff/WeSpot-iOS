@@ -17,4 +17,5 @@ public protocol CommonRepositoryProtocol {
     func fetchVoteOptions() -> Single<VoteResponseEntity?>
     func createProfilePresignedURL(query: CreateProfilePresignedURLQuery) -> Single<CreateProfilePresignedURLEntity?>
     func uploadUserProfileImage(_ image: Data, presigendURL: String) -> Single<Bool>
+    func fetchAppVersionItem() async throws -> WSVersionEntity
 }

@@ -45,7 +45,7 @@ public final class SignInViewReactor: Reactor {
         self.createNewMemberUseCase = createNewMemberUseCase
         self.initialState = State(
             accountRequest: CreateAccountRequest(),
-            isLoading: false,
+            isLoading: true,
             isShow: false
         )
     }

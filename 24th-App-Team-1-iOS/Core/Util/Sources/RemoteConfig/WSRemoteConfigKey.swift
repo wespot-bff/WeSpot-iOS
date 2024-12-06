@@ -8,7 +8,7 @@
 import Foundation
 
 //MARK: WSRemoteConfig Key
-enum WSRemoteConfigKey: String {
+public enum WSRemoteConfigKey: String {
     case latestVersion = "IOS_LATEST_VERSION"
     case minversion = "IOS_MIN_VERSION"
 }

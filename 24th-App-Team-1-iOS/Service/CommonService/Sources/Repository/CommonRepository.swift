@@ -11,6 +11,8 @@ import CommonDomain
 import Util
 import Extensions
 
+import FirebaseRemoteConfig
+import Firebase
 import RxSwift
 import RxCocoa
 
@@ -18,6 +20,7 @@ public final class CommonRepository: CommonRepositoryProtocol {
     
     
     private let networkService: WSNetworkServiceProtocol = WSNetworkService()
+    private let dataSources: RemoteConfig = RemoteConfig.remoteConfig()
     
     public init() { }
     
@@ -100,5 +103,20 @@ public final class CommonRepository: CommonRepositoryProtocol {
             .catchAndReturn(false)
             .logErrorIfDetected(category: Network.error)
             .asSingle()
+    }
+    
+    public func fetchAppVersionItem() async throws -> WSVersionEntity {
+        let fetchStatus = try await dataSources.fetch(withExpirationDuration: 0)
+        
+        if fetchStatus == .success {
+            try await dataSources.activate()
+            guard let minVersion = dataSources.configValue(forKey: WSRemoteConfigKey.minversion.rawValue).stringValue,
+                  let latestVersion = dataSources.configValue(forKey: WSRemoteConfigKey.latestVersion.rawValue).stringValue else {
+                throw WSRemoteConfigError.notFoundVersion
+            }
+            return (latestVersion, minVersion)
+        } else {
+            throw WSRemoteConfigError.invalidFirebaseConfigure
+        }
     }
 }

@@ -143,9 +143,9 @@ extension Target {
         - module: ModulePaths Type
      - Returns: Target Type
      */
-    public static func feature(module: ModulePaths.Feature, dependencies: [TargetDependency]) -> Self {
+    public static func feature(module: ModulePaths.Feature, dependencies: [TargetDependency], product: Product = .framework) -> Self {
         TargetConfig(infoPlist: .makeInfoPlist(), sources: .sources, dependencies: dependencies)
-            .makeTarget(with: module.name, bundleId: module.bundleId, product: .framework)
+            .makeTarget(with: module.name, bundleId: module.bundleId, product: product)
     }
     
     /**
@@ -155,9 +155,9 @@ extension Target {
         - product: Target Product Type
      - Returns: Target Type
      */
-    public static func domain(module: ModulePaths.Domain, dependencies: [TargetDependency]) -> Self {
+    public static func domain(module: ModulePaths.Domain, dependencies: [TargetDependency], product: Product = .framework) -> Self {
         TargetConfig(infoPlist: .default, sources: .sources, dependencies: dependencies)
-            .makeTarget(with: module.name, bundleId: module.bundleId, product: .framework)
+            .makeTarget(with: module.name, bundleId: module.bundleId, product: product)
     }
     
     /**
@@ -166,9 +166,9 @@ extension Target {
         - module: ModulePaths Type
      - Returns: Target Type
      */
-    public static func service(module: ModulePaths.Service, dependencies: [TargetDependency]) -> Self {
+    public static func service(module: ModulePaths.Service, dependencies: [TargetDependency], product: Product = .framework) -> Self {
         TargetConfig(infoPlist: .default, sources: .sources, dependencies: dependencies)
-            .makeTarget(with: module.name, bundleId: module.bundleId, product: .framework)
+            .makeTarget(with: module.name, bundleId: module.bundleId, product: product)
     }
     
     /**
@@ -177,9 +177,9 @@ extension Target {
         - module: ModulePaths Type
      - Returns: Target Type
      */
-    public static func core(module: ModulePaths.Core, dependencies: [TargetDependency] = []) -> Self {
+    public static func core(module: ModulePaths.Core, dependencies: [TargetDependency] = [], product: Product = .framework) -> Self {
         TargetConfig(infoPlist: .default, sources: .sources, dependencies: dependencies)
-            .makeTarget(with: module.name, bundleId: module.bundleId, product: .framework)
+            .makeTarget(with: module.name, bundleId: module.bundleId, product: product)
     }
     
     /**

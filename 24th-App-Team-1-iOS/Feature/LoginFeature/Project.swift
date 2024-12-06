@@ -20,6 +20,6 @@ let loginFeature = Project.makeProject(
             .shared(module: .DesignSystem),
             .core(module: .Util),
             .core(module: .Storage)
-        ])
+        ], product: .staticFramework)
     ]
 )

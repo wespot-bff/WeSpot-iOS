@@ -14,8 +14,7 @@ let project = Project.makeProject(
     targets: [
         .core(module: .Util, dependencies: [
             .shared(module: .ThirdPartyLib),
-            .shared(module: .DesignSystem),
-            .SPM.firebaseRemoteConfig
+            .shared(module: .DesignSystem)
         ])
     ]
 )

@@ -14,13 +14,18 @@ import ReactorKit
 public final class VoteMainViewReactor: Reactor {
     public var initialState: State
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
-        
+    private let fetchAppVersionUseCase: FetchAppVersionItemUseCaseProtocol
+    
+    
+    
     public enum Action {
+        case viewDidLoad
         case didTapToggleButton(VoteTypes)
     }
     
     public struct State {
         var voteTypes: VoteTypes
+        var updateType: WSUpdateTypes
         @Pulse var isShowEffectView: Bool
         @Pulse var isSelected: Bool
         @Pulse var voteResponseEntity: VoteResponseEntity?
@@ -28,16 +33,21 @@ public final class VoteMainViewReactor: Reactor {
     
     public enum Mutation {
         case setVoteTypes(VoteTypes)
+        case setUpdateType(WSUpdateTypes)
         case setSelectedVoteButton(Bool, VoteResponseEntity?)
         case setShowEffectView(Bool)
     }
     
-    public init() {
+    public init(
+        fetchAppVersionUseCase:FetchAppVersionItemUseCaseProtocol
+    ) {
         self.initialState = State(
             voteTypes: .main,
+            updateType: .noUpdate,
             isShowEffectView: false,
             isSelected: false
         )
+        self.fetchAppVersionUseCase = fetchAppVersionUseCase
     }
     
     public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
@@ -57,6 +67,20 @@ public final class VoteMainViewReactor: Reactor {
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
+        case .viewDidLoad:
+            return Observable.create { [weak self] observer in
+                Task {
+                    do {
+                        guard let self else { return }
+                        let updateType = try await self.fetchAppVersionUseCase.execute()
+                        observer.onNext(.setUpdateType(updateType))
+                    } catch {
+                        observer.onError(error)
+                    }
+                }
+                return Disposables.create()
+            }
+            
         case let .didTapToggleButton(voteTypes):
             return .just(.setVoteTypes(voteTypes))
         }
@@ -73,6 +97,8 @@ public final class VoteMainViewReactor: Reactor {
             newState.voteTypes = voteTypes
         case let .setShowEffectView(isShowEffectView):
             newState.isShowEffectView = isShowEffectView
+        case let .setUpdateType(updateType):
+            newState.updateType = updateType
         }
         
         return newState

@@ -18,11 +18,15 @@ import Swinject
 
 struct DomainAssembly: Assembly {
     func assemble(container: Container) {
-        
         //common
         container.register(CreateCheckProfanityUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
             return createCheckProfanityUseCase(commonRepository: repository)
+        }
+        
+        container.register(FetchAppVersionItemUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return FetchAppVersionItemUseCase(commonRepository: repository)
         }
         
         container.register(CreateReportUserUseCaseProtocol.self) { resolver in

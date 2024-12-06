@@ -65,6 +65,39 @@ public final class VoteMainViewController: BaseViewController<VoteMainViewReacto
     public override func bind(reactor: Reactor) {
         super.bind(reactor: reactor)
         
+        Observable.just(())
+            .map { Reactor.Action.viewDidLoad }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.updateType }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, updateType in
+                let currentVersion = Bundle.main.appVersion
+                let lastPromptedVersion = UserDefaultsManager.shared.lastPromptedVersion
+                guard currentVersion != lastPromptedVersion else { return }
+                switch updateType {
+                case .minorUpdate, .patchUpdate:
+                    WSAlertBuilder(showViewController: owner)
+                        .setButtonType(type: .all)
+                        .setAlertType(type: .titleWithMeesage)
+                        .setTitle(title: "새로운 버전이 업데이트 되었어요!")
+                        .setMessage(message: "유저의 의견을 반영해서 사용성을 개선했어요\n지금 업데이트하고 더 나은 위스팟을 만나보세요")
+                        .setConfirm(text: "업데이트")
+                        .setCancel(text: "다음에 할래요")
+                        .action(.confirm) {
+                            UIApplication.shared.open(WSURLType.appStore.urlString)
+                        }
+                        .show()
+                    UserDefaultsManager.shared.lastPromptedVersion = currentVersion
+                default:
+                    break
+                }
+            }
+            .disposed(by: disposeBag)
+        
         reactor.pulse(\.$voteResponseEntity)
             .compactMap { $0?.response }
             .filter { $0.isEmpty }

@@ -18,7 +18,8 @@ struct VoteMainPresentationAssembly: Assembly {
     func assemble(container: Container) {
         
         container.register(VoteMainViewReactor.self) { resolver in
-            return VoteMainViewReactor()
+            let fetchAppVersionItemUseCase = resolver.resolve(FetchAppVersionItemUseCaseProtocol.self)!
+            return VoteMainViewReactor(fetchAppVersionUseCase: fetchAppVersionItemUseCase)
         }
         
         container.register(VoteMainViewController.self) { resolver in
