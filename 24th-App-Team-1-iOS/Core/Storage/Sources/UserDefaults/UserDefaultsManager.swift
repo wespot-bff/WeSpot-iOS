@@ -7,6 +7,7 @@
 
 import Foundation
 import LoginDomain
+import Extensions
 import VoteDomain
 
 public class UserDefaultsManager {
@@ -26,12 +27,13 @@ public class UserDefaultsManager {
         case fcmToken
         case voteStub
         case expiredDate
+        case lastPromptedVersion
     }
     
     @UserDefaultsWrapper(key: Key.isAccessed.rawValue, defaultValue: false)
        public var isAccessed: Bool?
     
-    @UserDefaultsWrapper (key: Key.accessToken.rawValue, defaultValue: "")
+    @UserDefaultsWrapper(key: Key.accessToken.rawValue, defaultValue: "")
         public var accessToken: String?
     
     @UserDefaultsWrapper(key: Key.refreshToken.rawValue, defaultValue: "")
@@ -57,6 +59,9 @@ public class UserDefaultsManager {
     
     @UserDefaultsWrapper(key: Key.voteStub.rawValue, defaultValue: [])
         public var voteRequest: [CreateVoteItemReqeuest]
+    
+    @UserDefaultsWrapper(key: Key.lastPromptedVersion.rawValue, defaultValue: Bundle.main.appVersion)
+        public var lastPromptedVersion: String
     
     
     public func clearAllData() {
