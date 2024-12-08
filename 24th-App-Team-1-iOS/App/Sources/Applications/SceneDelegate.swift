@@ -30,6 +30,7 @@ import KeychainSwift
 public class SceneDelegate: UIResponder, UISceneDelegate {
     
     var window: UIWindow?
+    private let notificationHandler = WSNotificationHandler()
     
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
@@ -70,6 +71,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         ])
         
         window = UIWindow(windowScene: scene)
+        UNUserNotificationCenter.current().delegate = notificationHandler
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
         let refreshToken = KeychainManager.shared.get(type: .refreshToken)
@@ -105,6 +107,13 @@ extension SceneDelegate {
         NotificationCenter.default.addObserver(forName: .showVoteMainViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             setupMainViewController()
+        }
+        
+        NotificationCenter.default.addObserver(forName: .showProfileSettingViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let profileSettingViewController = DependencyContainer.shared.injector.resolve(ProfileSettingViewController.self)
+            topViewController?.navigationController?.pushViewController(profileSettingViewController, animated: true)
         }
         
         NotificationCenter.default.addObserver(forName: .showSignInViewController, object: nil, queue: .main) { [weak self] _ in
