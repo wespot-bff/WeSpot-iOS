@@ -72,7 +72,6 @@ public final class SplashViewController: BaseViewController<SplashViewReactor> {
                 reactor.state.map { $0.updateType }
             )
             .observe(on: MainScheduler.instance)
-            .debug("updateType splash")
             .bind(with: self) { owner, arg in
                 switch arg.1 {
                 case .major:
