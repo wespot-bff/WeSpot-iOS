@@ -60,9 +60,8 @@ public class UserDefaultsManager {
     @UserDefaultsWrapper(key: Key.voteStub.rawValue, defaultValue: [])
         public var voteRequest: [CreateVoteItemReqeuest]
     
-    @UserDefaultsWrapper(key: Key.lastPromptedVersion.rawValue, defaultValue: Bundle.main.appVersion)
+    @UserDefaultsWrapper(key: Key.lastPromptedVersion.rawValue, defaultValue: "")
         public var lastPromptedVersion: String
-    
     
     public func clearAllData() {
         let defaults = UserDefaults.standard

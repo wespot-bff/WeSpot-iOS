@@ -9,6 +9,7 @@ import Foundation
 
 import LoginFeature
 import SplashFeature
+import SplashDomain
 import CommonDomain
 import Swinject
 
@@ -17,8 +18,8 @@ struct SplashPresentationAssembly: Assembly {
     
     func assemble(container: Container) {
         container.register(SplashViewReactor.self) { (resolver, accessToken: String?) in
-            let fetchAppVersionUseCase = resolver.resolve(FetchAppVersionItemUseCaseProtocol.self)!
-            return SplashViewReactor(fetchAppVersionUseCase: fetchAppVersionUseCase, accessToken: accessToken)
+            let fetchMajorAppVersionUseCase = resolver.resolve(FetchMajorAppVersionUseCaseProtocol.self)!
+            return SplashViewReactor(fetchMajorAppVersionUseCase: fetchMajorAppVersionUseCase, accessToken: accessToken)
         }
         
         container.register(SplashViewController.self) { (resolver, accessToken: String?) in

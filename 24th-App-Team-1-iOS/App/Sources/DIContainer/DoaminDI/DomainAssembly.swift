@@ -8,6 +8,7 @@
 import Foundation
 import CommonDomain
 import CommonService
+import SplashDomain
 import VoteDomain
 import LoginDomain
 import MessageDomain
@@ -24,9 +25,14 @@ struct DomainAssembly: Assembly {
             return createCheckProfanityUseCase(commonRepository: repository)
         }
         
-        container.register(FetchAppVersionItemUseCaseProtocol.self) { resolver in
+        container.register(FetchMajorAppVersionUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
-            return FetchAppVersionItemUseCase(commonRepository: repository)
+            return FetchMajorAppVersionUseCase(commonRepository: repository)
+        }
+        
+        container.register(FetchMinorAppVersionUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return FetchMinorAppVersionUseCase(commonRepository: repository)
         }
         
         container.register(CreateReportUserUseCaseProtocol.self) { resolver in

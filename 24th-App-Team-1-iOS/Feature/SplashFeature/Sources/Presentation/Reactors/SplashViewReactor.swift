@@ -6,43 +6,45 @@
 //
 
 import ReactorKit
-import CommonDomain
+import SplashDomain
 import Util
 
 public final class SplashViewReactor: Reactor {
     public var initialState: State
-    private let fetchAppVersionUseCase: FetchAppVersionItemUseCaseProtocol
+    private let fetchMajorAppVersionUseCase: FetchMajorAppVersionUseCaseProtocol
     
     public enum Action {
         case willEnterForeground
     }
     
     public enum Mutation {
-        case setUpdatetype(WSUpdateTypes)
+        case setUpdatetype(MajorUpdateTypes)
     }
     
     public struct State {
         var accessToken: String?
-        var updateType: WSUpdateTypes = .noUpdate
+        var updateType: MajorUpdateTypes = .noUpdate
     }
     
     public init(
-        fetchAppVersionUseCase: FetchAppVersionItemUseCaseProtocol,
+        fetchMajorAppVersionUseCase: FetchMajorAppVersionUseCaseProtocol,
         accessToken: String?
     ) {
         self.initialState = State(accessToken: accessToken)
-        self.fetchAppVersionUseCase = fetchAppVersionUseCase
+        self.fetchMajorAppVersionUseCase = fetchMajorAppVersionUseCase
     }
-    
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .willEnterForeground:
             return Observable.create { [weak self] observer in
+                guard let self else {
+                    observer.onCompleted()
+                    return Disposables.create()
+                }
                 Task {
                     do {
-                        guard let self else { return }
-                        let updateType = try await self.fetchAppVersionUseCase.execute()
+                        let updateType = try await self.fetchMajorAppVersionUseCase.execute()
                         observer.onNext(.setUpdatetype(updateType))
                     } catch {
                         observer.onError(error)

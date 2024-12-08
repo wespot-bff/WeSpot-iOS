@@ -111,10 +111,11 @@ public final class CommonRepository: CommonRepositoryProtocol {
         if fetchStatus == .success {
             try await dataSources.activate()
             guard let minVersion = dataSources.configValue(forKey: WSRemoteConfigKey.minversion.rawValue).stringValue,
-                  let latestVersion = dataSources.configValue(forKey: WSRemoteConfigKey.latestVersion.rawValue).stringValue else {
+                  let latestVersion = dataSources.configValue(forKey: WSRemoteConfigKey.latestVersion.rawValue).stringValue,
+                  let updateType = dataSources.configValue(forKey: WSRemoteConfigKey.updateType.rawValue).stringValue else {
                 throw WSRemoteConfigError.notFoundVersion
             }
-            return (latestVersion, minVersion)
+            return (latestVersion, minVersion, updateType)
         } else {
             throw WSRemoteConfigError.invalidFirebaseConfigure
         }

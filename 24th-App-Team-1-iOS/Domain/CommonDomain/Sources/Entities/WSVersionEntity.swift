@@ -8,4 +8,4 @@
 import Foundation
 
 
-public typealias WSVersionEntity = (latestVersion: String, minVersion: String)
+public typealias WSVersionEntity = (latestVersion: String, minVersion: String, updateType: String)

@@ -14,7 +14,7 @@ import ReactorKit
 public final class VoteMainViewReactor: Reactor {
     public var initialState: State
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
-    private let fetchAppVersionUseCase: FetchAppVersionItemUseCaseProtocol
+    private let fetchMinorAppVersionUseCase: FetchMinorAppVersionUseCaseProtocol
     
     
     
@@ -25,7 +25,7 @@ public final class VoteMainViewReactor: Reactor {
     
     public struct State {
         var voteTypes: VoteTypes
-        var updateType: WSUpdateTypes
+        @Pulse var updateType: MinorUpdateTypes
         @Pulse var isShowEffectView: Bool
         @Pulse var isSelected: Bool
         @Pulse var voteResponseEntity: VoteResponseEntity?
@@ -33,13 +33,13 @@ public final class VoteMainViewReactor: Reactor {
     
     public enum Mutation {
         case setVoteTypes(VoteTypes)
-        case setUpdateType(WSUpdateTypes)
+        case setUpdateType(MinorUpdateTypes)
         case setSelectedVoteButton(Bool, VoteResponseEntity?)
         case setShowEffectView(Bool)
     }
     
     public init(
-        fetchAppVersionUseCase:FetchAppVersionItemUseCaseProtocol
+        fetchMinorAppVersionUseCase: FetchMinorAppVersionUseCaseProtocol
     ) {
         self.initialState = State(
             voteTypes: .main,
@@ -47,7 +47,7 @@ public final class VoteMainViewReactor: Reactor {
             isShowEffectView: false,
             isSelected: false
         )
-        self.fetchAppVersionUseCase = fetchAppVersionUseCase
+        self.fetchMinorAppVersionUseCase = fetchMinorAppVersionUseCase
     }
     
     public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
@@ -68,11 +68,15 @@ public final class VoteMainViewReactor: Reactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
-            return Observable.create { [weak self] observer in
+            return Observable
+                .create { [weak self] observer in
+                    guard let self else {
+                        observer.onCompleted()
+                        return Disposables.create()
+                    }
                 Task {
                     do {
-                        guard let self else { return }
-                        let updateType = try await self.fetchAppVersionUseCase.execute()
+                        let updateType = try await self.fetchMinorAppVersionUseCase.execute()
                         observer.onNext(.setUpdateType(updateType))
                     } catch {
                         observer.onError(error)

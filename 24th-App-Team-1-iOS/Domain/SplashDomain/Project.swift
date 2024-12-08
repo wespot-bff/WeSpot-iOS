@@ -13,7 +13,8 @@ let splashDomain = Project.makeProject(
     module: .domain(.SplashDomain),
     targets: [
         .domain(module: .SplashDomain, dependencies: [
-            .shared(module: .ThirdPartyLib)
+            .shared(module: .ThirdPartyLib),
+            .domain(module: .CommonDomain)
         ])
     ]
 )
