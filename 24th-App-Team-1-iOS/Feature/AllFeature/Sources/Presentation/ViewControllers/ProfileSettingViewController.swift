@@ -221,7 +221,6 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         userProfileEditButton
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .withUnretained(self)
             .bind(with: self) { owner, _ in
                 owner.showProfileActionSheetViewController()
             }
