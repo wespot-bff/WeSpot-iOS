@@ -222,8 +222,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                owner.pickerViewController.modalPresentationStyle = .fullScreen
-                owner.present(owner.pickerViewController, animated: true)
+                owner.showProfileActionSheetViewController()
             }
             .disposed(by: disposeBag)
         
@@ -407,4 +406,34 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .disposed(by: disposeBag)
         
     }
+}
+
+
+extension ProfileSettingViewController {
+    
+    private func showProfileActionSheetViewController() {
+        let profileEditAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let addProfileImageAction = UIAlertAction(title: "앨범에서 사진 선택", style: .default) { _ in
+            self.showPickerViewController()
+        }
+        
+        let removeProfileAction = UIAlertAction(title: "기본 이미지 적용", style: .destructive) { _ in
+            self.reactor?.action.onNext(.didTappedRemoveProfileImage)
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        profileEditAlertController.addAction(addProfileImageAction)
+        profileEditAlertController.addAction(removeProfileAction)
+        profileEditAlertController.addAction(cancelAction)
+        
+        self.present(profileEditAlertController, animated: true)
+    }
+    
+    private func showPickerViewController() {
+        pickerViewController.modalPresentationStyle = .fullScreen
+        present(pickerViewController, animated: true)
+    }
+    
 }

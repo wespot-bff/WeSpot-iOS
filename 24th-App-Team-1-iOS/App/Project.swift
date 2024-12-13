@@ -6,13 +6,13 @@ let project = Project
         module: .app(.app),
         targets: [
             .app(module: .app, dependencies: [
+                .feature(module: .SplashFeature),
                 .feature(module: .LoginFeature),
                 .feature(module: .AllFeature),
                 .feature(module: .VoteFeature),
                 .feature(module: .MessageFeature),
                 .feature(module: .NotificationFeature),
                 .shared(module: .DesignSystem),
-                .SPM.firebaseAnalytics,
                 .SPM.firebaseMessaging
             ])
         ]

@@ -11,17 +11,16 @@ import Storage
 import DesignSystem
 
 import LoginFeature
+import SplashFeature
 import CommonDomain
 import LoginDomain
 import LoginService
 import VoteFeature
-import VoteDomain
+import Firebase
 import VoteService
 import AllFeature
 import NotificationFeature
 import Swinject
-import SnapKit
-import ReactorKit
 import RxKakaoSDKAuth
 import KakaoSDKAuth
 import MessageFeature
@@ -35,6 +34,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
         DependencyContainer.shared.injector.assemble([
+            SplashPresentationAssembly(),
             SignInPresentationAssembly(),
             SignUpNamePresentationAssembly(),
             SignUpClassPresentationAssembly(),
@@ -74,16 +74,8 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         UNUserNotificationCenter.current().delegate = notificationHandler
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
-        let refreshToken = KeychainManager.shared.get(type: .refreshToken)
-        
-        
-        if accessToken == nil { // accessToken 값이 없으면 (회원가입 안됨)
-            let signInViewController = DependencyContainer.shared.injector.resolve(SignInViewController.self)
-            window?.rootViewController = UINavigationController(rootViewController: signInViewController)
-            
-        } else { // accessToken 값이 있으면 (회원가입이 됨)
-            setupMainViewController()
-        }
+        let splashViewController = DependencyContainer.shared.injector.resolve(SplashViewController.self, argument: accessToken)
+        window?.rootViewController = UINavigationController(rootViewController: splashViewController)
         setupViewControllers()
         window?.makeKeyAndVisible()
     }

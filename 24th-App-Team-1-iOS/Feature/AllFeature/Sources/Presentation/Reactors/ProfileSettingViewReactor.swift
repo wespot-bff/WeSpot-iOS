@@ -38,6 +38,7 @@ public final class ProfileSettingViewReactor: Reactor {
     public enum Action {
         case didUpdateIntroduceProfile(String)
         case didTappedProfileEditButton(Data)
+        case didTappedRemoveProfileImage
         case didTapUpdateUserButton
         case viewWillAppear
     }
@@ -176,6 +177,22 @@ public final class ProfileSettingViewReactor: Reactor {
                 .just(.setSelectedImage(true)),
                 .just(.setButtonEnabled(true))
             )
+        case .didTappedRemoveProfileImage:
+            let query = UpdateUserProfileImageRequestQuery(url: nil)
+            
+            return updateUserProfileImageUseCase.execute(query: query)
+                .asObservable()
+                .flatMap { entity -> Observable<Mutation> in
+                    guard let entity else {
+                        return .empty()
+                    }
+                    
+                    return .concat(
+                        .just(.setLoading(false)),
+                        .just(.setUserProfileImageItem(entity)),
+                        .just(.setLoading(true))
+                    )
+                }
         }
     }
     

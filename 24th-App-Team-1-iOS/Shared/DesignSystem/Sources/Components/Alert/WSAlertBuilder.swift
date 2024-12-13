@@ -12,6 +12,12 @@ public enum AlertType {
     case titleWithMeesage
 }
 
+public enum ButtonType {
+    case confirm
+    case cancel
+    case all
+}
+
 
 //MARK: WSAlertView에 모든 구성요소를 설정하는 모듈
 public final class WSAlertBuilder {
@@ -22,6 +28,7 @@ public final class WSAlertBuilder {
     private var builderAction: WSAlertActionProperty?
     
     private var alertType: AlertType = .titleWithMeesage
+    private var buttonType: ButtonType = .all
     private var alertTitle: String?
     private var alertMessage: String?
     private var confirmText: String?
@@ -41,6 +48,11 @@ public final class WSAlertBuilder {
     
     public func setAlertType(type: AlertType) -> Self {
         self.alertType = type
+        return self
+    }
+    
+    public func setButtonType(type: ButtonType) -> Self {
+        self.buttonType = type
         return self
     }
     
@@ -71,6 +83,7 @@ public final class WSAlertBuilder {
         alertViewController.modalTransitionStyle = .crossDissolve
         
         alertViewController.alertType = alertType
+        alertViewController.buttonType = buttonType
         alertViewController.titleLabel.text = alertTitle
         alertViewController.titleLabel.textAlignment = alertTitleAlignment ?? .center
         alertViewController.messageLabel.text = alertMessage

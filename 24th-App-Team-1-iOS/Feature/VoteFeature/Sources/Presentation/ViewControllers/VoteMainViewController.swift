@@ -65,6 +65,42 @@ public final class VoteMainViewController: BaseViewController<VoteMainViewReacto
     public override func bind(reactor: Reactor) {
         super.bind(reactor: reactor)
         
+        self.rx.viewDidLoad
+            .map { Reactor.Action.viewDidLoad }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.pulse(\.$updateType)
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { owner, updateType in
+                switch updateType {
+                    
+                case let .minor(type):
+                    let currentVersion = Bundle.main.appVersion
+                    let description = type == "usability" ? "유저의 의견을 반영해서 사용성을 개선했어요\n지금 업데이트하고 더 나은 위스팟을 만나보세요" : "유저의 의견을 반영하여 신규 기능을 출시했어요\n지금 업데이트하고 새로운 위스팟을 만나보세요"
+                    guard
+                        UserDefaultsManager.shared.lastPromptedVersion.isEmpty ||
+                            self.compareVersion(versionA: currentVersion, versionB: UserDefaultsManager.shared.lastPromptedVersion) == .orderedAscending
+                    else {
+                        return
+                    }
+                    WSAlertBuilder(showViewController: owner)
+                        .setButtonType(type: .all)
+                        .setAlertType(type: .titleWithMeesage)
+                        .setTitle(title: "새로운 버전이 업데이트 되었어요!")
+                        .setMessage(message: description)
+                        .setConfirm(text: "업데이트")
+                        .setCancel(text: "다음에 할래요")
+                        .action(.confirm) {
+                            UIApplication.shared.open(WSURLType.appStore.urlString)
+                        }
+                        .show()
+                default:
+                    break
+                }
+            }
+            .disposed(by: disposeBag)
+        
         reactor.pulse(\.$voteResponseEntity)
             .compactMap { $0?.response }
             .filter { $0.isEmpty }
@@ -120,5 +156,26 @@ public final class VoteMainViewController: BaseViewController<VoteMainViewReacto
             }
             .disposed(by: disposeBag)
         
+    }
+}
+
+
+extension VoteMainViewController {
+    private func compareVersion(versionA: String, versionB: String) -> ComparisonResult {
+        let componentsA = versionA.split(separator: ".").map { Int($0) ?? 0 }
+        let componentsB = versionB.split(separator: ".").map { Int($0) ?? 0 }
+        
+        let count = max(componentsA.count, componentsB.count)
+        for i in 0..<count {
+            let valueA = i < componentsA.count ? componentsA[i] : 0
+            let valueB = i < componentsB.count ? componentsB[i] : 0
+            
+            if valueA < valueB {
+                return .orderedAscending
+            } else if valueA > valueB {
+                return .orderedDescending
+            }
+        }
+        return .orderedSame
     }
 }
