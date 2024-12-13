@@ -8,6 +8,7 @@
 import Foundation
 import CommonDomain
 import CommonService
+import SplashDomain
 import VoteDomain
 import LoginDomain
 import MessageDomain
@@ -18,11 +19,20 @@ import Swinject
 
 struct DomainAssembly: Assembly {
     func assemble(container: Container) {
-        
         //common
         container.register(CreateCheckProfanityUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
             return createCheckProfanityUseCase(commonRepository: repository)
+        }
+        
+        container.register(FetchMajorAppVersionUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return FetchMajorAppVersionUseCase(commonRepository: repository)
+        }
+        
+        container.register(FetchMinorAppVersionUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return FetchMinorAppVersionUseCase(commonRepository: repository)
         }
         
         container.register(CreateReportUserUseCaseProtocol.self) { resolver in
