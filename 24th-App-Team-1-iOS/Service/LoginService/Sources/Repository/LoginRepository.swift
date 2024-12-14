@@ -20,28 +20,53 @@ public final class LoginRepository: LoginRepositoryProtocol {
     
     public init() { }
     
-    
-    public func createNewMemberToken(body: CreateSignUpTokenRequest) -> Single<CreateSignUpTokenResponseEntity?> {
-        let body = CreateSignUpTokenRequestDTO(socialType: body.socialType, authorizationCode: body.authorizationCode, identityToken: body.identityToken, fcmToken: body.fcmToken)
-        let endPoint = LoginEndPoint.createSocialLogin(body)
+    /// 로그인 하는 함수
+    public func LoginUser(body: LoginDomain.SignInUserRequest) -> Single<LoginDomain.LoginResultEnum?> {
+        let body = SignInUserRequest(
+            socialType: body.socialType,
+            authorizationCode: body.authorizationCode,
+            identityToken: body.identityToken,
+            fcmToken: body.fcmToken
+        )
+        let endPoint = LoginEndPoint.executeSocialLogin(body)
         
-        return networkService.request(endPoint: endPoint)
-            .asObservable()
-            .decodeMap(CreateSignUpTokenResponseDTO.self)
-            .logErrorIfDetected(category: Network.error)
-            .map { $0.toDomain() }
-            .asSingle()
+        return networkService.requestWithStatusCode(endPoint: endPoint)
+            .flatMap { (data, statusCode) -> Single<LoginDomain.LoginResultEnum?> in
+                switch statusCode {
+                case 200:
+                    return Observable.just(data)
+                        .decodeMap(SignInUserRepsonseDTO.self)
+                        .map { .success200($0.toDomain()) }
+                        .asSingle()
+                    
+                case 202:
+                    return Observable.just(data)
+                        .decodeMap(SignUpTokenResponseDTO.self)
+                        .map { .success202($0.toDomain()) }
+                        .asSingle()
+                    
+                default:
+                    return Single.just(.unknown)
+                }
+            }
     }
     
-    
-    
-    public func createAccount(body: CreateAccountRequest) -> Single<CreateAccountResponseEntity?> {
+    /// 유저정보 기입 및 가입
+    public func SignUpUser(body: SignUpUserRequest) -> Single<SignUpTokenEntity?> {
         let consents = ConsentsRequestDTO(marketing: body.consents.marketing)
-        let body = CreateAccountRequestDTO(name: body.name, gender: body.gender.uppercased(), schoolId: body.schoolId, grade: body.grade, classNumber: body.classNumber, consents: consents, signUpToken: body.signUpToken, profileUrl: body.profileUrl, introduction: body.introduction)
-        let endPoint = LoginEndPoint.createAccount(body)
+        let body = SignUPRequestDTO(name: body.name,
+                                    gender: body.gender.uppercased(),
+                                    schoolId: body.schoolId,
+                                    grade: body.grade,
+                                    classNumber: body.classNumber,
+                                    consents: consents,
+                                    signUpToken: body.signUpToken,
+                                    profileUrl: body.profileUrl,
+                                    introduction: body.introduction)
+        let endPoint = LoginEndPoint.executeSingUp(body)
         return networkService.request(endPoint: endPoint)
             .asObservable()
-            .decodeMap(CreateAccountResponseDTO.self)
+            .decodeMap(CompleteSignUpResponseDTO.self)
             .logErrorIfDetected(category: Network.error)
             .map { $0.toDomain() }
             .asSingle()
