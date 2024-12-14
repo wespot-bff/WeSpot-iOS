@@ -1,0 +1,3 @@
+BASE_URL = "https://00442fee-86c6-42fe-955b-3074233b46fc.mock.pstmn.io/api/v1"
+KAKAO_NATIVE_APP_KEY = 1ba806464ca070525a788cf23ebbbeaf
+KAKAO_API_KEY = kakao1ba806464ca070525a788cf23ebbbeaf

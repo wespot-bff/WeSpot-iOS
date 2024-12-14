@@ -1,5 +1,5 @@
 //
-//  CreateSignUpTokenRuquestToken.swift
+//  SignInUserRequest.swift
 //  LoginDomain
 //
 //  Created by eunseou on 7/30/24.
@@ -7,13 +7,16 @@
 
 import Foundation
 
-public struct CreateSignUpTokenRequest {
+public struct SignInUserRequest {
     public let socialType: String
     public let authorizationCode: String
     public let identityToken: String
     public let fcmToken: String
     
-    public init(socialType: String, authorizationCode: String, identityToken: String, fcmToken: String) {
+    public init(socialType: String,
+                authorizationCode: String,
+                identityToken: String,
+                fcmToken: String) {
         self.socialType = socialType
         self.authorizationCode = authorizationCode
         self.identityToken = identityToken

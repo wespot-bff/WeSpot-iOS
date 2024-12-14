@@ -1,7 +1,7 @@
 //
-//  CreateAccountRequest.swift
+//  SingUpUserRequest.swift
 //  LoginDomain
-//
+//  Updated by Choi on 12/12/24
 //  Created by eunseou on 7/30/24.
 //
 
@@ -15,7 +15,7 @@ public struct ConsentsRequest {
     }
 }
 
-public struct CreateAccountRequest {
+public struct SignUpUserRequest {
     public var name: String
     public var gender: String
     public var schoolId: Int

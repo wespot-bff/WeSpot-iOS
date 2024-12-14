@@ -18,7 +18,9 @@ import RxCocoa
 import ReactorKit
 
 public final class SignUpIntroduceViewController: BaseViewController<SignUpIntroduceViewReactor> {
+    
     //MARK: - Properties
+    
     private let scrollView: UIScrollView = UIScrollView()
     private let containerView: UIView = UIView()
     private let profileContainerView: UIView = UIView()

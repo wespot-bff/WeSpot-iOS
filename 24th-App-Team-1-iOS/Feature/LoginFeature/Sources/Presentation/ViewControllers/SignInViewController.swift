@@ -207,7 +207,6 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        
         pageControl.rx.controlEvent(.valueChanged)
             .map { _ in self.pageControl.currentPage }
             .bind(with: self) { owner, currentPage in
@@ -220,9 +219,9 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
             .bind(to: loadingIndicatorView.rx.isHidden)
             .disposed(by: disposeBag)
         
-        reactor.pulse(\.$signUpTokenResponse)
+        reactor.pulse(\.$signUpToken)
             .filter { $0 != nil }
-            .withLatestFrom(reactor.state.map { $0.accountRequest })
+            .withLatestFrom(reactor.state.map { $0.loginRequest })
             .bind(with: self) { owner, response in
                 let signUpSchoolViewController = DependencyContainer.shared.injector.resolve(SignUpSchoolViewController.self, arguments: response, "")
                 owner.navigationController?.setViewControllers([signUpSchoolViewController], animated: true)

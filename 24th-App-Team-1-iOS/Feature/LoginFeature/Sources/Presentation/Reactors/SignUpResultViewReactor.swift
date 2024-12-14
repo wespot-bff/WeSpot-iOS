@@ -17,7 +17,7 @@ public final class SignUpResultViewReactor: Reactor {
     public var initialState: State
     
     public struct State {
-        @Pulse var accountRequest: CreateAccountRequest
+        @Pulse var accountRequest: SignUpUserRequest
         var isAccountCreationCompleted: Bool = false
         @Pulse var schoolName: String
         @Pulse var profileImage: Data?
@@ -47,7 +47,7 @@ public final class SignUpResultViewReactor: Reactor {
     }
     
     public init(
-        accountRequest: CreateAccountRequest,
+        accountRequest: SignUpUserRequest,
         schoolName: String,
         profileImage: Data?
     ) {

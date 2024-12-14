@@ -41,15 +41,15 @@ struct DomainAssembly: Assembly {
         }
         
         // login
-        container.register(CreateAccountUseCaseProtocol.self) { resovler in
+        container.register(SignInUserUseCaseProtocol.self) { resovler in
             let repository = resovler.resolve(LoginRepositoryProtocol.self)!
-            return CreateAccountUseCase(loginRepository: repository)
+            return SignInUserUseCase(loginRepository: repository)
         }
         
         
-        container.register(CreateNewMemberUseCaseProtocol.self) { resovler in
+        container.register(SignUpUserUseCaseProtocol.self) { resovler in
             let repository = resovler.resolve(LoginRepositoryProtocol.self)!
-            return CreateSignUpTokenUseCase(loginRepository: repository)
+            return SignUpUserUseCase(loginRepository: repository)
         }
         
         container.register(FetchSchoolListUseCaseProtocol.self) { resovler in

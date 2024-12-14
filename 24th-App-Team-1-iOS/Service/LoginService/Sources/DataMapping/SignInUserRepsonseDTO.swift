@@ -27,7 +27,7 @@ extension SignInUserRepsonseDTO {
 }
 
 extension SignInUserRepsonseDTO {
-    func toDomain() -> CreateAccountResponseEntity {
+    func toDomain() -> LoginUserEntity {
         return .init(
             accessToken: accessToken,
             refreshToken: refreshToken,
@@ -40,7 +40,7 @@ extension SignInUserRepsonseDTO {
 }
 
 extension SignInUserRepsonseDTO.UserSettingResponseDTO {
-    func toDomain() -> CreateAccountSettingResponseEntity {
+    func toDomain() -> UserSettingEntity {
         return .init(
             isVoteNotification: isVoteNotification,
             isMessageNotification: isMessageNotification,

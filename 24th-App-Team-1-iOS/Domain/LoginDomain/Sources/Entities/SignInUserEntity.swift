@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct SignInUserEntity {
+public struct LoginUserEntity {
     public let accessToken: String
     public let refreshToken: String
     public let refreshTokenExpiredAt: String

@@ -18,6 +18,7 @@ import ReactorKit
 public final class SignUpCompleteViewController: BaseViewController<SignUpCompleteViewReactor> {
 
     //MARK: - Properties
+    
     private let imageView = UIImageView()
     private let inviteStartButton = WSButton(wsButtonType: .default(12))
     private let completeTitleLabel = WSLabel(wsFont: .Body03)
@@ -25,6 +26,7 @@ public final class SignUpCompleteViewController: BaseViewController<SignUpComple
     private let startButton = WSButton(wsButtonType: .strokeButton)
     
     //MARK: - LifeCycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         

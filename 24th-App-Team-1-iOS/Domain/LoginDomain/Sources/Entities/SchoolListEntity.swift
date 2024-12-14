@@ -12,7 +12,9 @@ public struct SchoolListResponseEntity {
     public var lastCursorId: Int
     public var hasNext: Bool
     
-    public init(schools: [SchoolListEntity], lastCursorId: Int, hasNext: Bool) {
+    public init(schools: [SchoolListEntity],
+                lastCursorId: Int,
+                hasNext: Bool) {
         self.schools = schools
         self.lastCursorId = lastCursorId
         self.hasNext = hasNext

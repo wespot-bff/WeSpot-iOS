@@ -24,7 +24,7 @@ public final class SignUpNameViewReactor: Reactor {
         var errorMessage: String?
         var isButtonEnabled: Bool = false
         var isWarningHidden: Bool = true
-        @Pulse var accountRequest: CreateAccountRequest
+        @Pulse var accountRequest: SignUpUserRequest
         @Pulse var isConfirm: Bool = false
         var schoolName: String
     }
@@ -44,11 +44,12 @@ public final class SignUpNameViewReactor: Reactor {
     
     public init(
         createCheckProfanityUseCase: CreateCheckProfanityUseCaseProtocol,
-        accountRequest: CreateAccountRequest,
+        accountRequest: SignUpUserRequest,
         schoolName: String
     ) {
         self.createCheckProfanityUseCase = createCheckProfanityUseCase
-        self.initialState = State(accountRequest: accountRequest, schoolName: schoolName)
+        self.initialState = State(accountRequest: accountRequest,
+                                  schoolName: schoolName)
     }
     
     public func mutate(action: Action) -> Observable<Mutation> {
