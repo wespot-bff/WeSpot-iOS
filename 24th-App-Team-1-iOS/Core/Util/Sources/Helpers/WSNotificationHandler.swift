@@ -19,12 +19,13 @@ public final class WSNotificationHandler: NSObject, UNUserNotificationCenterDele
         print("APNS Payload 알림 페이로드 : \(userInfo)")
         
         guard let payload = NotificationPayload(dictionary: userInfo) else { return }
-        let payloadType = payload.aps.category
-        
+        let payloadType = payload.type
         //TODO: Coordinator Pattern으로 수정
         switch payloadType {
         case .voteMain:
             NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
+        case .voteResult:
+            NotificationCenter.default.post(name: .showVoteEffectViewController, object: nil)
         case .voteRecevied:
             NotificationCenter.default.post(name: .showVoteInventoryViewController, object: nil)
         case .profile:

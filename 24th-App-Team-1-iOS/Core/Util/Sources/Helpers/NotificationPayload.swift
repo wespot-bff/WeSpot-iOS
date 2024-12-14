@@ -19,6 +19,10 @@ public enum NotificationCategory: String, Decodable {
 
 public struct NotificationPayload: Decodable {
     public let aps: NotificationAPS
+    public let userId: String?
+    public let targetId: String?
+    public let date: String
+    public let type: NotificationCategory
     
     public init?(dictionary: [AnyHashable: Any]) {
         do {
@@ -32,7 +36,6 @@ public struct NotificationPayload: Decodable {
 
 public struct NotificationAPS: Decodable {
     public let alert: NotificationAlert
-    public let category: NotificationCategory
 }
 
 public struct NotificationAlert: Decodable {

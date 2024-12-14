@@ -134,6 +134,13 @@ extension SceneDelegate {
             }
         }
         
+        NotificationCenter.default.addObserver(forName: .showVoteEffectViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let voteEffectViewController = DependencyContainer.shared.injector.resolve(VoteEffectViewController.self)
+            topViewController?.navigationController?.pushViewController(voteEffectViewController, animated: true)
+        }
+        
         NotificationCenter.default.addObserver(forName: .showVoteInventoryViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             let topViewController = self.window?.rootViewController?.topMostViewController()
