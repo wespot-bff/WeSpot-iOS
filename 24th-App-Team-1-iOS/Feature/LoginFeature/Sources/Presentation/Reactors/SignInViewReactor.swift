@@ -84,6 +84,8 @@ public final class SignInViewReactor: Reactor {
         var newState = state
         switch mutation {
         case .setSignUpToken(let signUpTokenResponse):
+            KeychainManager.shared.delete(type: .accessToken)
+            KeychainManager.shared.delete(type: .refreshToken)
             newState.signUpToken = signUpTokenResponse
             let expiredDate = Date.now.addingTimeInterval(30 * 60)
                 .toFormatLocaleString(with: .dashYyyyMMddhhmmss)
