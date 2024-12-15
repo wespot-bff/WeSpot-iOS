@@ -25,8 +25,7 @@ struct SignUpSchoolPresentationAssembly: Assembly {
         }
 
         container.register(SignUpSchoolViewController.self) { (resolver, accountRequest: SignInUserRequest, schoolName: String) in
-            let reactor = resolver.resolve(SignUpSchoolViewReactor.self, arguments: accountRequest, schoolName)!
-            
+            let reactor = resolver.resolve(SignUpSchoolViewReactor.self, arguments: accountRequest, schoolName)
             return SignUpSchoolViewController(reactor: reactor)
         }
 
