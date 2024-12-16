@@ -88,7 +88,8 @@ public final class ProfileAccountSettingViewController: BaseViewController<Profi
         
         accountTableView
             .rx.itemSelected
-            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .throttle(.milliseconds(300),
+                      scheduler: MainScheduler.instance)
             .bind(with: self) { owner, indexPath in
                 if indexPath.item == 0 {
                     WSAlertBuilder(showViewController: self)

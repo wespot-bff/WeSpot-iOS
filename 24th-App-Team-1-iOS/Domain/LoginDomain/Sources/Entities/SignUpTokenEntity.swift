@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct CreateSignUpTokenResponseEntity {
+public struct SignUpTokenEntity {
     public let signUpToken: String
     
     public init(signUpToken: String) {

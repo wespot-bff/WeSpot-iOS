@@ -16,7 +16,7 @@ public final class SignUpGradeViewReactor: Reactor {
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     
     public struct State {
-        var accountRequest: CreateAccountRequest
+        var accountRequest: SignUpUserRequest
         var isGradeSelected: Bool = false
         var schoolName: String
         @Pulse var isSelected: Bool = false
@@ -35,7 +35,8 @@ public final class SignUpGradeViewReactor: Reactor {
     
     public var initialState: State
     
-    public init(accountRequest: CreateAccountRequest, schoolName: String) {
+    public init(accountRequest: SignUpUserRequest,
+                schoolName: String) {
         self.initialState = State(accountRequest: accountRequest, schoolName: schoolName)
     }
     

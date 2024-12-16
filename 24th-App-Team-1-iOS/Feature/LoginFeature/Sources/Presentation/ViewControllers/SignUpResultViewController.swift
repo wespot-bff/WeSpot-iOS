@@ -245,7 +245,9 @@ public final class SignUpResultViewController: BaseViewController<SignUpResultVi
         self.present(policyAgreementBottomSheetViewController, animated: true)
     }
     
-    private func showSignUpBottomSheet(argument: CreateAccountRequest, schoolName: String, profilimage: Data?) {
+    private func showSignUpBottomSheet(argument: SignUpUserRequest,
+                                       schoolName: String,
+                                       profilimage: Data?) {
         let signUpInfoBottomSheetViewController = DependencyContainer.shared.injector.resolve(SignUpInfoBottomSheetViewController.self, arguments: argument, schoolName, profilimage)
         signUpInfoBottomSheetViewController.modalPresentationStyle = .overCurrentContext
         signUpInfoBottomSheetViewController.modalTransitionStyle = .crossDissolve
