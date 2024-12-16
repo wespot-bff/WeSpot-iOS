@@ -100,7 +100,7 @@ public final class VoteEffectViewController: BaseViewController<VoteEffectViewRe
         effectCollectionView.snp.makeConstraints {
             $0.top.equalTo(toggleView.snp.bottom).offset(12)
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(480)
+            $0.height.equalTo(VoteConstraint.voteEffectCollectionViewHeight)
         }
         
         effectPageControl.snp.makeConstraints {
@@ -233,14 +233,14 @@ public final class VoteEffectViewController: BaseViewController<VoteEffectViewRe
     private func createRankerAllLayoutSection() -> NSCollectionLayoutSection {
         let rankerAllItemSize: NSCollectionLayoutSize = .init(
             widthDimension: .absolute(view.frame.width),
-            heightDimension: .absolute(480)
+            heightDimension: .absolute(VoteConstraint.voteEffectCollectionViewHeight)
         )
         
         let rankerAllItem: NSCollectionLayoutItem = NSCollectionLayoutItem(layoutSize: rankerAllItemSize)
         
         let rankerGroupSize: NSCollectionLayoutSize = .init(
             widthDimension: .absolute(view.frame.width),
-            heightDimension: .absolute(480)
+            heightDimension: .absolute(VoteConstraint.voteEffectCollectionViewHeight)
         )
         
         let rankerAllGroup: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(

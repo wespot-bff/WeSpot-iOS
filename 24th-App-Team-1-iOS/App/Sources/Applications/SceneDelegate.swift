@@ -11,17 +11,16 @@ import Storage
 import DesignSystem
 
 import LoginFeature
+import SplashFeature
 import CommonDomain
 import LoginDomain
 import LoginService
 import VoteFeature
-import VoteDomain
+import Firebase
 import VoteService
 import AllFeature
 import NotificationFeature
 import Swinject
-import SnapKit
-import ReactorKit
 import RxKakaoSDKAuth
 import KakaoSDKAuth
 import MessageFeature
@@ -34,6 +33,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
         DependencyContainer.shared.injector.assemble([
+            SplashPresentationAssembly(),
             SignInPresentationAssembly(),
             SignUpNamePresentationAssembly(),
             SignUpClassPresentationAssembly(),
@@ -82,6 +82,8 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         } else { // accessToken 값이 있으면 바로 메인화면으로 이동
             setupMainViewController()
         }
+        let splashViewController = DependencyContainer.shared.injector.resolve(SplashViewController.self, argument: accessToken)
+        window?.rootViewController = UINavigationController(rootViewController: splashViewController)
         setupViewControllers()
         window?.makeKeyAndVisible()
     }

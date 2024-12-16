@@ -30,7 +30,8 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
     private let userNameTextField: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "김선희", title: "이름")
     private let userGenderTextFiled: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "여", title: "성별")
     private let userClassInfoTextField: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "역삼중학교 1학년 6반", title: "학적 정보")
-    private let userIntroduceTextField: WSTextField = WSTextField(state: .default, placeholder: "안녕 난 선희다", title: "한줄 소개")
+    private let userIntroduceTextField: WSTextField = WSTextField(state: .default, placeholder: "안녕 난 선희다", title: "MBTI")
+    private let privacyButton: WSButton = WSButton(wsButtonType: .default(12))
     private let editButton: WSButton = WSButton(wsButtonType: .default(12))
     private let errorLabel: WSLabel = WSLabel(wsFont: .Body07)
     private let introduceCountLabel: WSLabel = WSLabel(wsFont: .Body07)
@@ -95,21 +96,25 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         userNameTextField.snp.makeConstraints {
             $0.top.equalTo(userContainerView.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
         }
         
         userGenderTextFiled.snp.makeConstraints {
             $0.top.equalTo(userNameTextField.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
         }
         
         userClassInfoTextField.snp.makeConstraints {
             $0.top.equalTo(userGenderTextFiled.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
         }
         
         userIntroduceTextField.snp.makeConstraints {
             $0.top.equalTo(userClassInfoTextField.snp.bottom).offset(52)
             $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(ProfileConstraint.profileSettingTextFiledHeight)
             $0.bottom.equalToSuperview()
         }
         
@@ -217,8 +222,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                owner.pickerViewController.modalPresentationStyle = .fullScreen
-                owner.present(owner.pickerViewController, animated: true)
+                owner.showProfileActionSheetViewController()
             }
             .disposed(by: disposeBag)
         
@@ -402,4 +406,34 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .disposed(by: disposeBag)
         
     }
+}
+
+
+extension ProfileSettingViewController {
+    
+    private func showProfileActionSheetViewController() {
+        let profileEditAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let addProfileImageAction = UIAlertAction(title: "앨범에서 사진 선택", style: .default) { _ in
+            self.showPickerViewController()
+        }
+        
+        let removeProfileAction = UIAlertAction(title: "기본 이미지 적용", style: .destructive) { _ in
+            self.reactor?.action.onNext(.didTappedRemoveProfileImage)
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        profileEditAlertController.addAction(addProfileImageAction)
+        profileEditAlertController.addAction(removeProfileAction)
+        profileEditAlertController.addAction(cancelAction)
+        
+        self.present(profileEditAlertController, animated: true)
+    }
+    
+    private func showPickerViewController() {
+        pickerViewController.modalPresentationStyle = .fullScreen
+        present(pickerViewController, animated: true)
+    }
+    
 }

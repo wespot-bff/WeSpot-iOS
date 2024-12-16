@@ -17,11 +17,13 @@ public final class WSAlertView: UIViewController {
     private let containerView: UIView = UIView()
     var titleLabel: WSLabel = WSLabel(wsFont: .Header01)
     var messageLabel: WSLabel = WSLabel(wsFont: .Body06)
+    let buttonStackView: UIStackView = UIStackView()
     var confirmButton: WSButton = WSButton(wsButtonType: .default(10))
     var cancelButton: WSButton = WSButton(wsButtonType: .secondaryButton)
     var alertAction: WSAlertActionProperty?
     
     var alertType: AlertType = .titleWithMeesage
+    var buttonType: ButtonType = .all
     private var titleText: String?
     private var messageText: String?
     private var confirmText: String?
@@ -38,11 +40,21 @@ public final class WSAlertView: UIViewController {
     //MARK: Configure
     private func setupUI() {
         view.addSubview(containerView)
+        
+        switch buttonType {
+        case .confirm:
+            buttonStackView.addArrangedSubview(confirmButton)
+        case .cancel:
+            buttonStackView.addArrangedSubview(cancelButton)
+        case .all:
+            buttonStackView.addArrangedSubviews(confirmButton, cancelButton)
+        }
+        
         switch alertType {
         case .message:
-            containerView.addSubviews(titleLabel, confirmButton, cancelButton)
+            containerView.addSubviews(titleLabel, buttonStackView)
         case .titleWithMeesage:
-            containerView.addSubviews(titleLabel, messageLabel, confirmButton, cancelButton)
+            containerView.addSubviews(titleLabel, messageLabel, buttonStackView)
         }
     }
     
@@ -63,18 +75,10 @@ public final class WSAlertView: UIViewController {
                 $0.height.equalTo(30)
             }
             
-            confirmButton.snp.makeConstraints {
-                $0.right.equalToSuperview().offset(-20)
+            buttonStackView.snp.makeConstraints {
+                $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.height.equalTo(52)
-                $0.bottom.equalToSuperview().offset(-20)
-                $0.width.equalTo(131)
-            }
-            
-            cancelButton.snp.makeConstraints {
-                $0.left.equalToSuperview().offset(20)
-                $0.height.equalTo(52)
-                $0.bottom.equalToSuperview().offset(-20)
-                $0.width.equalTo(131)
+                $0.bottom.equalToSuperview().inset(20)
             }
             
             
@@ -94,22 +98,14 @@ public final class WSAlertView: UIViewController {
             }
             
             messageLabel.snp.makeConstraints {
-                $0.horizontalEdges.equalToSuperview().offset(20)
+                $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.top.equalTo(titleLabel.snp.bottom).offset(8)
             }
             
-            confirmButton.snp.makeConstraints {
-                $0.right.equalToSuperview().offset(-20)
+            buttonStackView.snp.makeConstraints {
+                $0.horizontalEdges.equalToSuperview().inset(20)
                 $0.height.equalTo(52)
-                $0.bottom.equalToSuperview().offset(-20)
-                $0.width.equalTo(131)
-            }
-            
-            cancelButton.snp.makeConstraints {
-                $0.left.equalToSuperview().offset(20)
-                $0.height.equalTo(52)
-                $0.bottom.equalToSuperview().offset(-20)
-                $0.width.equalTo(131)
+                $0.bottom.equalToSuperview().inset(20)
             }
         }
         
@@ -132,6 +128,12 @@ public final class WSAlertView: UIViewController {
         
         messageLabel.do {
             $0.textColor = DesignSystemAsset.Colors.gray300.color
+        }
+        
+        buttonStackView.do {
+            $0.axis = .horizontal
+            $0.spacing = 8
+            $0.distribution = .fillEqually
         }
         
         confirmButton.do {

@@ -51,6 +51,7 @@ public final class SignInViewReactor: Reactor {
                                               identityToken: "",
                                               fcmToken: ""),
             isLoading: false,
+            accountRequest: CreateAccountRequest(),
             isShow: false
         )
     }
@@ -173,5 +174,48 @@ extension SignInViewReactor {
             }
             return Disposables.create()
         }
+    }
+    
+    private func executeSignUp(socialType: String, authorizationCode: String, identityToken: String) -> Observable<Mutation> {
+        let fcmToken = UserDefaultsManager.shared.fcmToken ?? ""
+        let body = CreateSignUpTokenRequest(socialType: socialType,
+                                            authorizationCode: authorizationCode,
+                                            identityToken: identityToken,
+                                            fcmToken: fcmToken)
+        
+        let accessToken = KeychainManager.shared.get(type: .accessToken)
+        if accessToken == nil {
+            return createNewMemberUseCase
+                .execute(body: body)
+                .asObservable()
+                .compactMap { $0 }
+                .flatMap { response -> Observable<Mutation> in
+                    return .concat(
+                        .just(.setLoading(false)),
+                        .just(.setSignUpTokenResponse(response)),
+                        .just(.setLoading(true))
+                    )
+                }
+        } else {
+            return .just(.setTransitionFlag(true))
+        }
+    }
+    
+    public func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
+        switch mutation {
+        case .setSignUpTokenResponse(let signUpTokenResponse):
+            newState.signUpTokenResponse = signUpTokenResponse
+            newState.accountRequest.signUpToken = signUpTokenResponse.signUpToken
+            let expiredDate = Date.now.addingTimeInterval(30 * 60)
+                .toFormatLocaleString(with: .dashYyyyMMddhhmmss)
+                .toLocalDate(with: .dashYyyyMMddhhmmss)
+            UserDefaultsManager.shared.expiredDate = expiredDate
+        case .setLoading(let isLoading):
+            newState.isLoading = isLoading
+        case let .setTransitionFlag(isShow):
+            newState.isShow = isShow
+        }
+        return newState
     }
 }
