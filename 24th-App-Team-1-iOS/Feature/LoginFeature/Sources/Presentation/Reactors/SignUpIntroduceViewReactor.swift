@@ -20,7 +20,7 @@ public final class SignUpIntroduceViewReactor: Reactor {
     private let updateUserProfileUploadUseCaseProtocol: UpdateUserProfileUploadUseCaseProtocol
     
     public struct State {
-        @Pulse var accountReqeust: CreateAccountRequest
+        @Pulse var accountReqeust: SignUpUserRequest
         var introduce: String
         var schoolName: String
         @Pulse var imageData: Data?
@@ -49,7 +49,7 @@ public final class SignUpIntroduceViewReactor: Reactor {
     
     
     public init(
-        accountReqeust: CreateAccountRequest,
+        accountReqeust: SignUpUserRequest,
         createCheckProfanityUseCase: CreateCheckProfanityUseCaseProtocol,
         createPresignedURLUseCase: CreatePresigendURLUseCaseProtocol,
         updateUserProfileUploadUseCaseProtocol: UpdateUserProfileUploadUseCaseProtocol,

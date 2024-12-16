@@ -1,32 +1,33 @@
 //
-//  CreateAccountResponseDTO.swift
+//  SignInUserRepsonseDTO.swift
 //  LoginService
 //
+//  Updated by JiCheol on 12/5/24
 //  Created by eunseou on 7/30/24.
 //
 
 import Foundation
 import LoginDomain
 
-public struct CreateAccountResponseDTO: Decodable {
+public struct SignInUserRepsonseDTO: Decodable {
     public let accessToken: String
     public let refreshToken: String
     public let refreshTokenExpiredAt: String
-    public let setting: CreateAccountSettingResponseDTO
+    public let setting: UserSettingResponseDTO
     public let name: String
     public let isProfileChanged: Bool
 }
 
-extension CreateAccountResponseDTO {
-    public struct CreateAccountSettingResponseDTO: Decodable {
+extension SignInUserRepsonseDTO {
+    public struct UserSettingResponseDTO: Decodable {
         public let isVoteNotification: Bool
         public let isMessageNotification: Bool
         public let isMarketingNotification: Bool
     }
 }
 
-extension CreateAccountResponseDTO {
-    func toDomain() -> CreateAccountResponseEntity {
+extension SignInUserRepsonseDTO {
+    func toDomain() -> LoginUserEntity {
         return .init(
             accessToken: accessToken,
             refreshToken: refreshToken,
@@ -38,8 +39,8 @@ extension CreateAccountResponseDTO {
     }
 }
 
-extension CreateAccountResponseDTO.CreateAccountSettingResponseDTO {
-    func toDomain() -> CreateAccountSettingResponseEntity {
+extension SignInUserRepsonseDTO.UserSettingResponseDTO {
+    func toDomain() -> UserSettingEntity {
         return .init(
             isVoteNotification: isVoteNotification,
             isMessageNotification: isMessageNotification,

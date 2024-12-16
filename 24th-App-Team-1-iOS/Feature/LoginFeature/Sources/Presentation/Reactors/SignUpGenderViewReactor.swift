@@ -16,7 +16,7 @@ public final class SignUpGenderViewReactor: Reactor {
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     
     public struct State {
-        var accountRequest: CreateAccountRequest
+        var accountRequest: SignUpUserRequest
         var schoolName: String
     }
     
@@ -30,7 +30,8 @@ public final class SignUpGenderViewReactor: Reactor {
     
     public var initialState: State
     
-    public init(accountRequest: CreateAccountRequest, schoolName: String) {
+    public init(accountRequest: SignUpUserRequest,
+                schoolName: String) {
         self.initialState = State(accountRequest: accountRequest, schoolName: schoolName)
     }
     

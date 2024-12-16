@@ -207,7 +207,6 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        
         pageControl.rx.controlEvent(.valueChanged)
             .map { _ in self.pageControl.currentPage }
             .bind(with: self) { owner, currentPage in
@@ -220,23 +219,17 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
             .bind(to: loadingIndicatorView.rx.isHidden)
             .disposed(by: disposeBag)
         
-        reactor.pulse(\.$signUpTokenResponse)
-            .filter { $0 != nil }
-            .withLatestFrom(reactor.state.map { $0.accountRequest })
-            .bind(with: self) { owner, response in
-                
-                let signUpSchoolViewController = DependencyContainer.shared.injector.resolve(SignUpSchoolViewController.self, arguments: response, "")
+        reactor.pulse(\.$signUpToken)
+            .compactMap { $0?.signUpToken }
+            .map { SignUpUserRequest(signUpToken: $0) }
+            .bind(with: self) { owner, registerRequest in
+                let signUpSchoolViewController = DependencyContainer.shared.injector.resolve(
+                    SignUpSchoolViewController.self,
+                    arguments: registerRequest, ""
+                )
                 owner.navigationController?.setViewControllers([signUpSchoolViewController], animated: true)
             }
             .disposed(by: disposeBag)
-        
-        
-//        reactor.pulse(\.$isShow)
-//            .filter { $0 == true }
-//            .bind { _ in
-//                NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
-//            }
-//            .disposed(by: disposeBag)
     }
     
     private func setupCarousel() {

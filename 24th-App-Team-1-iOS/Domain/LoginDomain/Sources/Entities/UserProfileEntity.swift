@@ -11,7 +11,8 @@ public struct UserProfileImageResponseEntity {
     public let profileImage: String
     public let profileBackground: String
     
-    public init(profileImage: String, profileBackground: String) {
+    public init(profileImage: String,
+                profileBackground: String) {
         self.profileImage = profileImage
         self.profileBackground = profileBackground
     }
@@ -27,7 +28,14 @@ public struct UserProfileResponseEntity {
     public let classNumber: Int
     public let profileImages: UserProfileImageResponseEntity
     
-    public init(id: Int, name: String, gender: String, introduction: String, schoolName: String, grade: Int, classNumber: Int, profileImages: UserProfileImageResponseEntity) {
+    public init(id: Int,
+                name: String,
+                gender: String,
+                introduction: String,
+                schoolName: String,
+                grade: Int,
+                classNumber: Int,
+                profileImages: UserProfileImageResponseEntity) {
         self.id = id
         self.name = name
         self.gender = gender

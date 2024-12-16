@@ -11,7 +11,8 @@ public struct SchoolListRequestQuery {
     public let name: String
     public let cursorId: Int // 커서 ID
     
-    public init(name: String, cursorId: Int) {
+    public init(name: String,
+                cursorId: Int) {
         self.name = name
         self.cursorId = cursorId
     }

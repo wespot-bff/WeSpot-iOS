@@ -74,6 +74,16 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         UNUserNotificationCenter.current().delegate = notificationHandler
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
+        let refreshToken = KeychainManager.shared.get(type: .refreshToken)
+        
+        
+        if accessToken == nil || refreshToken == nil { // accessToken 값이 없으면 로그인 혹은 회원가입
+            let signInViewController = DependencyContainer.shared.injector.resolve(SignInViewController.self)
+            window?.rootViewController = UINavigationController(rootViewController: signInViewController)
+            
+        } else { // accessToken 값이 있으면 바로 메인화면으로 이동
+            setupMainViewController()
+        }
         let splashViewController = DependencyContainer.shared.injector.resolve(SplashViewController.self, argument: accessToken)
         window?.rootViewController = UINavigationController(rootViewController: splashViewController)
         setupViewControllers()

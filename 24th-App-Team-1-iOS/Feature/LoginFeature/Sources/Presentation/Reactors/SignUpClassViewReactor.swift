@@ -17,7 +17,7 @@ public final class SignUpClassViewReactor: Reactor {
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     
     public struct State {
-        var accountRequest: CreateAccountRequest
+        @Pulse var accountRequest: SignUpUserRequest
         var isEnabledButton: Bool = false
         var schoolName: String
         @Pulse var isSelected: Bool = false
@@ -34,9 +34,10 @@ public final class SignUpClassViewReactor: Reactor {
         case setEnabledButton(Bool)
     }
     
-    
-    public init(accountRequest: CreateAccountRequest, schoolName: String) {
-        self.initialState = State(accountRequest: accountRequest, schoolName: schoolName)
+    public init(accountRequest: SignUpUserRequest,
+                schoolName: String) {
+        self.initialState = State(accountRequest: accountRequest,
+                                  schoolName: schoolName)
     }
     
     public func mutate(action: Action) -> Observable<Mutation> {
