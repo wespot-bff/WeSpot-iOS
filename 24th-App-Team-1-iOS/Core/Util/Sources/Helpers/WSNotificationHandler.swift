@@ -16,7 +16,6 @@ public final class WSNotificationHandler: NSObject, UNUserNotificationCenterDele
     
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        print("APNS Payload 알림 페이로드 : \(userInfo)")
         
         guard let payload = NotificationPayload(dictionary: userInfo) else { return }
         let payloadType = payload.type
