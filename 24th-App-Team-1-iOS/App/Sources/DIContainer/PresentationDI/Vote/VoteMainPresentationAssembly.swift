@@ -18,21 +18,13 @@ struct VoteMainPresentationAssembly: Assembly {
     func assemble(container: Container) {
         
         container.register(VoteMainViewReactor.self) { resolver in
-            return VoteMainViewReactor()
+            let fetchMinorAppVersionUseCase = resolver.resolve(FetchMinorAppVersionUseCaseProtocol.self)!
+            return VoteMainViewReactor(fetchMinorAppVersionUseCase: fetchMinorAppVersionUseCase)
         }
         
         container.register(VoteMainViewController.self) { resolver in
             let reactor = resolver.resolve(VoteMainViewReactor.self)!
         
-            return VoteMainViewController(reactor: reactor)
-        }
-        
-        container.register(VoteMainViewReactor.self) { resolver  in
-            return VoteMainViewReactor()
-        }
-        
-        container.register(VoteMainViewController.self) { resolver in
-            let reactor = resolver.resolve(VoteMainViewReactor.self)!
             return VoteMainViewController(reactor: reactor)
         }
     }

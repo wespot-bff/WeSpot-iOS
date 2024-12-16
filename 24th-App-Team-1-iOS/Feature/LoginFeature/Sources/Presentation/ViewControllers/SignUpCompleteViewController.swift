@@ -77,11 +77,11 @@ public final class SignUpCompleteViewController: BaseViewController<SignUpComple
         }
         
         inviteStartButton.do {
-            $0.setupButton(text: "친구 초대하고 시작하기")
+            $0.setupButton(text: "같이 할 친구 데려오기")
         }
         
         startButton.do {
-            $0.setupButton(text: "바로 시작하기")
+            $0.setupButton(text: "바로 입장하기")
         }
         completeTitleLabel.do {
             $0.textColor = DesignSystemAsset.Colors.primary300.color
@@ -90,7 +90,7 @@ public final class SignUpCompleteViewController: BaseViewController<SignUpComple
         }
         completeDescriptionLabel.do {
             $0.textColor = DesignSystemAsset.Colors.gray100.color
-            $0.text = "이제 모든 준비가 끝났어요\n위스팟을 시작해볼까요?"
+            $0.text = "이제 모든 준비가 끝났어요\n위스팟에 입장해 볼까요?"
             $0.textAlignment = .center
         }
     }

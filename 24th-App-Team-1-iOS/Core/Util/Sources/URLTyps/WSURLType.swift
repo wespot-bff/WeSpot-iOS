@@ -11,6 +11,8 @@ import Foundation
 public enum WSURLType {
     /// 질문지 추가 링크
     case addQuestion
+    /// 앱 스토어 링크
+    case appStore
     /// 공식 계정 링크
     case accountOfficial
     /// wespot 카카오톡 채널 링크
@@ -43,6 +45,8 @@ public enum WSURLType {
         switch self {
         case .addQuestion:
             return URL(string: "https://forms.gle/eiKdpjmwdxzvqm947")!
+        case .appStore:
+            return URL(string: "itms-apps://itunes.apple.com/app/6661029016")!
         case .accountOfficial:
             return URL(string: "https://www.instagram.com/wespot.official/")!
         case .kakaoChaanel:

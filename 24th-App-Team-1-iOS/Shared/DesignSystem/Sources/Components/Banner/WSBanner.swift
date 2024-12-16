@@ -81,7 +81,7 @@ public final class WSBanner: UIView {
     private func setupAutoLayout() {
         
         stackView.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(18)
+            $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().offset(20)
             $0.trailing.greaterThanOrEqualTo(arrowButton.snp.leading).offset(-5)
         }

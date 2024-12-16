@@ -121,7 +121,7 @@ public final class VoteInventoryDetailViewController: BaseViewController<VoteInv
         
         detailConfirmButton.do {
             $0.setupFont(font: .Body03)
-            $0.setupButton(text: "누가 보냈는지 궁금해요")
+            $0.setupButton(text: "누가 나를 뽑았는지 궁금해요")
             
         }
         
