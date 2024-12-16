@@ -26,7 +26,7 @@ public final class SignUpNameViewController: BaseViewController<SignUpNameViewRe
     private let warningLabel = WSLabel(wsFont: .Body07)
     private let textLengthLabel = WSLabel(wsFont: .Body07)
     private let nextButton = WSButton(wsButtonType: .default(12))
-    private let accountInjector: Injector = DependencyInjector(container: Container())
+    private let accountInjector: Injector = DependencyInjector()
     
     //MARK: - LifeCycle
     public override func viewDidLoad() {

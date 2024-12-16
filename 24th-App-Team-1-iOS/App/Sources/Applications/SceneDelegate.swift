@@ -126,7 +126,7 @@ extension SceneDelegate {
             let topViewController = self.window?.rootViewController?.topMostViewController()
             let voteOption = notification.userInfo?["voteOption"] as? VoteResponseEntity
             if !(voteOption?.response.isEmpty ?? true) {
-                let voteProcessViewController = DependencyContainer.shared.injector.resolve(VoteProcessViewController.self, argument: voteOption)
+                let voteProcessViewController = VoteProcessDIContainer(voteResponseEntity: voteOption).makeViewController()
                 topViewController?.navigationController?.pushViewController(voteProcessViewController, animated: true)
             } else {
                 let voteBeginViewController = DependencyContainer.shared.injector.resolve(VoteBeginViewController.self)

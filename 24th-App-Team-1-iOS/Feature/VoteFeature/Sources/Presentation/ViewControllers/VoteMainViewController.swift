@@ -115,7 +115,7 @@ public final class VoteMainViewController: BaseViewController<VoteMainViewReacto
             .map { $0 }
             .filter { !($0?.response.isEmpty ?? true) }
             .bind(with: self) { owner, entity in
-                let voteProcessViewController = DependencyContainer.shared.injector.resolve(VoteProcessViewController.self, argument: entity)
+                let voteProcessViewController = VoteProcessDIContainer(voteResponseEntity: entity).makeViewController()
                 owner.navigationController?.pushViewController(voteProcessViewController, animated: true)
             }
             .disposed(by: disposeBag)

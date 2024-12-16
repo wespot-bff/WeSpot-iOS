@@ -67,7 +67,7 @@ public final class SplashViewController: BaseViewController<SplashViewReactor> {
             .disposed(by: disposeBag)
         
         Observable
-            .combineLatest(
+            .zip(
                 reactor.state.map { $0.accessToken },
                 reactor.state.map { $0.updateType }
             )
