@@ -26,7 +26,7 @@ extension SignUpResponseDTO {
 }
 
 extension SignUpResponseDTO {
-    func toDomain() -> CreateAccountResponseEntity {
+    func toDomain() -> LoginUserEntity {
         return .init(
             accessToken: accessToken,
             refreshToken: refreshToken,
@@ -38,8 +38,8 @@ extension SignUpResponseDTO {
     }
 }
 
-extension CreateAccountResponseDTO.UserSettingResponseDTO {
-    func toDomain() -> CreateAccountSettingResponseEntity {
+extension SignUpResponseDTO.UserSettingResponseDTO {
+    func toDomain() -> UserSettingEntity {
         return .init(
             isVoteNotification: isVoteNotification,
             isMessageNotification: isMessageNotification,
