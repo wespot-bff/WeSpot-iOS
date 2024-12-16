@@ -21,7 +21,7 @@ public final class LoginRepository: LoginRepositoryProtocol {
     public init() { }
     
     /// 로그인 하는 함수
-    public func LoginUser(body: LoginDomain.SignInUserRequest) -> Single<LoginDomain.LoginResultEnum?> {
+    public func loginUser(body: LoginDomain.SignInUserRequest) -> Single<LoginDomain.LoginResultEnum?> {
         let body = SignInUserRequest(
             socialType: body.socialType,
             authorizationCode: body.authorizationCode,
@@ -40,6 +40,7 @@ public final class LoginRepository: LoginRepositoryProtocol {
                         .asSingle()
                     
                 case 202:
+
                     return Observable.just(data)
                         .decodeMap(SignUpTokenResponseDTO.self)
                         .map { .success202($0.toDomain()) }

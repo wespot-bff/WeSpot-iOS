@@ -23,7 +23,7 @@ public final class SignInUserUseCase: SignInUserUseCaseProtocol {
     }
 
     public func execute(body: SignInUserRequest) -> Single<LoginResultEnum?> {
-        return loginRepository.LoginUser(body: body)
+        return loginRepository.loginUser(body: body)
     }
     
 }
