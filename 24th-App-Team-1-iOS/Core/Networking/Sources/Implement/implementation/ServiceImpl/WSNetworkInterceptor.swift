@@ -22,7 +22,6 @@ public final class WSNetworkInterceptor: RequestInterceptor {
         var urlRequest = urlRequest
         
         guard let accessToken = KeychainManager.shared.get(type: .accessToken) else {
-            urlRequest.headers.add(name: "Authorization", value: "Bearer testToken")
             completion(.success(urlRequest))
             return
         }

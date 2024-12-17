@@ -15,8 +15,8 @@ import ReactorKit
 
 public final class VoteProcessViewReactor: Reactor {
     
-    private let createVoteUseCase: CreateVoteUseCaseProtocol
-    private let createUserReportUseCase: CreateReportUserUseCaseProtocol
+    @Injected private var createVoteUseCase: CreateVoteUseCaseProtocol
+    @Injected private var createUserReportUseCase: CreateReportUserUseCaseProtocol
     
     public struct State {
         @Pulse var questionSection: [VoteProcessSection]
@@ -53,8 +53,6 @@ public final class VoteProcessViewReactor: Reactor {
     public let initialState: State
     
     public init(
-        createVoteUseCase: CreateVoteUseCaseProtocol,
-        createUserReportUseCase: CreateReportUserUseCaseProtocol,
         voteResponseEntity: VoteResponseEntity? = nil
     ) {
         self.initialState = State(
@@ -64,8 +62,6 @@ public final class VoteProcessViewReactor: Reactor {
             finalVoteCount: 1,
             isLoading: false
         )
-        self.createVoteUseCase = createVoteUseCase
-        self.createUserReportUseCase = createUserReportUseCase
     }
     
     public func mutate(action: Action) -> Observable<Mutation> {

@@ -29,6 +29,7 @@ import KeychainSwift
 public class SceneDelegate: UIResponder, UISceneDelegate {
     
     var window: UIWindow?
+    private let notificationHandler = WSNotificationHandler()
     
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
@@ -70,18 +71,11 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         ])
         
         window = UIWindow(windowScene: scene)
+        UNUserNotificationCenter.current().delegate = notificationHandler
         
         let accessToken = KeychainManager.shared.get(type: .accessToken)
         let refreshToken = KeychainManager.shared.get(type: .refreshToken)
-        
-        
-        if accessToken == nil || refreshToken == nil { // accessToken 값이 없으면 로그인 혹은 회원가입
-            let signInViewController = DependencyContainer.shared.injector.resolve(SignInViewController.self)
-            window?.rootViewController = UINavigationController(rootViewController: signInViewController)
-            
-        } else { // accessToken 값이 있으면 바로 메인화면으로 이동
-            setupMainViewController()
-        }
+    
         let splashViewController = DependencyContainer.shared.injector.resolve(SplashViewController.self, argument: accessToken)
         window?.rootViewController = UINavigationController(rootViewController: splashViewController)
         setupViewControllers()
@@ -109,6 +103,13 @@ extension SceneDelegate {
             setupMainViewController()
         }
         
+        NotificationCenter.default.addObserver(forName: .showProfileSettingViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let profileSettingViewController = DependencyContainer.shared.injector.resolve(ProfileSettingViewController.self)
+            topViewController?.navigationController?.pushViewController(profileSettingViewController, animated: true)
+        }
+        
         NotificationCenter.default.addObserver(forName: .showSignInViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             let signInViewController = DependencyContainer.shared.injector.resolve(SignInViewController.self)
@@ -127,12 +128,19 @@ extension SceneDelegate {
             let topViewController = self.window?.rootViewController?.topMostViewController()
             let voteOption = notification.userInfo?["voteOption"] as? VoteResponseEntity
             if !(voteOption?.response.isEmpty ?? true) {
-                let voteProcessViewController = DependencyContainer.shared.injector.resolve(VoteProcessViewController.self, argument: voteOption)
+                let voteProcessViewController = VoteProcessDIContainer(voteResponseEntity: voteOption).makeViewController()
                 topViewController?.navigationController?.pushViewController(voteProcessViewController, animated: true)
             } else {
                 let voteBeginViewController = DependencyContainer.shared.injector.resolve(VoteBeginViewController.self)
                 topViewController?.navigationController?.pushViewController(voteBeginViewController, animated: true)
             }
+        }
+        
+        NotificationCenter.default.addObserver(forName: .showVoteEffectViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let voteEffectViewController = DependencyContainer.shared.injector.resolve(VoteEffectViewController.self)
+            topViewController?.navigationController?.pushViewController(voteEffectViewController, animated: true)
         }
         
         NotificationCenter.default.addObserver(forName: .showVoteInventoryViewController, object: nil, queue: .main) { [weak self] _ in

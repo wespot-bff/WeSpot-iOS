@@ -261,7 +261,7 @@ extension VoteProcessViewController {
             return
         }
         let entity = self.reactor?.currentState.voteResponseEntity
-        let voteProcessViewController = DependencyContainer.shared.injector.resolve(VoteProcessViewController.self, argument: entity)
+        let voteProcessViewController = VoteProcessDIContainer(voteResponseEntity: entity).makeViewController()
         self.navigationController?.pushViewController(voteProcessViewController, animated: true)
     }
     
