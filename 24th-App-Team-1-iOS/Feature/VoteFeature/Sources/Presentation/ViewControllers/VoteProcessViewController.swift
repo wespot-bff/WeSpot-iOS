@@ -219,7 +219,6 @@ public final class VoteProcessViewController: BaseViewController<VoteProcessView
             .disposed(by: disposeBag)
         
         reactor.pulse(\.$isEnabled)
-            .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
             .bind(to: resultButton.rx.isEnabled)
             .disposed(by: disposeBag)
