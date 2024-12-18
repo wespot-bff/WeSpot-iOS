@@ -14,7 +14,8 @@ let project = Project.makeProject(
     targets: [
         .core(module: .Util, dependencies: [
             .shared(module: .ThirdPartyLib),
-            .shared(module: .DesignSystem)
+            .shared(module: .DesignSystem),
+            .domain(module: .CommonDomain)
         ])
     ]
 )
