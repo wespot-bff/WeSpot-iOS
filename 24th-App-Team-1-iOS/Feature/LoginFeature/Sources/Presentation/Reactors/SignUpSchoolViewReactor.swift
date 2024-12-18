@@ -24,7 +24,7 @@ public final class SignUpSchoolViewReactor: Reactor {
         var selectedSchool: SchoolListEntity?
         var cursorId: Int
         @Pulse var isLoading: Bool
-        var accountRequest: CreateAccountRequest
+        var accountRequest: SignUpUserRequest
     }
     
     public enum Action {
@@ -43,7 +43,7 @@ public final class SignUpSchoolViewReactor: Reactor {
     
     public init(
         fetchSchoolListUseCase: FetchSchoolListUseCaseProtocol,
-        accountRequest: CreateAccountRequest,
+        accountRequest: SignUpUserRequest,
         schoolName: String
     ) {
         self.initialState = State(

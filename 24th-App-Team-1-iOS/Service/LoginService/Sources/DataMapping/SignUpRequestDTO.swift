@@ -1,13 +1,14 @@
 //
-//  CreateAccountRequestDTO.swift
+//  SignUpRequestDTO.swift
 //  LoginService
 //
+//  Updated by JiCheol on 12/5/24
 //  Created by eunseou on 7/30/24.
 //
 
 import Foundation
 
-public struct CreateAccountRequestDTO: Encodable {
+public struct SignUPRequestDTO: Encodable {
     public let name: String
     public let gender: String
     public let schoolId: Int

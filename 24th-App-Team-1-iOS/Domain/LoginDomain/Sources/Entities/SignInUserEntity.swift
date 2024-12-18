@@ -1,17 +1,18 @@
 //
-//  createAccountEntity.swift
+//  SignInUserEntity.swift
 //  LoginDomain
 //
+//  Updated by JiCheol on 12/5/24
 //  Created by eunseou on 7/30/24.
 //
 
 import Foundation
 
-public struct CreateAccountResponseEntity {
+public struct LoginUserEntity {
     public let accessToken: String
     public let refreshToken: String
     public let refreshTokenExpiredAt: String
-    public let setting: CreateAccountSettingResponseEntity
+    public let setting: UserSettingEntity
     public let name: String
     public let isProfileChanged: Bool
     
@@ -19,7 +20,7 @@ public struct CreateAccountResponseEntity {
         accessToken: String,
         refreshToken: String,
         refreshTokenExpiredAt: String,
-        setting: CreateAccountSettingResponseEntity,
+        setting: UserSettingEntity,
         name: String,
         isProfileChanged: Bool
     
@@ -34,7 +35,7 @@ public struct CreateAccountResponseEntity {
 }
 
 
-public struct CreateAccountSettingResponseEntity {
+public struct UserSettingEntity {
     public let isVoteNotification: Bool
     public let isMessageNotification: Bool
     public let isMarketingNotification: Bool

@@ -28,7 +28,7 @@ public final class SignUpGradeViewController: BaseViewController<SignUpGradeView
     private let bottomSheetView = SelectGradeBottomSheetView()
     private let dimView = UIView()
     private let dimTapGesture = UITapGestureRecognizer()
-    private let accountInjector: Injector = DependencyInjector(container: Container())
+    private let accountInjector: Injector = DependencyInjector()
     
     //MARK: - LifeCycle
     public override func viewDidLoad() {

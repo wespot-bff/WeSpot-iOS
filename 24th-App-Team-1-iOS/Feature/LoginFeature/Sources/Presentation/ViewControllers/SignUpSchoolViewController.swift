@@ -180,7 +180,8 @@ public final class SignUpSchoolViewController: BaseViewController<SignUpSchoolVi
         reactor.state
             .map { $0.schoolName.isEmpty || (!$0.schoolName.isEmpty && $0.schoolList.schools.count > 0)}
             .distinctUntilChanged()
-            .bind(to: additionalButton.rx.isHidden, additionalButtonLine.rx.isHidden)
+            .bind(to: additionalButton.rx.isHidden,
+                  additionalButtonLine.rx.isHidden)
             .disposed(by: disposeBag)
         
         reactor.pulse(\.$isLoading)

@@ -11,7 +11,7 @@ import Swinject
 
 public final class DependencyContainer {
     public static let shared = DependencyContainer()
-    public let injector: Injector = DependencyInjector(container: Container())
+    public lazy var injector: Injector = DependencyInjector()
     
     private init() { }
 }

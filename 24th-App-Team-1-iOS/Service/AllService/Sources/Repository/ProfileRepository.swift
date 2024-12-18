@@ -14,10 +14,8 @@ import AllDomain
 import RxSwift
 import RxCocoa
 
-
 public final class ProfileRepository: ProfileRepositoryProtocol {
     
-        
     private let networkService: WSNetworkServiceProtocol = WSNetworkService()
     
     public init() { }

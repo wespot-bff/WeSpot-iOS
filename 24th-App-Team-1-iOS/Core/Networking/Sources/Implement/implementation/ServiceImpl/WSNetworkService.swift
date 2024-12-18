@@ -53,6 +53,35 @@ public final class WSNetworkService: WSNetworkServiceProtocol {
         }
     }
     
+    /// requestWithStatusCode
+    public func requestWithStatusCode(endPoint: URLRequestConvertible) -> Single<(data: Data, statusCode: Int)> {
+        return Single<(data: Data, statusCode: Int)>.create { single in
+            WSNetworkService.session.request(endPoint)
+                .responseData { response in
+                    let statusCode = response.response?.statusCode ?? 0
+                    switch response.result {
+                    case let .success(data):
+                        // 성공 시 Data와 StatusCode를 함께 반환
+                        single(.success((data: data, statusCode: statusCode)))
+                    case let .failure(error):
+                        // 실패 시 StatusCode 기반 에러 처리
+                        switch statusCode {
+                        case 400:
+                            single(.failure(WSNetworkError.badRequest(message: response.request?.url?.absoluteString ?? "")))
+                        case 401:
+                            single(.failure(WSNetworkError.unauthorized))
+                        case 404:
+                            single(.failure(WSNetworkError.notFound))
+                        default:
+                            single(.failure(WSNetworkError.default(message: error.localizedDescription)))
+                        }
+                    }
+                }
+            return Disposables.create()
+        }
+    }
+    
+    
     public func upload(endPoint: URLRequestConvertible, binaryData: Data) -> Single<Bool> {
         return Single<Bool>.create { single in
        WSNetworkService.session.upload(binaryData, with: endPoint)

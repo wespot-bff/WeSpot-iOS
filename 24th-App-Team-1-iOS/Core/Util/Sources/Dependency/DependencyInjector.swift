@@ -15,6 +15,7 @@ public protocol DependencyAssemblable {
 }
 
 public protocol DependencyResolvable {
+    func resolve<T>() -> T
     func resolve<T>(_ serviceType: T.Type) -> T
     func resolve<T, Arg>(_ serviceType: T.Type, argument: Arg) -> T
     func resolve<T, Arg1, Arg2>(_ serviceType: T.Type, arguments arg1: Arg1, _ arg2: Arg2) -> T
@@ -27,7 +28,7 @@ public typealias Injector = DependencyAssemblable & DependencyResolvable
 public final class DependencyInjector: Injector {
     private let container: Container
     
-    public init(container: Container) {
+    public init(container: Container = Container()) {
         self.container = container
     }
     
@@ -43,6 +44,10 @@ public final class DependencyInjector: Injector {
     
     public func resolve<T>(_ serviceType: T.Type) -> T {
         container.resolve(serviceType)!
+    }
+    
+    public func resolve<T>() -> T {
+        container.resolve(T.self)!
     }
     
     public func resolve<T, Arg>(_ serviceType: T.Type, argument: Arg) -> T {

@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 
 public protocol LoginRepositoryProtocol {
-    func createNewMemberToken(body: CreateSignUpTokenRequest) -> Single<CreateSignUpTokenResponseEntity?> // 신규회원
-    func createAccount(body: CreateAccountRequest) -> Single<CreateAccountResponseEntity?> //회원가입
+    func loginUser(body: LoginDomain.SignInUserRequest) -> Single<LoginDomain.LoginResultEnum?> // 로그인
+    func SignUpUser(body: SignUpUserRequest) -> Single<SignUpTokenEntity?> //회원가입
     func fetchSchoolList(query: SchoolListRequestQuery) -> Single<SchoolListResponseEntity?> // 학교 검색
 }

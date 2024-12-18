@@ -25,7 +25,7 @@ public final class SignUpClassViewController: BaseViewController<SignUpClassView
     private let classTextField = WSTextField(state: .default, placeholder: "현재 반을 입력해 주세요")
     private let warningLabel = WSLabel(wsFont: .Body07, text: "정확한 반을 입력해 주세요")
     private let nextButton = WSButton(wsButtonType: .default(12))
-    private let accountInjector: Injector = DependencyInjector(container: Container())
+    private let accountInjector: Injector = DependencyInjector()
     
     //MARK: - LifeCycle
     public override func viewWillAppear(_ animated: Bool) {

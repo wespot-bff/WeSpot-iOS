@@ -14,11 +14,11 @@ import ReactorKit
 
 public final class SignUpCompleteViewReactor: Reactor {
     
-    private let createAccountUseCase: CreateAccountUseCaseProtocol
+    private let signUpUseCase: SignUpUserUseCaseProtocol
     
     public struct State {
-        @Pulse var accountEntity: CreateAccountResponseEntity?
-        @Pulse var accountRequest: CreateAccountRequest
+        @Pulse var accountEntity: LoginUserEntity?
+        @Pulse var accountRequest: SignUpUserRequest
         @Pulse var isLoading: Bool
         @Pulse var isExpired: Bool
     }
@@ -30,13 +30,14 @@ public final class SignUpCompleteViewReactor: Reactor {
     public enum Mutation {
         case setLoading(Bool)
         case setExpiredDate(Bool)
-        case setAccountToken(CreateAccountResponseEntity)
+        case setAccountToken(SignUpTokenEntity)
     }
     
     public var initialState: State
     
-    public init(createAccountUseCase: CreateAccountUseCaseProtocol, accountRequest: CreateAccountRequest) {
-        self.createAccountUseCase = createAccountUseCase
+    public init(signUpUseCase: SignUpUserUseCaseProtocol,
+                accountRequest: SignUpUserRequest) {
+        self.signUpUseCase = signUpUseCase
         self.initialState = State(
             accountRequest: accountRequest,
             isLoading: false,
@@ -56,7 +57,7 @@ public final class SignUpCompleteViewReactor: Reactor {
             if expiredDate <= currentDate {
                 return .just(.setExpiredDate(true))
             } else {
-                return createAccountUseCase
+                return signUpUseCase
                     .execute(body: currentState.accountRequest)
                     .asObservable()
                     .flatMap { response -> Observable<Mutation> in
@@ -77,12 +78,13 @@ public final class SignUpCompleteViewReactor: Reactor {
         case let .setLoading(isLoading):
             newState.isLoading = isLoading
         case let .setAccountToken(accountEntity):
-            newState.accountEntity = accountEntity
-            KeychainManager.shared.set(value: accountEntity.accessToken, type: .accessToken)
-            KeychainManager.shared.set(value: accountEntity.refreshToken, type: .refreshToken)
-            
-            UserDefaultsManager.shared.refreshToken = accountEntity.refreshToken
-            UserDefaultsManager.shared.userName = accountEntity.name
+            break
+//            newState.accountEntity = accountEntity
+//            KeychainManager.shared.set(value: accountEntity.accessToken, type: .accessToken)
+//            KeychainManager.shared.set(value: accountEntity.refreshToken, type: .refreshToken)
+//            
+//            UserDefaultsManager.shared.refreshToken = accountEntity.refreshToken
+//            UserDefaultsManager.shared.userName = accountEntity.name
         case let .setExpiredDate(isExpired):
             newState.isExpired = isExpired
         }

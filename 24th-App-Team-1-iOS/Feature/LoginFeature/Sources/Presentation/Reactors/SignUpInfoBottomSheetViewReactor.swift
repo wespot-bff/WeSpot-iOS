@@ -24,12 +24,14 @@ public final class SignUpInfoBottomSheetViewReactor: Reactor {
     }
     
     public struct State {
-        var accountRequest: CreateAccountRequest
+        var accountRequest: SignUpUserRequest
         var schoolName: String
         var profileImage: Data?
     }
     
-    public init(accountRequest: CreateAccountRequest, schoolName: String, profileImage: Data?) {
+    public init(accountRequest: SignUpUserRequest,
+                schoolName: String,
+                profileImage: Data?) {
         self.initialState = State(
             accountRequest: accountRequest,
             schoolName: schoolName,
