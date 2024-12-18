@@ -26,6 +26,7 @@ public final class VoteProcessViewReactor: Reactor {
         @Pulse var finalVoteCount: Int
         @Pulse var reportEntity: CreateReportUserEntity?
         @Pulse var isLoading: Bool
+        @Pulse var isEnabled: Bool
         var voteItemEntity: VoteItemEntity?
         var createVoteEntity: CreateVoteEntity?
     }
@@ -46,6 +47,7 @@ public final class VoteProcessViewReactor: Reactor {
         case setProcessCount(Int)
         case setVoteUserItems(VoteUserEntity)
         case setVoteResponseItems(VoteResponseEntity?)
+        case setResultButtonEnabled(Bool)
         case setCreateVoteItems(CreateVoteEntity)
         case setReportItem(CreateReportUserEntity)
     }
@@ -60,7 +62,8 @@ public final class VoteProcessViewReactor: Reactor {
             voteResponseEntity: voteResponseEntity,
             processCount: 1,
             finalVoteCount: 1,
-            isLoading: false
+            isLoading: false,
+            isEnabled: false
         )
     }
     
@@ -68,7 +71,6 @@ public final class VoteProcessViewReactor: Reactor {
         switch action {
         case .viewDidLoad:
             let index = UserDefaultsManager.shared.voteRequest.count
-            
             var voteSectionItems: [VoteProcessItem] = []
             let processCount = UserDefaultsManager.shared.voteRequest.count + 1
             let finalCount = currentState.voteResponseEntity?.response.count ?? 0
@@ -105,20 +107,20 @@ public final class VoteProcessViewReactor: Reactor {
         case let .didTappedQuestionItem(row):
 
             let index = UserDefaultsManager.shared.voteRequest.count
-            guard let request = currentState.voteResponseEntity?.response[index] else { return .empty() }
-            var currentOptions = UserDefaultsManager.shared.voteRequest
+            guard let request = currentState.voteResponseEntity?.response[index] else {
+                return .empty()
+            }
             
             let voteOption = CreateVoteItemReqeuest(
                 userId: request.userInfo.id,
                 voteOptionId: request.voteInfo[row].id
             )
             
-            if index < currentOptions.count {
-                UserDefaultsManager.shared.voteRequest[index] = voteOption
-            } else {
+            if index < request.voteInfo.count - 1 {
                 UserDefaultsManager.shared.voteRequest.append(voteOption)
             }
-            return .empty()
+            let isEnabled = UserDefaultsManager.shared.voteRequest.count == request.voteInfo.count - 1 ? true : false
+            return .just(.setResultButtonEnabled(isEnabled))
             
         case .didTappedResultButton:
             
@@ -179,6 +181,8 @@ public final class VoteProcessViewReactor: Reactor {
             newState.processCount = processCount
         case let .setVoteCount(finalVoteCount):
             newState.finalVoteCount = finalVoteCount
+        case let .setResultButtonEnabled(isEnabled):
+            newState.isEnabled = isEnabled
         }
         return newState
     }

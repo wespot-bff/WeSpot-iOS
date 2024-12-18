@@ -131,6 +131,7 @@ public final class VoteProcessViewController: BaseViewController<VoteProcessView
             $0.setupButton(text: VoteProcessStr.voteResultText)
             $0.setupFont(font: .Body03)
             $0.isHidden = true
+            $0.isEnabled = false
         }
         
         self.navigationController?.do {
@@ -173,7 +174,7 @@ public final class VoteProcessViewController: BaseViewController<VoteProcessView
         
         resultButton.rx
             .tap
-            .throttle(.milliseconds(300), latest: false, scheduler: MainScheduler.instance)
+            .throttle(.seconds(1), latest: false, scheduler: MainScheduler.instance)
             .map { Reactor.Action.didTappedResultButton }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
@@ -215,6 +216,11 @@ public final class VoteProcessViewController: BaseViewController<VoteProcessView
         
         reactor.pulse(\.$isLoading)
             .bind(to: loadingIndicator.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+        reactor.pulse(\.$isEnabled)
+            .observe(on: MainScheduler.instance)
+            .bind(to: resultButton.rx.isEnabled)
             .disposed(by: disposeBag)
         
         reactor.pulse(\.$questionSection)
