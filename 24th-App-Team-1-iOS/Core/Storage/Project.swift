@@ -15,7 +15,8 @@ let project = Project
             .core(module: .Storage, dependencies: [
                 .shared(module: .ThirdPartyLib),
                 .domain(module: .LoginDomain),
-                .domain(module: .VoteDomain)
+                .domain(module: .VoteDomain),
+                .core(module: .Extensions)
             ])
         ]
     )

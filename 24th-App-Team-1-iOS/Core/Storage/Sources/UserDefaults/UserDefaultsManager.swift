@@ -7,7 +7,6 @@
 
 import Foundation
 import LoginDomain
-import Extensions
 import VoteDomain
 
 public class UserDefaultsManager {
