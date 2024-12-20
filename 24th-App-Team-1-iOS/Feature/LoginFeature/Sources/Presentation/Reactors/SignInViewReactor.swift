@@ -19,7 +19,8 @@ import KeychainSwift
 
 public final class SignInViewReactor: Reactor {
     
-    private let signInUseCase: SignInUserUseCaseProtocol
+    @Injected private var signInUseCase: SignInUserUseCaseProtocol
+    @CoordinatorInjected public var signInCoordinator: Coordinator
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     private var disposeBag = DisposeBag()
     public var initialState: State
@@ -43,8 +44,7 @@ public final class SignInViewReactor: Reactor {
         case setTransitionFlag(Bool)
     }
     
-    public init(signInUseCase: SignInUserUseCaseProtocol) {
-        self.signInUseCase = signInUseCase
+    public init() {
         self.initialState = State(
             loginRequest: SignInUserRequest(socialType: "",
                                               authorizationCode: "",
