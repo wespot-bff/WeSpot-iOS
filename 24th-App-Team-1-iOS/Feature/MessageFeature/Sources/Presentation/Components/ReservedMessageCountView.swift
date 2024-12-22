@@ -12,6 +12,7 @@ import Storage
 import MessageDomain
 import SnapKit
 import Then
+import Util
 
 final class ReservedMessageCountView: UIView {
     
@@ -28,6 +29,7 @@ final class ReservedMessageCountView: UIView {
     private var messageLottieView = WSLottieView().then {
         $0.lottieView.animation = DesignSystemAnimationAsset.bgMessageOpenAnimate.animation
         $0.isStatus = true
+        $0.lottieView.loopMode = .playOnce
     }
     
     /// "남은 시간"에 대한 소개 라벨
@@ -158,21 +160,22 @@ extension ReservedMessageCountView {
         case .waitTime:
             titleLabel.text = userName + String.MessageTexts.messageHomePostableTitleText
             messageLottieView.lottieView.animation = DesignSystemAnimationAsset.bgMessageOpenAnimate.animation
+            sendMessageButton.setupButton(text: String.MessageTexts.messageSendWaitTimeButtonText)
             sendMessageButton.isEnabled = false
-            sendMessageButton.setupButton(text: String.MessageTexts.messageSendUnavailableButtonText)
             timeContentStackView.isHidden = true
+            
         case .postableTime:
             titleLabel.text = userName + String.MessageTexts.messageHomePostableTitleText
             messageLottieView.lottieView.animation = DesignSystemAnimationAsset.bgMessageOpenAnimate.animation
-            sendMessageButton.isEnabled = true
             sendMessageButton.setupButton(text: String.MessageTexts.messageSendAvailableButtonText)
+            sendMessageButton.isEnabled = true
             timeContentStackView.isHidden = false
 
         case .etcTime:
             titleLabel.text = userName + String.MessageTexts.messageHomeCompeleteTitleText
             messageLottieView.lottieView.animation = DesignSystemAnimationAsset.bgMessageCloseAnimate.animation
-            sendMessageButton.isEnabled = false
             sendMessageButton.setupButton(text: String.MessageTexts.messageSendAvailableButtonText)
+            sendMessageButton.isEnabled = false
             timeContentStackView.isHidden = true
 
         }
