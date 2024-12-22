@@ -7,6 +7,6 @@
 
 import Util
 
-final class MessageWriteViewController: BaseViewController<<#R: Reactor#>> {
+public final class MessageWriteViewController: BaseViewController<MessageWriteReactor> {
     
 }

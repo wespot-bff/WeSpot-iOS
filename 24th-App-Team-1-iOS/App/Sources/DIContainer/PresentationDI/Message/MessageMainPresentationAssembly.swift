@@ -13,7 +13,6 @@ import Swinject
 
 struct MessageHomePresentationAssembly: Assembly {
     func assemble(container: Container) {
-        
         container.register(MessageHomeViewReactor.self) { resolver in
             let fetchMessagesStatusUseCase = resolver.resolve(FetchMessagesStatusUseCaseProtocol.self)!
             let fetchReservedMessageUseCase = resolver.resolve(FetchReservedMessageUseCaseProtocol.self)!
@@ -27,6 +26,18 @@ struct MessageHomePresentationAssembly: Assembly {
             return MessageHomeViewController(reactor: reactor)
         }
         
+    }
+}
+
+struct MessageWritePresentationAssembly: Assembly {
+    func assemble(container: Container) {
+        container.register(MessageWriteReactor.self) { _ in
+            return MessageWriteReactor()
+        }
+        
+        container.register(MessageWriteViewController.self) { resolver in
+            let reactor = resolver.resolve(MessageWriteReactor.self)!
+            return MessageWriteViewController(reactor: reactor)
     }
 }
 
@@ -44,18 +55,18 @@ struct MessagePagePresentationAssembly: Assembly {
     }
 }
 
-struct MessageMainPresentationAssembly: Assembly {
-    func assemble(container: Container) {
-        container.register(MessageMainViewReactor.self) { resolver in
-            return MessageMainViewReactor()
+    struct MessageMainPresentationAssembly: Assembly {
+        func assemble(container: Container) {
+            container.register(MessageMainViewReactor.self) { resolver in
+                return MessageMainViewReactor()
+            }
+            
+            container.register(MessageMainViewController.self) { resovler in
+                let reactor = resovler.resolve(MessageMainViewReactor.self)!
+                
+                return MessageMainViewController(reactor: reactor)
+            }
         }
         
-        container.register(MessageMainViewController.self) { resovler in
-            let reactor = resovler.resolve(MessageMainViewReactor.self)!
-            
-            return MessageMainViewController(reactor: reactor)
-        }
     }
-    
-    
 }
