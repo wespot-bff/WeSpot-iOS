@@ -39,6 +39,7 @@ extension String.MessageTexts {
     static let messageLeftTimeIntroText: String = "쪽지 전달까지 남은 시간"
     static let postableTimeIntroText: String = "서로의 쪽지는 밤 10시에 전달해 드릴게요"
     static let waitTimeIntroText: String = "내일 저녁 5시에 새로운 쪽지를 보낼 수 있어요"
+    static let messageSendWaitTimeButtonText: String = "매일 저녁 5시에 새로운 쪽지를 보낼 수 있어요"
 
     // MARK: 쪽지함 관련 텍스트
 
