@@ -18,166 +18,136 @@ import ReactorKit
 public final class MessageHomeViewController: BaseViewController<MessageHomeViewReactor> {
     
     //MARK: - Properties
-    private let messageBannerView = WSBanner(image: DesignSystemAsset.Images.reservation.image , titleText: "예약 중인 쪽지 3개")
-    private lazy var messageCardView: MessageCardView = {
-        let hour = Calendar.current.component(.hour, from: Date())
-        if (0..<17).contains(hour) {
-            return MessageCardView(type: .morning)
-        } else if (17..<22).contains(hour) {
-            return MessageCardView(type: .evening)
-        } else {
-            return MessageCardView(type: .night)
-        }
-    }()
-    private var isAnimating = false
-    private var messageCardHeight: CGFloat {
-        let hour = Calendar.current.component(.hour, from: Date())
-        return (17...22).contains(hour) ? 400 : 352
+    
+    private lazy var messageBannerView = WSBanner(image: DesignSystemAsset.Images.reservation.image , titleText: "예약 중인 쪽지 3개").then {
+        $0.isHidden = true
     }
-    private var showBanner: Bool {
-        let hour = Calendar.current.component(.hour, from: Date())
-        return (17...24).contains(hour)
+    private lazy var messageTimeView = ReservedMessageCountView()
+    private lazy var contentStackView = UIStackView().then {
+        $0.axis = .vertical
+        $0.backgroundColor = .clear
     }
+    private let bottomInfoLabel = WSLabel(wsFont: .Body06,
+                                          text: "서로의 쪽지는 밤 10시에 전달해 드릴게요",
+                                          textAlignment: .center).then {
+        $0.textColor = DesignSystemAsset.Colors.gray200.color
+        $0.sizeToFit()
+    }
+
     
     //MARK: - LifeCycle
+    
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        messageTimeView.playLottie()
+    }
+    
+    override public func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
         setInitialLayout()
-        if showBanner {
-            animateBanner()
-        }
+    }
+    
+    override public func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
     }
     
     
     //MARK: - Functions
     public override func setupUI() {
         super.setupUI()
-        
-        if showBanner {
-            view.addSubview(messageBannerView)
+        [bottomInfoLabel, contentStackView].forEach {
+            self.view.addSubview($0)
         }
-        view.addSubview(messageCardView)
+        [messageBannerView,
+         messageTimeView].forEach {
+            contentStackView.addArrangedSubview($0)
+        }
+        contentStackView.setCustomSpacing(16, after: messageBannerView)
+
     }
     
     public override func setupAutoLayout() {
         super.setupAutoLayout()
-        
         setInitialLayout()
     }
     
     private func setInitialLayout() {
-        if showBanner {
-            messageBannerView.snp.remakeConstraints {
-                $0.top.equalTo(view.safeAreaLayoutGuide).offset(-80)
-                $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(20)
-                $0.height.equalTo(80)
-            }
-            messageCardView.snp.remakeConstraints {
-                $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-                $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(20)
-                $0.height.equalTo(messageCardHeight)
-            }
-        } else {
-            messageCardView.snp.remakeConstraints {
-                $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-                $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(20)
-                $0.height.equalTo(messageCardHeight)
-            }
+        contentStackView.snp.makeConstraints {
+            $0.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).offset(20)
+            $0.horizontalEdges.equalToSuperview().inset(20)
+        }
+        
+        bottomInfoLabel.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.top.equalTo(contentStackView.snp.bottom).offset(8)
+        }
+        
+        messageTimeView.snp.makeConstraints {
+            $0.height.equalTo(433)
         }
     }
     
     private func animateBanner() {
-        guard !isAnimating else { return }
-        isAnimating = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            UIView.animate(withDuration: 0.5, animations: {
-                self.messageBannerView.snp.remakeConstraints {
-                    $0.top.equalTo(self.view.safeAreaLayoutGuide).offset(20)
-                    $0.horizontalEdges.equalTo(self.view.safeAreaLayoutGuide).inset(20)
-                    $0.height.equalTo(80)
-                }
-                self.messageCardView.snp.remakeConstraints {
-                    $0.top.equalTo(self.messageBannerView.snp.bottom).offset(16)
-                    $0.horizontalEdges.equalTo(self.view.safeAreaLayoutGuide).inset(20)
-                    $0.height.equalTo(self.messageCardHeight)
-                }
-                self.view.layoutIfNeeded()
-            }, completion: { _ in
-                self.isAnimating = false
-            })
-        }
+
     }
     
     public override func setupAttributes() {
         super.setupAttributes()
-        
+        bottomInfoLabel.do {
+            $0.textColor = DesignSystemAsset.Colors.gray200.color
+        }
     }
     
     public override func bind(reactor: Reactor) {
         super.bind(reactor: reactor)
+        bindState(reactor: reactor)
+        bindAction(reacotr: reactor)
+        }
+}
+
+extension MessageHomeViewController {
+    private func bindState(reactor: MessageHomeViewReactor) {
         
-        self.rx.viewWillAppear
-            .bind(with: self) { owner, _ in
-                owner.messageCardView.messageLottieView.toggleAnimation(isStatus: true)
+        // 메시지 전송 가능 시간이 변경 및 타이머가 변경될 때마다 UI 업데이트
+        Observable.combineLatest(
+            reactor.state.compactMap { $0.messageAvailability }.distinctUntilChanged(),
+            reactor.state.compactMap { $0.remainingTime }
+        )
+        .observe(on: MainScheduler.instance)
+        .bind(with: self) { this, combined in
+            let (availability, remainingTime) = combined
+            this.messageTimeView.configureMessageCountView(
+                leftTime: remainingTime,
+                availableSend: availability.messageAvailabilityTime
+            )
+            
+            let newHeight = MessageConstants.reservedMessageViewHeight(for: availability.messageAvailabilityTime)
+            this.messageTimeView.snp.updateConstraints { make in
+                make.height.equalTo(newHeight)
+            }
+            this.view.layoutIfNeeded()
+        }
+        .disposed(by: disposeBag)
+        
+        // 예약된 메시지 개수가 변경될 때마다 UI 업데이트
+        reactor.pulse(\.$reservedMessages)
+            .compactMap { $0 }
+            .filter { $0 > 0 }
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { this, hasReservedMessages in
+                this.messageBannerView.isHidden = false
             }
             .disposed(by: disposeBag)
+    }
+    
+    private func bindAction(reacotr: MessageHomeViewReactor) {
+        reacotr.action.onNext(.viewDidLoad)
         
-        let hour = Calendar.current.component(.hour, from: Date())
-        
-        if (17..<22).contains(hour) {
-            reactor.action.onNext(.fetchReceivedMessageList)
-            
-            reactor.pulse(\.$reservedMessages)
-                .compactMap { $0 }
-                .bind(to: messageBannerView.rx.reservedMessages)
-                .disposed(by: disposeBag)
-            
-            reactor.pulse(\.$isSendAllowed)
-                .compactMap { $0 }
-                .bind(to: messageCardView.rx.isSendAllowed)
-                .disposed(by: disposeBag)
-            
-            reactor.pulse(\.$reservedMessages)
-                .bind(with: self) { owner, count in
-                    if count == 3 {
-                        owner.messageCardView.messageButton.do {
-                            $0.setupButton(text: "하루에 3개까지 작성할 수 있어요")
-                            $0.isEnabled = false
-                        }
-                    } else if count == 0 {
-                        owner.messageBannerView.isHidden = true
-                    } else {
-                        owner.messageCardView.messageButton.do {
-                            $0.setupButton(text: "익명 쪽지로 마음 표현하기")
-                            $0.isEnabled = true
-                        }
-                        owner.messageBannerView.isHidden = false
-                    }
-                }
-                .disposed(by: disposeBag)
-        } else if (22..<24).contains(hour) {
-            reactor.action.onNext(.fetchReceivedMessageList)
-            
-            reactor.pulse(\.$recievedMessages)
-                .bind(with: self) { owner, hasMessage in
-                    let showBanner = hasMessage ?? false
-                    owner.messageBannerView.isHidden = !showBanner
-                    
-                    if showBanner {
-                        owner.messageBannerView.do {
-                            $0.setTitleText("익명의 쪽지가 도착했어요")
-                            $0.setSubTitleText("지금 쪽지함을 열어 확인해 보세요")
-                            $0.setImageView(DesignSystemAsset.Images.message.image)
-                        }
-                        owner.animateBanner()
-                    } else {
-                        owner.isAnimating = true
-                        owner.setInitialLayout()
-                    }
-                }
-                .disposed(by: disposeBag)
-        }
+        messageTimeView.sendMessageButton.rx.tap
+            .bind(with: self) { this, _ in
+                this.reactor?.action.onNext(.sendButtonTapped)
+            }
+            .disposed(by: disposeBag)
     }
 }
 
