@@ -132,8 +132,11 @@ extension MessageHomeViewController {
                 this.view.layoutIfNeeded()
             }
             
-            this.bottomInfoLabel.isHidden = (availability.messageAvailabilityTime == .postableTime)
+            this.bottomInfoLabel.isHidden = (availability.messageAvailabilityTime != .waitTime)
             ? false : true
+            
+            this.bottomInfoLabel.text = availability.messageAvailabilityTime == .postableTime
+            ? String.MessageTexts.postableTimeIntroText : String.MessageTexts.waitTimeIntroText
             
             this.messageTimeView.configureMessageCountView(
                 leftTime: remainingTime,
@@ -144,6 +147,7 @@ extension MessageHomeViewController {
     }
     
     private func bindAction(reacotr: MessageHomeViewReactor) {
+        reacotr.action.onNext(.viewWillAppear)
         self.rx.viewWillAppear
             .bind { _ in
                 reacotr.action.onNext(.viewWillAppear)
