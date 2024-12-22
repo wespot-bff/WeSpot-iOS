@@ -110,38 +110,52 @@ extension MessageHomeViewController {
         
         // 메시지 전송 가능 시간이 변경 및 타이머가 변경될 때마다 UI 업데이트
         Observable.combineLatest(
-            reactor.state.compactMap { $0.messageAvailability }.distinctUntilChanged(),
+            reactor.pulse(\.$messageAvailability),
             reactor.state.compactMap { $0.remainingTime }
         )
+        .distinctUntilChanged { old, new in
+            let (oldAvail, oldTime) = old
+            let (newAvail, newTime) = new
+            // messageAvailabilityTime과 remainingTime 둘 다 동일하면 true
+            return oldAvail.messageAvailabilityTime == newAvail.messageAvailabilityTime
+                && oldTime == newTime
+        }
         .observe(on: MainScheduler.instance)
         .bind(with: self) { this, combined in
             let (availability, remainingTime) = combined
-            this.messageTimeView.configureMessageCountView(
-                leftTime: remainingTime,
-                availableSend: availability.messageAvailabilityTime
-            )
-            
+
             let newHeight = MessageConstants.reservedMessageViewHeight(for: availability.messageAvailabilityTime)
             this.messageTimeView.snp.updateConstraints { make in
                 make.height.equalTo(newHeight)
             }
-            this.view.layoutIfNeeded()
+            UIView.animate(withDuration: 0.3) {
+                this.view.layoutIfNeeded()
+            }
+            
+            this.bottomInfoLabel.isHidden = (availability.messageAvailabilityTime == .postableTime)
+            ? false : true
+            
+            this.messageTimeView.configureMessageCountView(
+                leftTime: remainingTime,
+                availableSend: availability.messageAvailabilityTime
+            )
         }
         .disposed(by: disposeBag)
-        
-        // 예약된 메시지 개수가 변경될 때마다 UI 업데이트
-        reactor.pulse(\.$reservedMessages)
-            .compactMap { $0 }
-            .filter { $0 > 0 }
-            .observe(on: MainScheduler.instance)
-            .bind(with: self) { this, hasReservedMessages in
-                this.messageBannerView.isHidden = false
-            }
-            .disposed(by: disposeBag)
     }
     
     private func bindAction(reacotr: MessageHomeViewReactor) {
-        reacotr.action.onNext(.viewDidLoad)
+        self.rx.viewWillAppear
+            .bind { _ in
+                reacotr.action.onNext(.viewWillAppear)
+            }
+            .disposed(by: disposeBag)
+        
+        self.rx.viewDidDisappear
+            .bind { _ in
+                reacotr.action.onNext(.viewDisappeared)
+            }
+            .disposed(by: disposeBag)
+        
         
         messageTimeView.sendMessageButton.rx.tap
             .bind(with: self) { this, _ in

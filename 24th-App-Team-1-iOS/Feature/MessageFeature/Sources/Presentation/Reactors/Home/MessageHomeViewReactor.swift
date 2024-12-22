@@ -28,12 +28,13 @@ public final class MessageHomeViewReactor: Reactor {
         @Pulse var reservedMessages: Int?
         @Pulse var isSendAllowed: Bool?
         @Pulse var recievedMessages: Bool?
-        var messageAvailability: MessageHomeTimeStateEntity = MessageHomeTimeStateEntity(messageAvailabilityTime: .waitTime)
+        @Pulse var messageAvailability: MessageHomeTimeStateEntity = MessageHomeTimeStateEntity(messageAvailabilityTime: .waitTime)
         var remainingTime: String?
     }
     
     public enum Action {
-        case viewDidLoad
+        case viewWillAppear
+        case viewDisappeared
         case checkCurrentTime
         case sendButtonTapped
     }
@@ -67,7 +68,7 @@ public final class MessageHomeViewReactor: Reactor {
 extension MessageHomeViewReactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .viewDidLoad:
+        case .viewWillAppear:
             startTimer()
             // 최초 진입 시 서버 데이터 로드
             return Observable.merge(
@@ -78,6 +79,9 @@ extension MessageHomeViewReactor {
         case .checkCurrentTime:
             return checkCurrentTimeAndUpdateState()
         case .sendButtonTapped:
+            return .empty()
+        case .viewDisappeared:
+            stopTimer()
             return .empty()
         }
     }
@@ -97,7 +101,6 @@ extension MessageHomeViewReactor {
             
         case .setMessageAvailability(let availabilityState):
             newState.messageAvailability = availabilityState
-            
         case .setRemainingSeconds(let time):
             newState.remainingTime = time
         }
@@ -138,9 +141,9 @@ extension MessageHomeViewReactor {
         let currentHour = Calendar.current.component(.hour, from: currentDate)
         let messageAvailabilityTime = determineTimeState(for: currentHour)
         let messageAvailability = MessageHomeTimeStateEntity(messageAvailabilityTime: messageAvailabilityTime)
-        
         // 남은 시간 계산
         let remainingTime = calculateRemainingTime(currentDate: currentDate, timeState: messageAvailabilityTime)
+
         
         // **주의**: Concurrency 기반으로 1초마다 갱신 중이므로
         // checkCurrentTimeAndUpdateState() 내에서 `startTimer()`는 더 이상 호출하지 않습니다.
@@ -190,7 +193,7 @@ extension MessageHomeViewReactor {
     private func determineTimeState(for hour: Int) -> MessageHomeTimeStateEntity.PostableTimeState {
         switch hour {
         case 0..<17:
-            return .postableTime       // 00:00 ~ 17:00
+            return .waitTime       // 00:00 ~ 17:00
         case 17..<22:
             return .postableTime   // 17:00 ~ 22:00
         case 22..<24:
@@ -216,7 +219,7 @@ extension MessageHomeViewReactor {
             let remainingSeconds = Int(endDate.timeIntervalSince(currentDate))
             return formatSeconds(remainingSeconds)
         default:
-            return nil
+          return "00:00:00"
         }
     }
     
