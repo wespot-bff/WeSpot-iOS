@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 
 public protocol FetchStudentSearchResultUseCase {
-    func fetchStudentSearchResult(query: SearchStudentRequest) -> Single<StudentListResponseEntity?>
+    func excute(query: SearchStudentRequest) -> Single<StudentListResponseEntity?>
 }
 public final class FetchStudentSearchResultUseCaseImpl: FetchStudentSearchResultUseCase {
     
@@ -20,7 +20,7 @@ public final class FetchStudentSearchResultUseCaseImpl: FetchStudentSearchResult
         self.repository = repository
     }
     
-    public func fetchStudentSearchResult(query: SearchStudentRequest) -> RxSwift.Single<StudentListResponseEntity?> {
+    public func excute(query: SearchStudentRequest) -> RxSwift.Single<StudentListResponseEntity?> {
         return repository.fetchStudentSearchResult(query: query)
     }
 }

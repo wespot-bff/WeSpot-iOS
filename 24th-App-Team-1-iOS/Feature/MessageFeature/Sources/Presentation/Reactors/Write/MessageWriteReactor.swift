@@ -14,7 +14,7 @@ public final class MessageWriteReactor: Reactor {
     
     // MARK: - UseCase
 
-    
+    private let fetchSearchResultUseCase: FetchStudentSearchResultUseCase
    
     
     // MARK: - Reactor Properties
@@ -22,7 +22,9 @@ public final class MessageWriteReactor: Reactor {
     public var initialState: State
     
     public struct State {
-
+        @Pulse var serachResult: StudentListResponseEntity?
+        var cursorId: Int = 0
+        @Pulse var NoSearchResult: Bool = false
     }
     
     public enum Action {
@@ -30,15 +32,15 @@ public final class MessageWriteReactor: Reactor {
     }
     
     public enum Mutation {
-        
+        case setSearchResult(StudentListResponseEntity?)
     }
     
     // MARK: - Init
 
     public init(
-
+        fetchSearchResultUseCase: FetchStudentSearchResultUseCase
     ) {
-        
+        self.fetchSearchResultUseCase = fetchSearchResultUseCase
         self.initialState = State()
     }
 }
@@ -50,7 +52,7 @@ extension MessageWriteReactor {
         switch action {
             
         case .searchStudent(let name):
-            return .empty()
+            return searhStudent(name: name)
         }
     }
     
@@ -59,6 +61,8 @@ extension MessageWriteReactor {
         
         switch mutation {
         
+        case .setSearchResult(let result):
+            newState.serachResult = result
         }
         
         return newState
@@ -68,8 +72,15 @@ extension MessageWriteReactor {
 // MARK: - Mutation Logic
 
 extension MessageWriteReactor {
-    /// 시간 체크 후 Mutation 반환
- 
+    private func searhStudent(name: String) -> Observable<Mutation> {
+        let query = SearchStudentRequest(name: name,
+                                         cursorId: currentState.cursorId)
+        return fetchSearchResultUseCase.excute(query: query)
+            .asObservable()
+            .flatMap { result in
+                return Observable.just(Mutation.setSearchResult(result))
+            }
+    }
 }
 
 // MARK: - Helper Methods

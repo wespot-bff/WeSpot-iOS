@@ -119,6 +119,11 @@ struct DomainAssembly: Assembly {
             return FetchReceivedMessageUseCase(repository: repository)
         }
         
+        container.register(FetchStudentSearchResultUseCase.self) { resolver in
+            let repository = resolver.resolve(MessageRepositoryProtocol.self)!
+            return FetchStudentSearchResultUseCaseImpl(repository: repository)
+        }
+        
         // Profile
         container.register(FetchUserProfileUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!

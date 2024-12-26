@@ -1,5 +1,5 @@
 //
-//  MessageWriteViewController.swift
+//  SearchStudentForMessageWriteViewController.swift
 //  MessageFeature
 //
 //  Created by 최지철 on 12/22/24.
@@ -14,7 +14,7 @@ import Then
 import SnapKit
 import RxCocoa
 
-public final class MessageWriteViewController: BaseViewController<MessageWriteReactor> {
+public final class SearchStudentForMessageWriteViewController: BaseViewController<MessageWriteReactor> {
     
     //MARK: - Properties
     
@@ -50,6 +50,12 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
     }
+    
+    override public func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        NotificationCenter.default.post(name: .hideTabBar, object: nil)
+    }
+    
     //MARK: - Configure
 
     public override func setupUI() {
@@ -60,7 +66,6 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
          searchResultTableView].forEach {
             self.view.addSubview($0)
         }
-        searchResultTableView.delegate = self
     }
     public override func setupAutoLayout() {
         super.setupAutoLayout()
@@ -108,7 +113,7 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
 
     //MARK: - Bind
 
-extension MessageWriteViewController {
+extension SearchStudentForMessageWriteViewController {
     private func bindAction(reactor: MessageWriteReactor) {
         studentSearchTextField.rx.controlEvent([.editingDidBegin,
                                                 .editingDidEnd])
@@ -133,7 +138,3 @@ extension MessageWriteViewController {
     }
 }
 
-
-extension MessageWriteViewController: UITableViewDelegate {
-    
-}

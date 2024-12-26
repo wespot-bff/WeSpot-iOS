@@ -31,13 +31,14 @@ struct MessageHomePresentationAssembly: Assembly {
 
 struct MessageWritePresentationAssembly: Assembly {
     func assemble(container: Container) {
-        container.register(MessageWriteReactor.self) { _ in
-            return MessageWriteReactor()
+        container.register(MessageWriteReactor.self) { resolver in
+            let fetchSearchResultUseCase = resolver.resolve(FetchStudentSearchResultUseCase.self)!
+            return MessageWriteReactor(fetchSearchResultUseCase: fetchSearchResultUseCase)
         }
         
-        container.register(MessageWriteViewController.self) { resolver in
+        container.register(SearchStudentForMessageWriteViewController.self) { resolver in
             let reactor = resolver.resolve(MessageWriteReactor.self)!
-            return MessageWriteViewController(reactor: reactor)
+            return SearchStudentForMessageWriteViewController(reactor: reactor)
         }
     }
 }
