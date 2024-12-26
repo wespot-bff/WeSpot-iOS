@@ -20,4 +20,5 @@ public extension Notification.Name {
     static let showVoteEffectViewController = Notification.Name("showVoteEffectViewController")
     static let showVoteInventoryViewController = Notification.Name("showVoteInventoryViewController")
     static let showProfileImageViewController = Notification.Name("showProfileImageViewController")
+    static let showMessageWriteViewController = Notification.Name("showMessageWriteViewController")
 }
