@@ -55,4 +55,19 @@ public final class messageRepository: MessageRepositoryProtocol {
             .map { $0.toDomain() }
             .asSingle()
     }
+    
+    public func fetchStudentSearchResult(query: SearchStudentRequest) -> Single<StudentListResponseEntity?> {
+        let query = SearchStudentRequestDTO(name: query.name,
+                                            cursorId: query.cursorId)
+        let endPoint = MessageEndPoint.searchStudent(query)
+        
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .decodeMap(StudentListResponseDTO.self)
+            .map {$0.toDomain()}
+            .asSingle()
+    }
+    
+    
 }

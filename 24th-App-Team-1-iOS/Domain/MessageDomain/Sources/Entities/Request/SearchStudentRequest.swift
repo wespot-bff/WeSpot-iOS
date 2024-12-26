@@ -6,3 +6,16 @@
 //
 
 import Foundation
+
+public struct SearchStudentRequest {
+    
+    public let name: String
+    public let cursorId: Int
+    
+    public init(name: String,
+                cursorId: Int) {
+        self.name = name
+        self.cursorId = cursorId
+    }
+    
+}
