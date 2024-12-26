@@ -162,8 +162,8 @@ extension SceneDelegate {
         NotificationCenter.default.addObserver(forName: .showMessageWriteViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             let topViewController = self.window?.rootViewController?.topMostViewController()
-            let messageWriteViewController = DependencyContainer.shared.injector.resolve(MessageWriteViewController.self)
-            topViewController?.navigationController?.pushViewController(messageWriteViewController, animated: true)
+            let SearchStudentForMessageWriteViewController = DependencyContainer.shared.injector.resolve(SearchStudentForMessageWriteViewController.self)
+            topViewController?.navigationController?.pushViewController(SearchStudentForMessageWriteViewController, animated: true)
         }
     }
     
