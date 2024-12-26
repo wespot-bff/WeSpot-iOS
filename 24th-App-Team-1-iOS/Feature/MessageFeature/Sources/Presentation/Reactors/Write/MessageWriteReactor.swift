@@ -26,11 +26,11 @@ public final class MessageWriteReactor: Reactor {
     }
     
     public enum Action {
-
+        case searchStudent(String)
     }
     
     public enum Mutation {
-
+        
     }
     
     // MARK: - Init
@@ -49,6 +49,8 @@ extension MessageWriteReactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
             
+        case .searchStudent(let name):
+            return .empty()
         }
     }
     

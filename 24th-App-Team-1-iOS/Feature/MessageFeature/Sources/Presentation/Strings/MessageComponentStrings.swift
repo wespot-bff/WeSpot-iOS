@@ -47,5 +47,6 @@ extension String.MessageTexts {
 
 // MARK: - Identifier(Reuse Identifier 등) 모음
 extension String.MessageTexts.Identifier {
+    static let studentSearchTableViewCell = "StudentSearchTableViewCell"
 
 }

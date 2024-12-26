@@ -54,6 +54,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
             MessageMainPresentationAssembly(),
             MessagePagePresentationAssembly(),
             MessageHomePresentationAssembly(),
+            MessageWritePresentationAssembly(),
             AllMainPresentationAssembly(),
             AllMainProfilePresentationAssembly(),
             AllMainProfileWebPresentationAssembly(),
@@ -156,6 +157,13 @@ extension SceneDelegate {
                 topViewController?.navigationController?.pushViewController(voteEffectViewController, animated: true)
             }
             
+        }
+        
+        NotificationCenter.default.addObserver(forName: .showMessageWriteViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let messageWriteViewController = DependencyContainer.shared.injector.resolve(MessageWriteViewController.self)
+            topViewController?.navigationController?.pushViewController(messageWriteViewController, animated: true)
         }
     }
     

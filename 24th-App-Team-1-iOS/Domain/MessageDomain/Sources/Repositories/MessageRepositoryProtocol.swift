@@ -13,4 +13,5 @@ public protocol MessageRepositoryProtocol {
     func fetchMessagesStatus() -> Single<MessageStatusResponseEntity?>
     func fetchReservedMessages() -> Single<ReservedMessageResponseEntity?>
     func fetchReceivedMessages(cursorId: Int) -> Single<ReceivedMessageResponseEntity?>
+    func fetchStudentSearchResult(query: SearchStudentRequest) -> Single<StudentListResponseEntity?>
 }

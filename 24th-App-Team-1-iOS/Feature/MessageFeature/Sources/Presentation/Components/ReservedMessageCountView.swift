@@ -52,7 +52,7 @@ final class ReservedMessageCountView: UIView {
                                              text: "00:00:00",
                                              textAlignment: .left).then {
         $0.snp.makeConstraints {
-            $0.width.equalTo(120)
+            $0.width.equalTo(135)
         }
         $0.textColor = DesignSystemAsset.Colors.gray100.color
     }

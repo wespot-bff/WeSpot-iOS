@@ -38,6 +38,7 @@ struct MessageWritePresentationAssembly: Assembly {
         container.register(MessageWriteViewController.self) { resolver in
             let reactor = resolver.resolve(MessageWriteReactor.self)!
             return MessageWriteViewController(reactor: reactor)
+        }
     }
 }
 
@@ -69,4 +70,3 @@ struct MessagePagePresentationAssembly: Assembly {
         }
         
     }
-}

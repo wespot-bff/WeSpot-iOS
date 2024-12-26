@@ -79,6 +79,7 @@ extension MessageHomeViewReactor {
         case .checkCurrentTime:
             return checkCurrentTimeAndUpdateState()
         case .sendButtonTapped:
+            NotificationCenter.default.post(name: .showMessageWriteViewController, object: nil)
             return .empty()
         case .viewDisappeared:
             stopTimer()
@@ -193,7 +194,7 @@ extension MessageHomeViewReactor {
     private func determineTimeState(for hour: Int) -> MessageHomeTimeStateEntity.PostableTimeState {
         switch hour {
         case 0..<17:
-            return .waitTime       // 00:00 ~ 17:00
+            return .postableTime       // 00:00 ~ 17:00
         case 17..<22:
             return .postableTime   // 17:00 ~ 22:00
         case 22..<24:
