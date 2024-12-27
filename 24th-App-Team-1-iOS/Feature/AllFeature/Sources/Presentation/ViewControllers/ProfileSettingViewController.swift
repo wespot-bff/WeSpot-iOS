@@ -30,7 +30,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
     private let userNameTextField: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "김선희", title: "이름")
     private let userGenderTextFiled: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "여", title: "성별")
     private let userClassInfoTextField: WSTextField = WSTextField(state: .withRightItem(DesignSystemAsset.Images.lock.image), placeholder: "역삼중학교 1학년 6반", title: "학적 정보")
-    private let userIntroduceTextField: WSTextField = WSTextField(state: .default, placeholder: "안녕 난 선희다", title: "MBTI")
+    private let userIntroduceTextField: WSTextField = WSTextField(state: .default, placeholder: "|(ex. 귀염둥이 엥뿌삐 ENFP)", title: "MBTI")
     private let privacyButton: WSButton = WSButton(wsButtonType: .default(12))
     private let editButton: WSButton = WSButton(wsButtonType: .default(12))
     private let errorLabel: WSLabel = WSLabel(wsFont: .Body07)
@@ -344,7 +344,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
             .disposed(by: disposeBag)
             
         reactor.state
-            .map { $0.userProfileEntity?.profile.iconUrl }
+            .map { $0.userProfileImageEntity?.url }
             .filter { $0 == nil }
             .map { _ in DesignSystemAsset.Images.profile.image }
             .distinctUntilChanged()
@@ -390,6 +390,7 @@ public final class ProfileSettingViewController: BaseViewController<ProfileSetti
         reactor.pulse(\.$isUpdate)
             .filter{ $0 == true }
             .bind(with: self) { owner, _ in
+                owner.view.endEditing(true)
                 owner.showWSToast(image: .check, message: "수정 완료")
             }
             .disposed(by: disposeBag)

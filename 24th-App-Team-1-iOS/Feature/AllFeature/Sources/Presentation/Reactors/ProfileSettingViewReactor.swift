@@ -189,6 +189,7 @@ public final class ProfileSettingViewReactor: Reactor {
                     
                     return .concat(
                         .just(.setLoading(false)),
+                        .just(.setUpdateUserProfile(true)),
                         .just(.setUserProfileImageItem(entity)),
                         .just(.setLoading(true))
                     )

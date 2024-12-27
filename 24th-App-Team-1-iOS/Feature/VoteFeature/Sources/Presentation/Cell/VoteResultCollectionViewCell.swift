@@ -215,7 +215,7 @@ extension VoteResultCollectionViewCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.winnerUser == nil }
-            .map { _ in "친구에게 데려오기" }
+            .map { _ in "친구 데려오기" }
             .distinctUntilChanged()
             .bind(to: resultDescriptionLabel.rx.text)
             .disposed(by: disposeBag)
