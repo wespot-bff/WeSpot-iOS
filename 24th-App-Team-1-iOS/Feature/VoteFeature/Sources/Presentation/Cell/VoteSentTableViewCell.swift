@@ -82,6 +82,9 @@ final class VoteSentTableViewCell: UITableViewCell {
         }
         sentImageView.do {
             $0.image = DesignSystemAsset.Images.imgInventoryProfileFiled.image
+            $0.layer.cornerRadius = 20
+            $0.contentMode = .scaleAspectFill
+            $0.clipsToBounds = true
         }
         
         sentTitleLabel.do {
