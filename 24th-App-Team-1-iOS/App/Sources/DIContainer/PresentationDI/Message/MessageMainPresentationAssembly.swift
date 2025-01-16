@@ -13,12 +13,11 @@ import Swinject
 
 struct MessageHomePresentationAssembly: Assembly {
     func assemble(container: Container) {
-        
         container.register(MessageHomeViewReactor.self) { resolver in
             let fetchMessagesStatusUseCase = resolver.resolve(FetchMessagesStatusUseCaseProtocol.self)!
-            let fetchReceivedMessageUseCase = resolver.resolve(FetchReceivedMessageUseCaseProtocol.self)!
+            let fetchReservedMessageUseCase = resolver.resolve(FetchReservedMessageUseCaseProtocol.self)!
              
-            return MessageHomeViewReactor(fetchMessagesStatusUseCase: fetchMessagesStatusUseCase, fetchReceivedMessageUseCase: fetchReceivedMessageUseCase)
+            return MessageHomeViewReactor(fetchMessagesStatusUseCase: fetchMessagesStatusUseCase, fetchReservedMessageUseCase: fetchReservedMessageUseCase)
         }
         
         container.register(MessageHomeViewController.self) { resolver in
@@ -27,6 +26,22 @@ struct MessageHomePresentationAssembly: Assembly {
             return MessageHomeViewController(reactor: reactor)
         }
         
+    }
+}
+
+struct MessageWritePresentationAssembly: Assembly {
+    func assemble(container: Container) {
+        container.register(MessageWriteReactor.self) { resolver in
+            let fetchSearchResultUseCase = resolver.resolve(FetchStudentSearchResultUseCase.self)!
+            let writeMessageUseCase =  resolver.resolve(WriteMessageUseCase.self)!
+            return MessageWriteReactor(fetchSearchResultUseCase: fetchSearchResultUseCase,
+                                       writeMessageUseCase: writeMessageUseCase)
+        }
+        
+        container.register(SearchStudentForMessageWriteViewController.self) { resolver in
+            let reactor = resolver.resolve(MessageWriteReactor.self)!
+            return SearchStudentForMessageWriteViewController(reactor: reactor)
+        }
     }
 }
 
@@ -44,18 +59,17 @@ struct MessagePagePresentationAssembly: Assembly {
     }
 }
 
-struct MessageMainPresentationAssembly: Assembly {
-    func assemble(container: Container) {
-        container.register(MessageMainViewReactor.self) { resolver in
-            return MessageMainViewReactor()
+    struct MessageMainPresentationAssembly: Assembly {
+        func assemble(container: Container) {
+            container.register(MessageMainViewReactor.self) { resolver in
+                return MessageMainViewReactor()
+            }
+            
+            container.register(MessageMainViewController.self) { resovler in
+                let reactor = resovler.resolve(MessageMainViewReactor.self)!
+                
+                return MessageMainViewController(reactor: reactor)
+            }
         }
         
-        container.register(MessageMainViewController.self) { resovler in
-            let reactor = resovler.resolve(MessageMainViewReactor.self)!
-            
-            return MessageMainViewController(reactor: reactor)
-        }
     }
-    
-    
-}

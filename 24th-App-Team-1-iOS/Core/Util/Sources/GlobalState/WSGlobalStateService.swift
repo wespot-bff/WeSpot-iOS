@@ -7,10 +7,9 @@
 
 import Foundation
 import CommonDomain
+import DesignSystem
 
 import RxSwift
-
-
 
 public protocol WSGlobalServiceProtocol {
     var event: PublishSubject<WSGlobalStateType> { get }
@@ -45,4 +44,5 @@ public enum WSGlobalStateType {
     case didUpdateUserBlockButton(id: String)
     case didTappedResignButton(_ isStatus: Bool)
     case didShowSignInViewController(_ isSuccess: Bool)
+    case showToast(_ message: String, type: ToastImagesType)
 }

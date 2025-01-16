@@ -14,7 +14,8 @@ import RxSwift
 import RxCocoa
 import ReactorKit
 
-public final class MessagePageViewController: UIPageViewController, View {
+public final class MessagePageViewController: UIPageViewController,
+                                              View {
 
     //MARK: - Properties
     public typealias Reactor = MessagePageViewReactor
@@ -26,7 +27,6 @@ public final class MessagePageViewController: UIPageViewController, View {
     //MARK: - Initialize
     public init(reactor: Reactor) {
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
-        
         self.reactor = reactor
     }
     
@@ -37,15 +37,12 @@ public final class MessagePageViewController: UIPageViewController, View {
     //MARK: - LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
-
         setupUI()
         setupAttributes()
     }
 
     //MARK: - Configure
     private func setupUI() {
-        
         setViewController(index: 0)
     }
     

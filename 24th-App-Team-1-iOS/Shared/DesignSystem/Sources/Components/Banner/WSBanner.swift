@@ -13,6 +13,7 @@ import Then
 public final class WSBanner: UIView {
     
     //MARK: - Compnents
+    
     private let imageView = UIImageView()
     private let stackView = UIStackView().then {
         $0.axis = .horizontal

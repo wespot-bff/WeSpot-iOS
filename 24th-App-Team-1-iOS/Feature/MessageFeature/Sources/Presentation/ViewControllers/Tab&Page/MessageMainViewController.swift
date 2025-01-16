@@ -18,6 +18,8 @@ import ReactorKit
 public final class MessageMainViewController: BaseViewController<MessageMainViewReactor> {
 
     //MARK: - Properties
+    
+    private let messageToggleView: MessageToggleView = MessageToggleView()
     private let messagePageViewController = MessagePageViewController(reactor: MessagePageViewReactor())
     
     //MARK: - LifeCycle
@@ -36,14 +38,20 @@ public final class MessageMainViewController: BaseViewController<MessageMainView
         super.setupUI()
         
         addChild(messagePageViewController)
-        view.addSubviews(messagePageViewController.view)
+        view.addSubviews(messageToggleView, messagePageViewController.view)
     }
     
     public override func setupAutoLayout() {
         super.setupAutoLayout()
         
-        messagePageViewController.view.snp.makeConstraints {
+        messageToggleView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(46)
+        }
+        
+        messagePageViewController.view.snp.makeConstraints {
+            $0.top.equalTo(messageToggleView.snp.bottom)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
@@ -62,14 +70,37 @@ public final class MessageMainViewController: BaseViewController<MessageMainView
         
         self.rx.viewWillAppear
             .bind(with: self) { owner, _ in
-                owner.noticeAlertViewController()
+
             }
             .disposed(by: disposeBag)
         
+        messageToggleView.mainButton
+            .rx.tap
+            .throttle(.milliseconds(300),
+                      scheduler: MainScheduler.instance)
+            .map { Reactor.Action.didTapToggleButton(.home) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        messageToggleView.resultButton
+            .rx.tap
+            .throttle(.milliseconds(300),
+                      scheduler: MainScheduler.instance)
+            .map { Reactor.Action.didTapToggleButton(.storage) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.messageTypes == .home ? true : false }
+            .distinctUntilChanged()
+            .skip(1)
+            .bind(to: messageToggleView.rx.isSelected)
+            .disposed(by: disposeBag)
         
         navigationBar.rightBarButton
             .rx.tap
-            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .throttle(.milliseconds(300),
+                      scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
                 NotificationCenter.default.post(name: .showNotifcationViewController, object: nil)
             }
@@ -80,12 +111,5 @@ public final class MessageMainViewController: BaseViewController<MessageMainView
 }
 
 extension MessageMainViewController {
-    private func noticeAlertViewController() {
-        let noticeAlertController = UIAlertController(title: "다음 버전에 출시될 기능입니다.", message: "", preferredStyle: .alert)
-        let confirmAlertAction = UIAlertAction(title: "확인", style: .default)
-        noticeAlertController.addAction(confirmAlertAction)
-        
-        
-        self.present(noticeAlertController, animated: true)
-    }
+
 }

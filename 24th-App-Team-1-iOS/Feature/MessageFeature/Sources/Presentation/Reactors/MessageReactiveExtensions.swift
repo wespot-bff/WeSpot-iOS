@@ -24,10 +24,3 @@ extension Reactive where Base: WSBanner {
     }
 }
 
-extension Reactive where Base: MessageCardView {
-    var isSendAllowed: Binder<Bool> {
-        return Binder(self.base) { view, isAllowed in
-            view.setSendAllowed(isAllowed)
-        }
-    }
-}

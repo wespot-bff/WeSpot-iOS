@@ -15,6 +15,38 @@ import RxSwift
 import RxCocoa
 
 public final class messageRepository: MessageRepositoryProtocol {
+    public func sendMessage(query: SendMessageRequest) -> RxSwift.Single<SendMessageResponseEntity> {
+        let query = SendMessageRequestDTO(content: query.content,
+                                          receiverId: query.reciverId,
+                                          senderName: query.senderName,
+                                          isAnonymous: query.isAnonymous)
+        let endPoint = MessageEndPoint.sendMessage(query)
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .decodeMap(SendMessageResponseDTO.self)
+            .map { $0.toDomain() }
+            .asSingle()
+    }
+    
+    
+    public func checkProfanity(message: String) -> Single<Bool> {
+        let query = CheckProfanityRequestDTO(message: message)
+        let endPoint = MessageEndPoint.checkProfanity(query)
+        
+        return networkService.requestWithStatusCode(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .map { response in
+                if response.statusCode == 400 {
+                    return true
+                } else  {
+                    return false
+                }
+            }
+            .asSingle()
+    }
+    
     
     private let networkService: WSNetworkServiceProtocol = WSNetworkService()
     
@@ -55,4 +87,19 @@ public final class messageRepository: MessageRepositoryProtocol {
             .map { $0.toDomain() }
             .asSingle()
     }
+    
+    public func fetchStudentSearchResult(query: SearchStudentRequest) -> Single<StudentListResponseEntity?> {
+        let query = SearchStudentRequestDTO(name: query.name,
+                                            cursorId: query.cursorId)
+        let endPoint = MessageEndPoint.searchStudent(query)
+        
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .decodeMap(StudentListResponseDTO.self)
+            .map {$0.toDomain()}
+            .asSingle()
+    }
+    
+    
 }
