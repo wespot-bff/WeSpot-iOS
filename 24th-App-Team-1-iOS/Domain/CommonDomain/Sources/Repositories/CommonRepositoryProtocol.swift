@@ -18,4 +18,5 @@ public protocol CommonRepositoryProtocol {
     func createProfilePresignedURL(query: CreateProfilePresignedURLQuery) -> Single<CreateProfilePresignedURLEntity?>
     func uploadUserProfileImage(_ image: Data, presigendURL: String) -> Single<Bool>
     func fetchAppVersionItem() async throws -> WSVersionEntity
+    func fetchProfileOnbardingItem(query: ProfileOnboardingQuery) async throws -> ProfileOnboardingEntity
 }

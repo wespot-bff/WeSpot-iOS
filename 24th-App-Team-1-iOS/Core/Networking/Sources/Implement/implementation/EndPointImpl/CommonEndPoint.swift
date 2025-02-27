@@ -33,6 +33,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
     
     case uploadProfileImage(String)
     
+    case fetchProfileOnboarding(Encodable)
+    
     public var spec: WSNetworkSpec {
         switch self {
         case .fetchUserProfile:
@@ -49,6 +51,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/image/presigned-url")
         case let .uploadProfileImage(presignedURL):
             return WSNetworkSpec(method: .put, url: presignedURL)
+        case let .fetchProfileOnboarding(pushType):
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/update-modal")
         }
     }
     
@@ -68,6 +72,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return "/image/presigned-url"
         case .uploadProfileImage:
             return ""
+        case .fetchProfileOnboarding:
+            return "/update-modal"
         }
     }
     
@@ -87,6 +93,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return .get
         case .uploadProfileImage:
             return .put
+        case .fetchProfileOnboarding:
+            return .get
         }
     }
     
@@ -98,7 +106,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return .requestBody(body)
         case let .updateUserProfile(body):
             return .requestBody(body)
-        case let .fetchProfilePresignedURL(query):
+        case let .fetchProfilePresignedURL(query),
+             let .fetchProfileOnboarding(query):
             return .requestQuery(query)
         default:
             return .none

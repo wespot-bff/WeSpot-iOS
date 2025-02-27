@@ -40,6 +40,11 @@ struct DomainAssembly: Assembly {
             return CreateReportUserUseCase(commonRepositroy: repository)
         }
         
+        container.register(FetchProfileOnboardingInfoUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return FetchProfileOnboardingInfoUseCase(commonRepository: repository)
+        }
+        
         container.register(CreatePresigendURLUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
             return CreatePresigendURLUseCase(commonRepository: repository)

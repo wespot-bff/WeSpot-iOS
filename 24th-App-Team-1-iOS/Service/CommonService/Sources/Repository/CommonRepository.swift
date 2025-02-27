@@ -21,6 +21,7 @@ public final class CommonRepository: CommonRepositoryProtocol {
     
     
     private let networkService: WSNetworkServiceProtocol = WSNetworkService()
+    private let networkAsyncService: WSNetworkAsyncServiceProtocol = WSNetworkAsyncService()
     private let dataSources: RemoteConfig = RemoteConfig.remoteConfig()
     
     public init() { }
@@ -127,5 +128,12 @@ public final class CommonRepository: CommonRepositoryProtocol {
         } else {
             throw WSRemoteConfigError.invalidFirebaseConfigure
         }
+    }
+    
+    public func fetchProfileOnbardingItem(query: ProfileOnboardingQuery) async throws -> ProfileOnboardingEntity {
+        let query = ProfileOnbardingInfoRequestDTO(publishNotificationType: query.publishNotificationType)
+        let endPoint = CommonEndPoint.fetchProfileOnboarding(query)
+        let responseDTO: ProfileOnboardingResponseDTO = try await networkAsyncService.request(endPoint: endPoint)
+        return responseDTO.toDomain()
     }
 }

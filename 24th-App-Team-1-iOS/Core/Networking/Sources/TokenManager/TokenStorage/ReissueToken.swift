@@ -8,7 +8,7 @@
 import Foundation
 
 struct ReissueToken: Encodable {
-    let token: String
+    let refreshToken: String
 }
 
 struct AccessToken: Decodable {

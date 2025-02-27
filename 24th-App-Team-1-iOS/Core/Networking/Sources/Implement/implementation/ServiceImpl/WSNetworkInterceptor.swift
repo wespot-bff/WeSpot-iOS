@@ -38,34 +38,30 @@ public final class WSNetworkInterceptor: RequestInterceptor {
     
     public func retry(_ request: Request, for session: Session, dueTo error: any Error, completion: @escaping (RetryResult) -> Void) {
         
-        guard let response = request.task?.response as? HTTPURLResponse else {
-            completion(.doNotRetryWithError(error))
-            return
-        }
-        
-        
-        guard response.statusCode == 401 else {
-            completion(.doNotRetry)
-            return
-        }
-        
-        guard let refreshToken = KeychainManager.shared.get(type: .refreshToken) else {
-            return completion(.doNotRetryWithError(WSNetworkError.default(message: "리프레쉬 토큰을 찾을 수 없습니다.")))
-        }
-        
-        let body = ReissueToken(token: refreshToken)
-        let endPoint = ReissueEndPoint.createReissueToken(body: body)
-        WSNetworkService().request(endPoint: endPoint)
-            .asObservable()
-            .decodeMap(AccessToken.self)
-            .logErrorIfDetected(category: Network.error)
-            .subscribe { token in
-                KeychainManager.shared.set(value: token.accessToken, type: .accessToken)
-                KeychainManager.shared.set(value: token.refreshToken, type: .refreshToken)
-            } onError: { error in
-                completion(.doNotRetryWithError(error))
+        if let response = request.response, response.statusCode == 401 {
+            guard let refreshToken = KeychainManager.shared.get(type: .refreshToken) else {
+                completion(.doNotRetry)
+                return
             }
-            .disposed(by: disposeBag)
+            
+            let body = ReissueToken(refreshToken: refreshToken)
+            let endPoint = ReissueEndPoint.createReissueToken(body: body)
+            WSNetworkService().request(endPoint: endPoint)
+                .asObservable()
+                .decodeMap(AccessToken.self)
+                .logErrorIfDetected(category: Network.error)
+                .subscribe { token in
+                    KeychainManager.shared.set(value: token.accessToken, type: .accessToken)
+                    KeychainManager.shared.set(value: token.refreshToken, type: .refreshToken)
+                    completion(.retry)
+                } onError: { error in
+                    completion(.doNotRetryWithError(error))
+                }
+                .disposed(by: disposeBag)
+            
+        } else {
+            completion(.doNotRetry)
+        }
         
     }
 }
