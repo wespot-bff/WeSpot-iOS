@@ -8,8 +8,15 @@
 import SwiftUI
 
 
-final class ProfileOnboardingHostingViewController: UIHostingController<ProfileOnboardingView> {
-    override func viewDidLoad() {
+public final class ProfileOnboardingHostingViewController: UIHostingController<ProfileOnboardingView> {
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        NotificationCenter.default.post(name: .hideTabBar, object: nil)
+    }
+    
+    public override func viewDidLoad() {
         super.viewDidLoad()
     }
 }

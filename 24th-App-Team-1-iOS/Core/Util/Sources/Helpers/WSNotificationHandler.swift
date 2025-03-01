@@ -28,7 +28,7 @@ public final class WSNotificationHandler: NSObject, UNUserNotificationCenterDele
         case .voteRecevied:
             NotificationCenter.default.post(name: .showVoteInventoryViewController, object: nil)
         case .profile:
-            NotificationCenter.default.post(name: .showProfileSettingViewController, object: nil)
+            NotificationCenter.default.post(name: .showProfileOnboardingView, object: nil)
         default:
             break
         }

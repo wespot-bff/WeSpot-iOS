@@ -24,7 +24,7 @@ public struct ProfileOnboardingView: View {
                 .frame(maxWidth: .infinity, minHeight: 60)
                 .foregroundColor(DesignSystemAsset.Colors.gray900.swiftUIColor)
                 .padding(.top, 44)
-            
+
             ScrollView {
                 VStack {
                     VStack(alignment: .leading) {
@@ -33,7 +33,7 @@ public struct ProfileOnboardingView: View {
                             .lineSpacing(10)
                             .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 20))
                             .multilineTextAlignment(.leading)
-                        
+
                         Text(viewModel.state.subTitleComponentText)
                             .lineLimit(1)
                             .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
@@ -44,15 +44,22 @@ public struct ProfileOnboardingView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
                     
-                    ZStack(alignment: .center) {
-                        VStack {
-                            AsyncImage(url: viewModel.state.imageComponent?.imageURL)
-                                .frame(maxWidth: CGFloat(viewModel.state.imageComponent?.imageWidth ?? 0), maxHeight: CGFloat(viewModel.state.imageComponent?.imageHeight ?? 0))
-                                .padding(.horizontal, 70)
-                            .frame(maxWidth: 336, maxHeight: 120)
+                    ZStack(alignment: .bottom) {
+                        AsyncImage(url: viewModel.state.imageComponent?.imageURL) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(maxWidth: 270, maxHeight: 320)
+                            case .failure(_):
+                                ProgressView()
+                            @unknown default:
+                                EmptyView()
+                            }
                         }
-                        .frame(maxWidth: 336, maxHeight: 120)
-                        
                         LinearGradient(
                             gradient: Gradient(stops: [
                                 .init(color: Color(UIColor(red: 27/255, green: 28/255, blue: 30/255, alpha: 0)), location: 0),
@@ -62,18 +69,18 @@ public struct ProfileOnboardingView: View {
                             startPoint: .top,
                             endPoint: .bottom
                         )
+                        .frame(width: 270, height: 116)
+                        .clipped()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: 446)
-                    .padding(.top, 16)
-                    
-                    
+                    .frame(width: 270, height: 320)
+
                     VStack(alignment: .leading) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 20)
                                 .stroke(DesignSystemAsset.Colors.primary300.swiftUIColor, lineWidth: 1)
                                 .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                                 .clipped()
-                            
+
                             Text(viewModel.state.chipComponentText)
                                 .font(DesignSystemFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                 .foregroundStyle(DesignSystemAsset.Colors.white.swiftUIColor)
@@ -85,7 +92,6 @@ public struct ProfileOnboardingView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
                     
-                    
                     Text(viewModel.state.descriptionComponentText)
                         .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         .foregroundStyle(DesignSystemAsset.Colors.gray200.swiftUIColor)
@@ -93,13 +99,23 @@ public struct ProfileOnboardingView: View {
                         .frame(maxWidth: .infinity, maxHeight: 42, alignment: .leading)
                         .padding(.leading, 20)
                         .padding(.bottom, 45)
-                    
-                    ZStack {
-                        AsyncImage(url: viewModel.state.descriptionImageComponent?.imageURL)
-                            .frame(maxWidth: CGFloat(viewModel.state.descriptionImageComponent?.imageWidth ?? 0),
-                                   maxHeight: CGFloat(viewModel.state.descriptionImageComponent?.imageHeight ?? 0))
-                        Spacer()
-                        
+
+                    ZStack(alignment: .bottom) {
+                        AsyncImage(url: viewModel.state.descriptionImageComponent?.imageURL) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(maxWidth: 270, maxHeight: 320)
+                            case .failure(_):
+                                ProgressView()
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
                         LinearGradient(
                             gradient: Gradient(stops: [
                                 .init(color: Color(UIColor(red: 27/255, green: 28/255, blue: 30/255, alpha: 0)), location: 0),
@@ -109,12 +125,15 @@ public struct ProfileOnboardingView: View {
                             startPoint: .top,
                             endPoint: .bottom
                         )
-                        .frame(maxWidth: 336, maxHeight: 120)
-                        
+                        .frame(width: 270, height: 116)
+                        .clipped()
                     }
+                    .frame(width: 270, height: 320)
+
                 }
                 .padding(.top, 16)
             }
+            .padding(.bottom, 40)
 
             HStack {
                 Button {
@@ -127,9 +146,9 @@ public struct ProfileOnboardingView: View {
                         .background(DesignSystemAsset.Colors.gray500.swiftUIColor)
                         .cornerRadius(10)
                 }
-                
+
                 Spacer()
-                
+
                 Button {
                     Task {
                         await viewModel.dispatcher(action: .didTappedUpdateProfile)

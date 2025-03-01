@@ -26,6 +26,7 @@ import KakaoSDKAuth
 import MessageFeature
 import KeychainSwift
 
+
 public class SceneDelegate: UIResponder, UISceneDelegate {
     
     var window: UIWindow?
@@ -98,6 +99,24 @@ extension SceneDelegate {
     //TODO: Coordinator 패턴으로 수정
     private func setupViewControllers() {
         
+        
+        NotificationCenter.default.addObserver(forName: .dismissProfileOnboardingView, object: nil, queue: .main) { [weak self]  _ in
+            guard let self else { return }
+            setupMainViewController()
+            
+            let rootViewController = self.window?.rootViewController?.topMostViewController()
+            
+            let profileOnboardingViewController = ProfileOnboardingHostingViewController(rootView: ProfileOnboardingView(viewModel: ProfileOnboardingViewModel()))
+            rootViewController?.navigationController?.pushViewController(profileOnboardingViewController, animated: false)
+            
+        }
+        
+        NotificationCenter.default.addObserver(forName: .showProfileOnboardingView, object: nil, queue: .main) { _ in
+            guard let topViewController = self.window?.rootViewController else { return }
+            let profileOnboardingViewController = ProfileOnboardingHostingViewController(rootView: ProfileOnboardingView(viewModel: ProfileOnboardingViewModel()))
+            topViewController.navigationController?.pushViewController(profileOnboardingViewController, animated: true)
+        }
+        
         NotificationCenter.default.addObserver(forName: .showVoteMainViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
             setupMainViewController()
@@ -107,8 +126,12 @@ extension SceneDelegate {
             guard let self else { return }
             let topViewController = self.window?.rootViewController?.topMostViewController()
             let profileSettingViewController = DependencyContainer.shared.injector.resolve(ProfileSettingViewController.self)
-            topViewController?.navigationController?.pushViewController(profileSettingViewController, animated: true)
+            if let navigationController = topViewController?.navigationController {
+                navigationController.popViewController(animated: false)
+                navigationController.pushViewController(profileSettingViewController, animated: true)
+            }
         }
+
         
         NotificationCenter.default.addObserver(forName: .showSignInViewController, object: nil, queue: .main) { [weak self] _ in
             guard let self else { return }
