@@ -44,12 +44,25 @@ extension String.MessageTexts {
     // MARK: 쪽지 작성(학생 검색) 관련 텍스트
     
     static let searchNoResultButtonText: String = "찾는 친구가 없다면?"
-
-    // MARK: 쪽지 작성 관련 텍스트
-
     
 
     // MARK: 쪽지함 관련 텍스트
+    
+    static let messageRecievedType: String = "RECEIVED"
+    static let messageSentType: String = "SENT"
+    
+    // MARK: 바텀시트(삭제, 차단, 신고) 관련 텍스트
+    
+    static let blockMessageAlertTitle: String = "정말 차단하시나요?"
+    static let blockMessageAlertDes: String = "해당 친구와의 쪽지 수신 및 발신이 차단돼요\n* 차단 해제 : 전체>설정>차단 목록>차단 해제"
+    static let blockMessageBtnTitle: String = "네 차단할래요"
+    static let reportMessageAlertTitle: String = "정말 신고하시나요?"
+    static let reportMessageAlertDes: String = "허위 신고로 확인될 시 서비스 이용이 제한되며\n쪽지는 신고 즉시 삭제돼요"
+    static let reportMessageBtnTitle: String = "네 신고할래요"
+    static let deleteMessageAlertTitle: String = "쪽지를 삭제하시나요?"
+    static let deleteMessageAlertDes: String = "삭제한 쪽지는 절대 되돌릴 수 없어요"
+    static let deleteMessageBtnTitle: String = "네 삭제할래요"
+
 
 }
 
@@ -57,5 +70,8 @@ extension String.MessageTexts {
 
 extension String.MessageTexts.Identifier {
     static let studentSearchTableViewCell = "StudentSearchTableViewCell"
+    static let messageCollectionViewCell = "MessageCollectionViewCell"
+    static let MessageBottomSheetTabelViewCell = "MessageBottomSheetTabelViewCell"
+    static let MessageReportCollectionViewCell = "MessageReportCollectionViewCell"
 
 }

@@ -40,6 +40,17 @@ public final class WSTextView: UITextView {
         $0.font = WSFont.Body04.font()
         $0.isUserInteractionEnabled = false
     }
+    
+    private let leftImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFit
+        $0.isHidden = true
+    }
+    
+    private let rightImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFit
+        $0.isHidden = true
+    }
+    
     public var placeholder: String = "Placeholder" {
         didSet {
             placeholderLabel.text = placeholder
@@ -78,6 +89,8 @@ public final class WSTextView: UITextView {
 
         // Placeholder 설정
         addSubview(placeholderLabel)
+        addSubview(leftImageView)
+        addSubview(rightImageView)
         placeholderLabel.text = placeholder
         placeholderLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(textViewState.padding)
@@ -85,8 +98,31 @@ public final class WSTextView: UITextView {
             make.trailing.equalToSuperview().inset(textViewState.padding.right)
         }
         
+        leftImageView.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(20)
+            $0.centerY.equalToSuperview()
+            $0.width.height.equalTo(24)
+        }
+        
+        rightImageView.snp.makeConstraints {
+            $0.trailing.equalToSuperview().inset(20)
+            $0.centerY.equalToSuperview()
+            $0.width.height.equalTo(24)
+        }
+        
         // Placeholder 숨김 상태 업데이트
         placeholderLabel.isHidden = !text.isEmpty
+        
+        switch textViewState {
+        case .withLeftItem(let image):
+            leftImageView.image = image
+            leftImageView.isHidden = false
+        case .withRightItem(let image):
+            rightImageView.image = image
+            rightImageView.isHidden = false
+        default:
+            break
+        }
 
         // 텍스트 변경 이벤트를 관찰하여 Placeholder 상태 업데이트
         rx.text.orEmpty

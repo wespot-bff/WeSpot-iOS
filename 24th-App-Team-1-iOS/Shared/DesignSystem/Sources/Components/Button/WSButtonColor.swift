@@ -12,6 +12,7 @@ public enum WSButtonColor {
     case primary
     case secondary
     case tertiary
+    case tab
     
     var color: UIColor {
         switch self {
@@ -21,6 +22,8 @@ public enum WSButtonColor {
             return DesignSystemAsset.Colors.gray500.color
         case .tertiary:
             return DesignSystemAsset.Colors.gray700.color
+        case .tab:
+            return DesignSystemAsset.Colors.gray900.color
         }
     }
 }

@@ -128,6 +128,11 @@ struct DomainAssembly: Assembly {
             let repository = resolver.resolve(MessageRepositoryProtocol.self)!
             return WriteMessageUseCaseImpl(repository: repository)
         }
+        
+        container.register(MessageStorageUseCase.self) { resolver in
+            let repository = resolver.resolve(MessageRepositoryProtocol.self)!
+            return MessageStorageUseCaseImpl(repository: repository)
+        }
 
         
         // Profile

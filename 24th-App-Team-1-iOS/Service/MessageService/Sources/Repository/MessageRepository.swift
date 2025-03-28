@@ -15,6 +15,36 @@ import RxSwift
 import RxCocoa
 
 public final class messageRepository: MessageRepositoryProtocol {
+    
+    public func blockMessage(messageId: Int) -> RxSwift.Single<Bool> {
+        let endPoint = MessageEndPoint.blockMessage(messageId)
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .map { _ in true }
+            .asSingle()
+    }
+    
+    public func deleteMessage(messageId: Int) -> RxSwift.Single<Bool> {
+        let endPoint = MessageEndPoint.deleteMessage(messageId)
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .map { _ in true }
+            .asSingle()
+    }
+    
+    public func getMessage(query: GetMessageRequest) -> Single<ReceivedMessageResponseEntity> {
+        let query = GetMessageRequestDTO(cursorId: query.cursorId, type: query.type)
+        let endPoint = MessageEndPoint.getMessage(query)
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .decodeMap(ReceievedMessageResponseDTO.self)
+            .map { $0.toDomain() }
+            .asSingle()
+    }
+    
     public func sendMessage(query: SendMessageRequest) -> RxSwift.Single<SendMessageResponseEntity> {
         let query = SendMessageRequestDTO(content: query.content,
                                           receiverId: query.reciverId,
@@ -26,6 +56,25 @@ public final class messageRepository: MessageRepositoryProtocol {
             .logErrorIfDetected(category: Network.error)
             .decodeMap(SendMessageResponseDTO.self)
             .map { $0.toDomain() }
+            .asSingle()
+    }
+    
+    public func readMessage(messageId: Int) -> Single<Bool> {
+        let endPoint = MessageEndPoint.readMessage(messageId)
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .map { _ in true }
+            .asSingle()
+    }
+    
+    public func reportMessage(query: ReportMessageRequest) -> Single<Bool> {
+        let queryDTO = ReportMessageRequestDTO(targetId: query.targetId, content: query.content, reportType: query.reportType)
+        let endPoint = MessageEndPoint.reportMessage(queryDTO)
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .logErrorIfDetected(category: Network.error)
+            .map { _ in true }
             .asSingle()
     }
     

@@ -21,7 +21,7 @@ public final class MessagePageViewController: UIPageViewController,
     public typealias Reactor = MessagePageViewReactor
     private lazy var messageViewControllers: [UIViewController] = [messageHomeViewController, messageStorageViewController]
     private lazy var messageHomeViewController = DependencyContainer.shared.injector.resolve(MessageHomeViewController.self)
-    private lazy var messageStorageViewController = MessageStorageViewController(reactor: MessageStorageViewReactor())
+    private lazy var messageStorageViewController = DependencyContainer.shared.injector.resolve(MessageStorageViewController.self)
     public var disposeBag: DisposeBag = DisposeBag()
     
     //MARK: - Initialize

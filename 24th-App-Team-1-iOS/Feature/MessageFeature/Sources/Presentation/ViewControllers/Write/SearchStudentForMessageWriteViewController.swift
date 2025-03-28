@@ -9,6 +9,7 @@ import UIKit
 import Util
 import DesignSystem
 import MessageDomain
+import Storage
 
 import ReactorKit
 import Then
@@ -22,7 +23,7 @@ public final class SearchStudentForMessageWriteViewController: BaseViewControlle
     
     private lazy var titleLabel = WSLabel(wsFont: .Header01).then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
-        $0.text = "오늘 WeSpot님을 설레게 했던\n친구는 누구인가요?"
+        $0.text = "오늘 \(UserDefaultsManager.shared.userName ?? "")님을 설레게 했던\n친구는 누구인가요?"
     }
     private let gradientView = WSGradientView()
     private let studentSearchTextField = WSTextField(state: .withLeftItem(DesignSystemAsset.Images.magnifyingglass.image),
@@ -51,6 +52,7 @@ public final class SearchStudentForMessageWriteViewController: BaseViewControlle
     }
     private let nextButton = WSButton(wsButtonType: .default(12))
     private let loadingIndicatorView: WSLottieIndicatorView = WSLottieIndicatorView()
+    private let noresultFriendButton = UIButton()
 
     
     //MARK: - LifeCycle
@@ -71,7 +73,8 @@ public final class SearchStudentForMessageWriteViewController: BaseViewControlle
         [titleLabel,
          studentSearchTextField,
          searchResultTableView,
-         gradientView].forEach {
+         gradientView,
+         noresultFriendButton].forEach {
             self.view.addSubview($0)
         }
         
@@ -108,18 +111,38 @@ public final class SearchStudentForMessageWriteViewController: BaseViewControlle
             $0.bottom.equalToSuperview().offset(-12)
             $0.height.equalTo(52)
         }
+        
+        noresultFriendButton.snp.makeConstraints {
+            $0.top.equalTo(studentSearchTextField.snp.bottom).offset(24)
+            $0.width.equalTo(111)
+            $0.height.equalTo(23)
+            $0.centerX.equalToSuperview()
+        }
     }
     public override func setupAttributes() {
         super.setupAttributes()
         navigationBar.do {
             $0.setNavigationBarUI(property: .leftWithRightItem(DesignSystemAsset.Images.arrow.image,
                                                                "닫기",
-                                                        UIImage()))
+                                                               UIImage()))
             $0.setNavigationBarAutoLayout(property: .leftWithRightItem)
         }
         nextButton.do {
             $0.setupButton(text: "다음")
             $0.isEnabled = false
+        }
+        noresultFriendButton.do {
+            $0.isHidden = false
+            let title = "찾는 친구가 없다면?"
+            let attributes: [NSAttributedString.Key: Any] = [
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .underlineColor: DesignSystemAsset.Colors.gray300.color,
+                .foregroundColor: DesignSystemAsset.Colors.gray300.color,
+                .font: WSFont.Body05.font(),
+                .baselineOffset: 4
+            ]
+            let attributedTitle = NSAttributedString(string: title, attributes: attributes)
+            $0.setAttributedTitle(attributedTitle, for: .normal)
         }
     }
         
@@ -188,7 +211,12 @@ extension SearchStudentForMessageWriteViewController {
                                                               animated: true)
             }
             .disposed(by: disposeBag)
-            
+        
+        noresultFriendButton.rx.tap
+            .bind(with: self) {  owner, _ in
+                owner.shareToKakaoTalk()
+            }
+            .disposed(by: disposeBag)
     }
     
     private func bindState(reactor: MessageWriteReactor) {
@@ -202,6 +230,13 @@ extension SearchStudentForMessageWriteViewController {
             )) { index, student, cell in
                 cell.configureCell(name: student.name,
                                    info: student.totalInfo)
+            }
+            .disposed(by: disposeBag)
+        
+        reactor.pulse(\.$serachResult)
+            .compactMap { $0?.users }
+            .bind(with: self) {  owner, students in
+                owner.noresultFriendButton.isHidden = students.isEmpty ? false : true
             }
             .disposed(by: disposeBag)
         
@@ -228,5 +263,9 @@ extension SearchStudentForMessageWriteViewController {
             }
             .disposed(by: disposeBag)
     }
+    
 }
 
+extension SearchStudentForMessageWriteViewController {
+
+}

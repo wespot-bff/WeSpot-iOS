@@ -10,9 +10,13 @@ import Foundation
 public struct MessageStatusResponseEntity {
     public let isSendAllowed: Bool
     public let remainingMessages: Int
+    public let countUnReadMessages: Int
     
-    public init(isSendAllowed: Bool, remainingMessages: Int) {
+    public init(isSendAllowed: Bool,
+                remainingMessages: Int,
+                countUnReadMessages: Int) {
         self.isSendAllowed = isSendAllowed
         self.remainingMessages = remainingMessages
+        self.countUnReadMessages = countUnReadMessages
     }
 }

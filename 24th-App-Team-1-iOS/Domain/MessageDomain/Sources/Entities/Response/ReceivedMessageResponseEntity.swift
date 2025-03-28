@@ -7,17 +7,19 @@
 
 import Foundation
 
-public struct ReceivedMessageResponseEntity: Decodable {
+public struct ReceivedMessageResponseEntity {
     public let messages: [ReceivedMessageEntity]
     public let hasNext: Bool
+    public let lastCursorId: Int
     
-    public init(messages: [ReceivedMessageEntity], hasNext: Bool) {
+    public init(messages: [ReceivedMessageEntity], hasNext: Bool, lastCursorId: Int) {
         self.messages = messages
         self.hasNext = hasNext
+        self.lastCursorId = lastCursorId
     }
 }
 
-public struct ReceivedMessageEntity: Decodable {
+public struct ReceivedMessageEntity {
     public let id: Int
     public let senderName: String
     public let receiver: ReceivedMessageReceiverEntity
@@ -26,9 +28,8 @@ public struct ReceivedMessageEntity: Decodable {
     public let isRead: Bool
     public let isBlocked: Bool
     public let isReported: Bool
-    public let readAt: String
     
-    public init(id: Int, senderName: String, receiver: ReceivedMessageReceiverEntity, content: String, receivedAt: String, isRead: Bool, isBlocked: Bool, isReported: Bool, readAt: String) {
+    public init(id: Int, senderName: String, receiver: ReceivedMessageReceiverEntity, content: String, receivedAt: String, isRead: Bool, isBlocked: Bool, isReported: Bool) {
         self.id = id
         self.senderName = senderName
         self.receiver = receiver
@@ -37,11 +38,10 @@ public struct ReceivedMessageEntity: Decodable {
         self.isRead = isRead
         self.isBlocked = isBlocked
         self.isReported = isReported
-        self.readAt = readAt
     }
 }
 
-public struct ReceivedMessageReceiverEntity: Decodable {
+public struct ReceivedMessageReceiverEntity {
     public let id: Int
     public let name: String
     public let schoolName: String
@@ -61,7 +61,7 @@ public struct ReceivedMessageReceiverEntity: Decodable {
     }
 }
 
-public struct ReceivedMessageProfileEntity: Decodable {
+public struct ReceivedMessageProfileEntity {
     public let backgroundColor: String
     public let iconUrl: URL
     

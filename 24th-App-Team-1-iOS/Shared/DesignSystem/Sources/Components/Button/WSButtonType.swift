@@ -12,6 +12,7 @@ public enum WSButtonType {
     case `default`(CGFloat)
     case secondaryButton
     case strokeButton
+    case tab
     
     
     var buttonProperties: WSButtonProperty {
@@ -42,6 +43,13 @@ public enum WSButtonType {
                 borderColor: DesignSystemAsset.Colors.primary400.color.cgColor,
                 borderWidth: 1
             )
+        case .tab:
+            return .init(backgroundColor: .tab,
+                         textColor: DesignSystemAsset.Colors.gray400.color,
+                         textFont: WSFont.Body06.font(),
+                         radius: 16,
+                         borderColor: DesignSystemAsset.Colors.gray400.color.cgColor,
+                         borderWidth: 1)
         }
     }
     
@@ -53,6 +61,8 @@ public enum WSButtonType {
             return DesignSystemAsset.Colors.pressedGray700.color
         case .secondaryButton:
             return DesignSystemAsset.Colors.pressedGray500.color
+        case .tab:
+            return DesignSystemAsset.Colors.gray500.color
         }
     }
     
@@ -60,6 +70,8 @@ public enum WSButtonType {
         switch self {
         case .strokeButton:
             return DesignSystemAsset.Colors.pressedPrimary400.color.cgColor
+        case .tab:
+            return DesignSystemAsset.Colors.gray400.color.cgColor
         default:
             return UIColor.clear.cgColor
         }
@@ -69,6 +81,8 @@ public enum WSButtonType {
         switch self {
         case .strokeButton, .secondaryButton:
             return DesignSystemAsset.Colors.gray300.color
+        case .tab:
+            return DesignSystemAsset.Colors.gray100.color
         default:
             return self.buttonProperties.textColor ?? UIColor()
         }

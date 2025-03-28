@@ -42,6 +42,13 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
         $0.sizeToFit()
         $0.isHidden = true
     }
+    
+    private let overTextWarningLabel = WSLabel(wsFont: .Body07).then {
+        $0.textColor = DesignSystemAsset.Colors.destructive.color
+        $0.text = "200자 이내로 입력해 주세요"
+        $0.sizeToFit()
+        $0.isHidden = true
+    }
 
     
     //MARK: - LifeCycle
@@ -63,6 +70,7 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
          contentTextField,
          contetnTextCountLabel,
          profanityWarningLabel,
+         overTextWarningLabel,
          postButton].forEach {
             self.view.addSubview($0)
         }
@@ -81,6 +89,10 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
             $0.height.equalTo(228)
         }
         profanityWarningLabel.snp.makeConstraints {
+            $0.top.equalTo(contentTextField.snp.bottom).offset(4)
+            $0.leading.equalToSuperview().offset(30)
+        }
+        overTextWarningLabel.snp.makeConstraints {
             $0.top.equalTo(contentTextField.snp.bottom).offset(4)
             $0.leading.equalToSuperview().offset(30)
         }
@@ -104,9 +116,10 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
             $0.setNavigationBarAutoLayout(property: .leftWithRightItem)
         }
         postButton.do {
-            $0.isEnabled = false
             $0.setupButton(text: "작성완료")
+            $0.isEnabled = false
         }
+        contentTextField.delegate = self
     }
         
     public override func bind(reactor: MessageWriteReactor) {
@@ -163,8 +176,10 @@ extension MessageWriteViewController {
                 print(profanityDetection)
                 if profanityDetection {
                     this.profanityWarningLabel.isHidden = false
+                    this.postButton.isEnabled = false
                     this.profanityWarningLabel.shakeAnimation()
                 } else {
+                    this.postButton.isEnabled = true
                     this.profanityWarningLabel.isHidden = true
                 }
             }
@@ -173,5 +188,22 @@ extension MessageWriteViewController {
     
     private func bindUI() {
         
+    }
+}
+extension MessageWriteViewController: UITextViewDelegate {
+    public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        // 현재 텍스트를 가져오고, 변경 후의 텍스트 길이를 계산합니다.
+        guard let currentText = textView.text,
+              let textRange = Range(range, in: currentText) else { return true }
+        let updatedText = currentText.replacingCharacters(in: textRange, with: text)
+        if updatedText.count > 200 {
+            overTextWarningLabel.isHidden = false
+            overTextWarningLabel.shakeAnimation()
+            postButton.isEnabled = false
+        } else {
+            overTextWarningLabel.isHidden = true
+            postButton.isEnabled = true
+        }
+        return updatedText.count <= 200
     }
 }

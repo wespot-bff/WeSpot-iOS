@@ -12,6 +12,7 @@ import MessageDomain
 public struct ReceievedMessageResponseDTO: Decodable {
     public let messages: [ReceievedMessageDTO]
     public let hasNext: Bool
+    public let lastCursorId: Int
 }
 
 public struct ReceievedMessageDTO: Decodable {
@@ -23,7 +24,6 @@ public struct ReceievedMessageDTO: Decodable {
     public let isRead: Bool
     public let isBlocked: Bool
     public let isReported: Bool
-    public let readAt: String
 }
 
 public struct ReceievedMessageReceiverDTO: Decodable {
@@ -43,13 +43,13 @@ public struct ReceievedMessageProfileDTO: Decodable {
 
 extension ReceievedMessageResponseDTO {
     func toDomain() -> ReceivedMessageResponseEntity {
-        return .init(messages: messages.map { $0.toDomain() }, hasNext: hasNext)
+        return .init(messages: messages.map { $0.toDomain() }, hasNext: hasNext, lastCursorId: lastCursorId)
     }
 }
 
 extension ReceievedMessageDTO {
     func toDomain() -> ReceivedMessageEntity {
-        return .init(id: id, senderName: senderName, receiver: receiver.toDomain(), content: content, receivedAt: receivedAt, isRead: isRead, isBlocked: isBlocked, isReported: isReported, readAt: readAt)
+        return .init(id: id, senderName: senderName, receiver: receiver.toDomain(), content: content, receivedAt: receivedAt, isRead: isRead, isBlocked: isBlocked, isReported: isReported)
     }
 }
 

@@ -33,6 +33,7 @@ public final class MessageHomeViewReactor: Reactor {
         @Pulse var recievedMessages: Bool?
         @Pulse var messageAvailability: MessageHomeTimeStateEntity = MessageHomeTimeStateEntity(messageAvailabilityTime: .waitTime)
         var remainingTime: String?
+        var haveMessage: Bool = false
     }
     
     public enum Action {
@@ -48,6 +49,7 @@ public final class MessageHomeViewReactor: Reactor {
         case setRecievedMessagesBool(Bool)
         case setMessageAvailability(MessageHomeTimeStateEntity)
         case setRemainingSeconds(String?)
+        case checkHaveMessage(Bool)
     }
     
     // MARK: - Init
@@ -107,6 +109,8 @@ extension MessageHomeViewReactor {
             newState.messageAvailability = availabilityState
         case .setRemainingSeconds(let time):
             newState.remainingTime = time
+        case .checkHaveMessage(let state):
+            newState.haveMessage = state
         }
         
         return newState
@@ -165,9 +169,11 @@ extension MessageHomeViewReactor {
             .asObservable()
             .flatMap { entity -> Observable<Mutation> in
                 guard let entity else {
-                    return .just(.setReservedMessagesCount(0)) // 기본 상태 반환
+                    return .just(.setReservedMessagesCount(0)) 
                 }
+                let messageCountState = entity.countUnReadMessages > 0
                 return Observable.concat(
+                    .just(.checkHaveMessage(messageCountState)),
                     .just(.setReservedMessagesCount(entity.remainingMessages)),
                     .just(.isSendAllowedState(entity.isSendAllowed))
                 )

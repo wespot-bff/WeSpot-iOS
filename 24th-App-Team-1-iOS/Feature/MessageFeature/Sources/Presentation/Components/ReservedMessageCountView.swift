@@ -22,7 +22,7 @@ final class ReservedMessageCountView: UIView {
     private lazy var titleLabel = WSLabel(wsFont: .Body01,
                                           textAlignment: .left).then {
         $0.textColor = .white
-        $0.text = "WeSpot" + String.MessageTexts.messageHomePostableTitleText
+        $0.text = UserDefaultsManager.shared.userName ?? "김제니" + String.MessageTexts.messageHomePostableTitleText
     }
     
     /// 편지 이미지를 보여주는 이미지 뷰
