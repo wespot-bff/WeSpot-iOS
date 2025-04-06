@@ -28,12 +28,11 @@ public final class MessageHomeViewReactor: Reactor {
     public var initialState: State
     
     public struct State {
-        @Pulse var reservedMessages: Int?
+        @Pulse var postableMessageCount: Int = 0
         @Pulse var isSendAllowed: Bool?
         @Pulse var recievedMessages: Bool?
-        @Pulse var messageAvailability: MessageHomeTimeStateEntity = MessageHomeTimeStateEntity(messageAvailabilityTime: .waitTime)
         var remainingTime: String?
-        var haveMessage: Bool = false
+        @Pulse var haveMessage: Bool = false
     }
     
     public enum Action {
@@ -44,10 +43,9 @@ public final class MessageHomeViewReactor: Reactor {
     }
     
     public enum Mutation {
-        case setReservedMessagesCount(Int)
+        case setPostableMessageCount(Int)
         case isSendAllowedState(Bool)
         case setRecievedMessagesBool(Bool)
-        case setMessageAvailability(MessageHomeTimeStateEntity)
         case setRemainingSeconds(String?)
         case checkHaveMessage(Bool)
     }
@@ -76,10 +74,7 @@ extension MessageHomeViewReactor {
         case .viewWillAppear:
             startTimer()
             // 최초 진입 시 서버 데이터 로드
-            return Observable.merge(
-                fetchMessagesStatus(),
-                fetchReservedMessages()
-            )
+            return fetchMessagesStatus()
             
         case .checkCurrentTime:
             return checkCurrentTimeAndUpdateState()
@@ -96,21 +91,17 @@ extension MessageHomeViewReactor {
         var newState = state
         
         switch mutation {
-        case .setReservedMessagesCount(let count):
-            newState.reservedMessages = count
             
         case .setRecievedMessagesBool(let hasMessages):
             newState.recievedMessages = hasMessages
-            
         case .isSendAllowedState(let isAllowed):
             newState.isSendAllowed = isAllowed
-            
-        case .setMessageAvailability(let availabilityState):
-            newState.messageAvailability = availabilityState
         case .setRemainingSeconds(let time):
             newState.remainingTime = time
         case .checkHaveMessage(let state):
             newState.haveMessage = state
+        case .setPostableMessageCount(let count):
+            newState.postableMessageCount = count
         }
         
         return newState
@@ -146,106 +137,62 @@ extension MessageHomeViewReactor {
     /// 시간 체크 후 Mutation 반환
     private func checkCurrentTimeAndUpdateState() -> Observable<Mutation> {
         let currentDate = Date()
-        let currentHour = Calendar.current.component(.hour, from: currentDate)
-        let messageAvailabilityTime = determineTimeState(for: currentHour)
-        let messageAvailability = MessageHomeTimeStateEntity(messageAvailabilityTime: messageAvailabilityTime)
         // 남은 시간 계산
-        let remainingTime = calculateRemainingTime(currentDate: currentDate, timeState: messageAvailabilityTime)
-
+        let remainingTime = calculateRemainingTime(currentDate: currentDate)
         
         // **주의**: Concurrency 기반으로 1초마다 갱신 중이므로
         // checkCurrentTimeAndUpdateState() 내에서 `startTimer()`는 더 이상 호출하지 않습니다.
         
         return Observable.concat([
-            .just(.setMessageAvailability(messageAvailability)),
             .just(.setRemainingSeconds(remainingTime))
         ])
     }
     
     /// 예약된 메시지 정보 불러오기
     private func fetchMessagesStatus() -> Observable<Mutation> {
+        print("fetchMessagesStatu11")
         return fetchMessagesStatusUseCase
             .execute()
             .asObservable()
+            .do(onError: { error in
+                print("fetchMessagesStatus error: \(error)")
+            })
             .flatMap { entity -> Observable<Mutation> in
-                guard let entity else {
-                    return .just(.setReservedMessagesCount(0)) 
-                }
                 let messageCountState = entity.countUnReadMessages > 0
+                print("Unread message count: \(entity.countUnReadMessages)")
                 return Observable.concat(
                     .just(.checkHaveMessage(messageCountState)),
-                    .just(.setReservedMessagesCount(entity.remainingMessages)),
+                    .just(.setPostableMessageCount(entity.remainingMessages)),
                     .just(.isSendAllowedState(entity.isSendAllowed))
                 )
             }
     }
     
-    /// 받은 메시지 정보 불러오기
-    private func fetchReservedMessages() -> Observable<Mutation> {
-        return fetchReservedMessageUseCase
-            .execute()
-            .asObservable()
-            .flatMap { entity -> Observable<Mutation> in
-                guard let entity else {
-                    return .empty()
-                }
-                let messageCount = entity.messages.count
-     
-                return .just(.setReservedMessagesCount(messageCount))
-            }
-    }
+
 }
 
 // MARK: - Helper Methods
 
 extension MessageHomeViewReactor {
-    /// 시간 체크
-    private func determineTimeState(for hour: Int) -> MessageHomeTimeStateEntity.PostableTimeState {
-        switch hour {
-        case 0..<17:
-            return .postableTime       // 00:00 ~ 17:00
-        case 17..<22:
-            return .postableTime   // 17:00 ~ 22:00
-        case 22..<24:
-            return .postableTime        // 22:00 ~ 24:00
-        default:
-            return .waitTime
-        }
-    }
-    
+
     /// 남은 시간 계산
-    private func calculateRemainingTime(
-        currentDate: Date,
-        timeState: MessageHomeTimeStateEntity.PostableTimeState
-    ) -> String? {
-        switch timeState {
-        case .postableTime:
-            var components = Calendar.current.dateComponents([.year, .month, .day], from: currentDate)
-            components.hour = 22
-            components.minute = 0
-            components.second = 0
-            guard let endDate = Calendar.current.date(from: components) else { return nil }
-            
-            let remainingSeconds = Int(endDate.timeIntervalSince(currentDate))
-            return formatSeconds(remainingSeconds)
-        default:
-          return "00:00:00"
+    private func calculateRemainingTime(currentDate: Date) -> String? {
+        let calendar = Calendar.current
+        // 내일 날짜를 계산하고, 그 날짜의 자정(시작)을 구합니다.
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: currentDate) else {
+            return nil
         }
-    }
-    
-    /// 오늘 받은 메시지인지 체크
-    private func isReceivedMessageToday(_ receivedAt: String) -> Bool {
-        guard let receivedDate = DateFormatter.iso8601().date(from: receivedAt) else {
-            return false
-        }
-        return receivedDate.isSameDay(as: Date())
-    }
-    
-    /// 초 -> HH:mm:ss 포맷 변환
-    private func formatSeconds(_ totalSeconds: Int) -> String {
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        let seconds = totalSeconds % 60
+        let startOfTomorrow = calendar.startOfDay(for: tomorrow)
+        
+        // 현재 시간과 내일 자정 사이의 초 단위 차이 계산
+        let interval = startOfTomorrow.timeIntervalSince(currentDate)
+        guard interval >= 0 else { return "00:00:00" }
+        
+        let hours = Int(interval) / 3600
+        let minutes = (Int(interval) % 3600) / 60
+        let seconds = Int(interval) % 60
+        
+        // HH:MM:SS 포맷으로 문자열 생성
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }

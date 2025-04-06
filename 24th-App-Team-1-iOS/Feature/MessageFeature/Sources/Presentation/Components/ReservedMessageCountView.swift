@@ -22,7 +22,8 @@ final class ReservedMessageCountView: UIView {
     private lazy var titleLabel = WSLabel(wsFont: .Body01,
                                           textAlignment: .left).then {
         $0.textColor = .white
-        $0.text = UserDefaultsManager.shared.userName ?? "김제니" + String.MessageTexts.messageHomePostableTitleText
+        $0.text = String.MessageTexts.messageHomePostableTitleText
+        $0.sizeToFit()
     }
     
     /// 편지 이미지를 보여주는 이미지 뷰
@@ -31,29 +32,39 @@ final class ReservedMessageCountView: UIView {
         $0.isStatus = true
         $0.lottieView.loopMode = .playOnce
     }
-    
-    /// "남은 시간"에 대한 소개 라벨
-    private let leftTimeIntoLabel = WSLabel(wsFont: .Body09,
-                                            text: String.MessageTexts.messageLeftTimeIntroText).then {
+    private let pencilIconImage = UIImageView().then {
+        $0.image = DesignSystemAsset.Images.icPencil.image
+        $0.contentMode = .scaleAspectFit
+    }
+    private let messageDesLabel = WSLabel(wsFont: .Body09,
+                                                text: String.MessageTexts.postableMessageCount).then {
+        $0.sizeToFit()
         $0.textColor = DesignSystemAsset.Colors.gray300.color
     }
+    private lazy var leftMessageCountLabel = WSLabel(wsFont: .Header05,
+                                             text: "3개",
+                                             textAlignment: .left).then {
+        $0.sizeToFit()
+        $0.textColor = DesignSystemAsset.Colors.gray100.color
+    }
     
-    /// 타이머 아이콘
-    private let timerImage = UIImageView().then {
+    private let countHoriznotalStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.alignment = .center
+        $0.spacing = 8
+    }
+
+    
+    private let timerIcon = UIImageView().then {
         $0.image = DesignSystemAsset.Images.icMessageHomeTimer.image
         $0.contentMode = .scaleAspectFit
-        $0.snp.makeConstraints {
-            $0.width.height.equalTo(20)
-        }
     }
     
     /// 남은 시간 라벨 (예: "00:00:00")
-    private lazy var leftTimeLabel = WSLabel(wsFont: .Header05,
+    private lazy var leftTimeMessageLabel = WSLabel(wsFont: .Header05,
                                              text: "00:00:00",
                                              textAlignment: .left).then {
-        $0.snp.makeConstraints {
-            $0.width.equalTo(135)
-        }
+        $0.sizeToFit()
         $0.textColor = DesignSystemAsset.Colors.gray100.color
     }
     
@@ -63,10 +74,18 @@ final class ReservedMessageCountView: UIView {
         $0.alignment = .center
         $0.spacing = 8
     }
+    
+    
+    private let countContentStackView = UIStackView().then {
+        $0.axis = .vertical
+        $0.alignment = .center
+        $0.spacing = 2
+    }
+    
     private let timeContentStackView = UIStackView().then {
         $0.axis = .vertical
         $0.alignment = .center
-        $0.spacing = 0
+        $0.spacing = 2
     }
     
     /// 쪽지 보내기 버튼
@@ -103,21 +122,23 @@ extension ReservedMessageCountView {
         self.backgroundColor = DesignSystemAsset.Colors.gray700.color
         self.layer.cornerRadius = 18
         
-        [timerImage, leftTimeLabel].forEach {
+        [pencilIconImage, leftMessageCountLabel].forEach {
+            countHoriznotalStackView.addArrangedSubview($0)
+        }
+        
+        [timerIcon, leftTimeMessageLabel].forEach {
             timeHoriznotalStackView.addArrangedSubview($0)
         }
         
-        [leftTimeIntoLabel, timeHoriznotalStackView].forEach {
-            timeContentStackView.addArrangedSubview($0)
-        }
         
-        [messageLottieView,
-         titleLabel,
-         timeContentStackView,
-         sendMessageButton].forEach {
-            self.addSubviews($0)
-        }
-
+        
+        
+        self.addSubviews(titleLabel,
+                         messageLottieView,
+                         messageDesLabel,
+                         countHoriznotalStackView,
+                         timeHoriznotalStackView,
+                         sendMessageButton)
     }
     
     private func setupConstraints() {
@@ -135,12 +156,20 @@ extension ReservedMessageCountView {
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.height.equalTo(52)
         }
-        timeContentStackView.snp.makeConstraints {
+        timeHoriznotalStackView.snp.makeConstraints {
             $0.height.equalTo(MessageConstants.messageSendButtonHeight)
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(sendMessageButton.snp.top).offset(-20)
         }
-
+        countHoriznotalStackView.snp.makeConstraints {
+            $0.height.equalTo(MessageConstants.messageSendButtonHeight)
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(sendMessageButton.snp.top).offset(-20)
+        }
+        messageDesLabel.snp.makeConstraints {
+            $0.bottom.equalTo(sendMessageButton.snp.top).offset(-72)
+            $0.centerX.equalToSuperview()
+        }
     }
 }
 
@@ -149,35 +178,31 @@ extension ReservedMessageCountView {
 extension ReservedMessageCountView {
     
     func playLottie() {
-        messageLottieView.lottieView.play()
+        messageLottieView.lottieView.play { finished in
+            if finished {
+
+            }
+        }
     }
     
-    func configureMessageCountView(leftTime: String,
-                                   availableSend: MessageHomeTimeStateEntity.PostableTimeState) {
+    func configure(count: Int, time: String) {
+        if count > 0 {
+            leftMessageCountLabel.text = "\(count)개"
+            self.sendMessageButton.setupButton(text: String.MessageTexts.messageSendAvailableButtonText)
+            messageDesLabel.text = String.MessageTexts.postableMessageCount
+            messageDesLabel.sizeToFit()
+            self.sendMessageButton.isEnabled = true
+            timeHoriznotalStackView.isHidden = true
+            countHoriznotalStackView.isHidden = false
         
-        leftTimeLabel.text = leftTime
-        switch availableSend {
-        case .waitTime:
-            titleLabel.text = userName + String.MessageTexts.messageHomePostableTitleText
-            messageLottieView.lottieView.animation = DesignSystemAnimationAsset.bgMessageOpenAnimate.animation
-            sendMessageButton.setupButton(text: String.MessageTexts.messageSendWaitTimeButtonText)
-            sendMessageButton.isEnabled = false
-            timeContentStackView.isHidden = true
-            
-        case .postableTime:
-            titleLabel.text = userName + String.MessageTexts.messageHomePostableTitleText
-            messageLottieView.lottieView.animation = DesignSystemAnimationAsset.bgMessageOpenAnimate.animation
-            sendMessageButton.setupButton(text: String.MessageTexts.messageSendAvailableButtonText)
-            sendMessageButton.isEnabled = true
-            timeContentStackView.isHidden = false
-
-        case .etcTime:
-            titleLabel.text = userName + String.MessageTexts.messageHomeCompeleteTitleText
-            messageLottieView.lottieView.animation = DesignSystemAnimationAsset.bgMessageCloseAnimate.animation
-            sendMessageButton.setupButton(text: String.MessageTexts.messageSendAvailableButtonText)
-            sendMessageButton.isEnabled = false
-            timeContentStackView.isHidden = true
-
+        } else {
+            self.sendMessageButton.setupButton(text: String.MessageTexts.messageSendUnavailableButtonText)
+            self.leftTimeMessageLabel.text = time
+            self.sendMessageButton.isEnabled = false
+            messageDesLabel.text = String.MessageTexts.messageLeftTimeIntroText
+            messageDesLabel.sizeToFit()
+            timeHoriznotalStackView.isHidden = false
+            countHoriznotalStackView.isHidden = true
         }
     }
 }

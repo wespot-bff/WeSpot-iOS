@@ -102,7 +102,7 @@ public final class messageRepository: MessageRepositoryProtocol {
     public init() { }
     
     
-    public func fetchMessagesStatus() -> Single<MessageStatusResponseEntity?> {
+    public func fetchMessagesStatus() -> Single<MessageStatusResponseEntity> {
         let endPoint = MessageEndPoint.messagesStatus
         
         return networkService.request(endPoint: endPoint)

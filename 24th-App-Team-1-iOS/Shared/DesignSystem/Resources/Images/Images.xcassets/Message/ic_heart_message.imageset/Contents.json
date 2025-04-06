@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "ic_Xmark 1 2.svg",
+      "filename" : "ic_heart_message.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "ic_Xmark 3.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "ic_Xmark 4.svg",
       "idiom" : "universal",
       "scale" : "3x"
     }

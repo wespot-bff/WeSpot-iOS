@@ -32,14 +32,14 @@ extension String.MessageTexts {
     
     // MARK: 쪽지 홈 관련 텍스트
     
-    static let messageHomePostableTitleText: String = "님을 설레게한 친구에게\n익명 쪽지로 마음을 표현해 보세요"
+    static let messageHomePostableTitleText: String = "\(UserDefaultsManager.shared.userName ?? "")님을 설레게 한 친구에게\n쪽지로 마음을 표현해 보세요"
     static let messageHomeCompeleteTitleText: String = "님의 소중한 마음을 모두 전달해 드렸어요"
-    static let messageSendUnavailableButtonText: String = "익명 쪽지함은 매일 밤 10시에 열려요"
-    static let messageSendAvailableButtonText: String = "익명 쪽지 보내기"
-    static let messageLeftTimeIntroText: String = "쪽지 전달까지 남은 시간"
-    static let postableTimeIntroText: String = "서로의 쪽지는 밤 10시에 전달해 드릴게요"
-    static let waitTimeIntroText: String = "내일 저녁 5시에 새로운 쪽지를 보낼 수 있어요"
-    static let messageSendWaitTimeButtonText: String = "매일 저녁 5시에 새로운 쪽지를 보낼 수 있어요"
+    static let messageSendUnavailableButtonText: String = "내일 새로운 쪽지를 작성할 수 있어요"
+    static let messageSendAvailableButtonText: String = "새로운 쪽지 보내기"
+    static let postableMessageCount: String = "오늘 보낼 수 있는 남은 쪽지"
+    static let messageLeftTimeIntroText: String = "새 쪽지 생성까지 남은 시간"
+    static let waitRepeatMessage: String = "답장을 기다리는 쪽지가 있어요"
+    static let checkMessageButtonText: String = "눌러서 바로 확인하기"
     
     // MARK: 쪽지 작성(학생 검색) 관련 텍스트
     

@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 
 public protocol FetchMessagesStatusUseCaseProtocol {
-    func execute() -> Single<MessageStatusResponseEntity?>
+    func execute() -> Single<MessageStatusResponseEntity>
 }
 
 public final class FetchMessagesStatusUseCase: FetchMessagesStatusUseCaseProtocol {
@@ -21,7 +21,8 @@ public final class FetchMessagesStatusUseCase: FetchMessagesStatusUseCaseProtoco
         self.repository = repository
     }
     
-    public func execute() -> Single<MessageStatusResponseEntity?> {
+    public func execute() -> Single<MessageStatusResponseEntity> {
+        print("FetchMessagesStatusUseCase")
         return repository.fetchMessagesStatus()
     }
 }
