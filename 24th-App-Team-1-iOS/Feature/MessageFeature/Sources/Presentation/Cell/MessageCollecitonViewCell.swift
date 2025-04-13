@@ -18,19 +18,26 @@ final class MessageCollectionViewCell: UICollectionViewCell {
     private let UnreadImage: UIImage = DesignSystemAsset.Images.messageUnread.image
     private var disposeBag = DisposeBag()
     var onMoreButtonTap: (() -> Void)?
-    var onDeleteButtonTap: (() -> Void)?
-    private let messageImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
-        $0.backgroundColor = .clear
-        $0.image = DesignSystemAsset.Images.messageUnread.image
+    var onFavoriteButtonTap: (() -> Void)?
+    var isFavorite: Bool = false
+    private let redDot = UIView().then {
+        $0.backgroundColor = UIColor(hex: "#FF4D4D")
+        $0.layer.cornerRadius = 4
+        
+    }
+    private let profileImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFit
+        $0.backgroundColor = .white
+        $0.layer.cornerRadius = 25
+        $0.clipsToBounds = true
     }
     
     private let moreButton = UIButton().then {
         $0.setImage(DesignSystemAsset.Images.icEllipsis.image, for: .normal)
         $0.backgroundColor = .clear
     }
-    private let xMarkButton = UIButton().then {
-        $0.setImage(DesignSystemAsset.Images.icXmark.image, for: .normal)
+    private let favoriteButton = UIButton().then {
+        $0.setImage(DesignSystemAsset.Images.icStar.image, for: .normal)
         $0.backgroundColor = .clear
     }
     private let studentInfoLabel = WSLabel(wsFont: .Body09).then {
@@ -43,22 +50,22 @@ final class MessageCollectionViewCell: UICollectionViewCell {
     private func layout() {
         self.backgroundColor = DesignSystemAsset.Colors.gray700.color
         self.layer.cornerRadius = 12
-        self.contentView.addSubviews(messageImageView,
+        self.contentView.addSubviews(profileImageView,
                                      moreButton,
-                                     xMarkButton,
                                      studentInfoLabel,
+                                     redDot,
+                                     favoriteButton,
                                      dateLabel)
         
-        messageImageView.snp.makeConstraints {
+        profileImageView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(18)
-            $0.horizontalEdges.equalToSuperview().inset(15)
-            $0.height.equalTo(100)
+            $0.size.equalTo(50)
+            $0.leading.equalToSuperview().offset(14)
         }
-
-        xMarkButton.snp.makeConstraints {
-            $0.width.height.equalTo(18)
-            $0.top.equalToSuperview().offset(8)
-            $0.trailing.equalToSuperview().inset(12)
+        redDot.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(14)
+            $0.leading.equalToSuperview().offset(60)
+            $0.size.equalTo(8)
         }
         
         moreButton.snp.makeConstraints {
@@ -68,50 +75,53 @@ final class MessageCollectionViewCell: UICollectionViewCell {
         }
         
         studentInfoLabel.snp.makeConstraints {
-            $0.top.equalTo(messageImageView.snp.bottom).offset(2)
+            $0.top.equalTo(profileImageView.snp.bottom).offset(2)
             $0.leading.equalToSuperview().offset(15)
             $0.trailing.equalToSuperview().inset(14)
             $0.bottom.equalTo(dateLabel.snp.top).offset(-17)
         }
         dateLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(15)
+            $0.leading.equalToSuperview().offset(14)
             $0.bottom.equalToSuperview().inset(12)
+        }
+        favoriteButton.snp.makeConstraints {
+            $0.size.equalTo(24)
+            $0.trailing.equalToSuperview().inset(10)
+            $0.bottom.equalToSuperview().inset(10)
         }
     }
     
     func configure(info: String,
                    date: String,
                    type: MessageButtonTabEnum,
-                   read: Bool = false,
+                   isFavorite: Bool = false,
+                   isRead: Bool = false,
+                   isBlock: Bool = false,
                    isReport: Bool = false) {
-        // 메시지 읽음 여부에 따른 이미지 설정
-        messageImageView.image = read ? readImage : UnreadImage
 
-        // 라벨 텍스트 설정
+        self.redDot.isHidden = isRead || isBlock || isReport
+        self.studentInfoLabel.text = isBlock ? String.MessageTexts.blockMessage : info
+        self.studentInfoLabel.text = isReport ? String.MessageTexts.reportMessage : info
+        self.favoriteButton.isHidden = isBlock || isReport
+        self.profileImageView.image = (isBlock || isReport) ? DesignSystemAsset.Images.icCaution.image : readImage
         studentInfoLabel.text = info
         dateLabel.text = date
+        self.favoriteButton.setImage(isFavorite ? DesignSystemAsset.Images.icStarFill.image : DesignSystemAsset.Images.icStar.image, for: .normal)
+        moreButton.rx.tap
+            .bind { [weak self] in
+                guard let self = self else { return }
+                self.onMoreButtonTap?()
+            }
+            .disposed(by: disposeBag)
         
-        // type에 따른 버튼 표시 처리
-        switch type {
-        case .received:
-            // 받은 메시지 : moreButton 표시, xMarkButton 숨김
-            moreButton.isHidden = false
-            xMarkButton.isHidden = true
-            moreButton.rx.tap
-                .bind { [weak self] in
-                    self?.onMoreButtonTap?()
-                }
-                .disposed(by: disposeBag)
-        case .sent:
-            // 보낸 메시지 : xMarkButton 표시, moreButton 숨김
-            moreButton.isHidden = true
-            xMarkButton.isHidden = false
-            xMarkButton.rx.tap
-           .bind(with: self) { owner, _ in
-               owner.onDeleteButtonTap?()
-           }
-           .disposed(by: disposeBag)
-        }
+        favoriteButton.rx.tap
+            .bind { [weak self] in
+                guard let self = self else { return }
+                self.isFavorite.toggle()
+                self.updateFavoriteButtonImage()
+                self.onFavoriteButtonTap?()
+            }
+            .disposed(by: disposeBag)
     }
     
     override func prepareForReuse() {
@@ -125,5 +135,12 @@ final class MessageCollectionViewCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func updateFavoriteButtonImage() {
+        let image = isFavorite
+            ? DesignSystemAsset.Images.icStarFill.image // For example, a filled star for favorited state
+            : DesignSystemAsset.Images.icStar.image     // Original star image for non-favorited state
+        favoriteButton.setImage(image, for: .normal)
     }
 }

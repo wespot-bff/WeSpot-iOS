@@ -9,5 +9,5 @@ import Foundation
 
 public enum MessageButtonTabEnum {
     case received
-    case sent
+    case favorite
 }

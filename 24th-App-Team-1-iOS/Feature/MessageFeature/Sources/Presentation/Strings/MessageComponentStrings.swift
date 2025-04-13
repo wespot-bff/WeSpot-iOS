@@ -50,6 +50,11 @@ extension String.MessageTexts {
     
     static let messageRecievedType: String = "RECEIVED"
     static let messageSentType: String = "SENT"
+    static let messageInventoryAllButton: String = "전체"
+    static let messageInventoryFavoriteButton: String = "즐겨찾기"
+    static let reportMessage: String = "신고 접수된 쪽지입니다"
+    static let blockMessage: String = "차단된 쪽지입니다"
+
     
     // MARK: 바텀시트(삭제, 차단, 신고) 관련 텍스트
     

@@ -20,7 +20,7 @@ public final class MessageStorageReactor: Reactor {
         var messageCount: Int = 0
         var tabState: MessageButtonTabEnum = .received
         @Pulse var recivedMessageList: [MessageContentModel] = []
-        @Pulse var sentMessageList: [MessageContentModel] = []
+        @Pulse var favoriteMessageList: [MessageContentModel] = []
         @Pulse var toastMessage: MessageContentModel?
         @Pulse var messageMode: MessageContentModel?
         // 페이징 관리: 각각 Received와 Sent의 커서 및 추가 데이터 여부
@@ -35,7 +35,7 @@ public final class MessageStorageReactor: Reactor {
     public enum Action {
         case loadMessages(type: String)              // 초기 데이터 로드
         case receivedMessageButtonTapped             // 받은 메시지 탭 전환
-        case sentMessageButtonTapped                 // 보낸 메시지 탭 전환
+        case favoriteMessageButtonTapped                 // 즐겨찾기 메시지 탭 전환
         case readMessage(MessageContentModel, tpye: String)        // 메시지 읽기
         case moreButtonTapped(MessageContentModel)   // More 버튼 탭(추가 옵션) 요청
         case loadMoreMessages(type: String)          // 스크롤 하단 도달 시 추가 데이터 로드
@@ -54,6 +54,7 @@ public final class MessageStorageReactor: Reactor {
         case setMessageToast(MessageContentModel)
         case setModeInfoMessage(MessageContentModel)
         case setReadMessage(MessageContentModel, type: String)
+        case setFavoriteMessage(MessageContentModel)
         case setDeleteMessage(MessageContentModel)
         case setReportMessage(MessageContentModel)
         case setBlockMessage(MessageContentModel)
@@ -78,8 +79,8 @@ public final class MessageStorageReactor: Reactor {
         case .loadMessages(let type):
             // 초기 데이터 로드: 해당 모드의 커서를 기준으로 호출
             return fetchMessageList(type: type, append: false)
-        case .sentMessageButtonTapped:
-            return Observable.just(.setButtonTabState(.sent))
+        case .favoriteMessageButtonTapped:
+            return Observable.just(.setButtonTabState(.favorite))
         case .loadMoreMessages(let type):
             if type == String.MessageTexts.messageRecievedType,
                !currentState.hasNextReceived {
@@ -125,9 +126,9 @@ public final class MessageStorageReactor: Reactor {
         case .appendRecievedMessageList(let messages):
             newState.recivedMessageList += messages
         case .setSentMessageList(let messages):
-            newState.sentMessageList = messages
+            newState.favoriteMessageList = messages
         case .appendSentMessageList(let messages):
-            newState.sentMessageList += messages
+            newState.favoriteMessageList += messages
         case .setMessageToast(let message):
             newState.toastMessage = message
         case .setModeInfoMessage(let message):
@@ -145,23 +146,51 @@ public final class MessageStorageReactor: Reactor {
                     with: updatedMessage
                 )
             } else if type == String.MessageTexts.messageSentType {
-                newState.sentMessageList = upadateReadMessages(
-                    in: newState.sentMessageList,
+                newState.favoriteMessageList = upadateReadMessages(
+                    in: newState.favoriteMessageList,
                     with: updatedMessage
                 )
             }
         case .setDeleteMessage(let deleteMessage):
-            newState.recivedMessageList = updateDeleteMessage(in: state.recivedMessageList,
-                                                              with: deleteMessage)
+            if currentState.tabState == .received {
+                newState.recivedMessageList = updateDeleteMessage(in: state.recivedMessageList,
+                                                                  with: deleteMessage)
+            }
+            else {
+                newState.favoriteMessageList = updateDeleteMessage(in: state.favoriteMessageList,
+                                                                        with: deleteMessage)
+            }
             newState.disMissBottomSheet = true
         case .setReportMessage(let reportMessage):
-            newState.recivedMessageList = updateDeleteMessage(in: state.recivedMessageList,
-                                                              with: reportMessage)
+            if currentState.tabState == .received {
+                newState.recivedMessageList = updateDeleteMessage(in: state.recivedMessageList,
+                                                                  with: reportMessage)
+            }
+            else {
+                newState.favoriteMessageList = updateDeleteMessage(in: state.favoriteMessageList,
+                                                                        with: reportMessage)
+            }
             newState.disMissBottomSheet = true
         case .setBlockMessage(let blockMessage):
-            newState.recivedMessageList = updateDeleteMessage(in: state.recivedMessageList,
-                                                              with: blockMessage)
+            if currentState.tabState == .received {
+                newState.recivedMessageList = updateDeleteMessage(in: state.recivedMessageList,
+                                                                  with: blockMessage)
+            }
+            else {
+                newState.favoriteMessageList = updateDeleteMessage(in: state.favoriteMessageList,
+                                                                        with: blockMessage)
+            }
             newState.disMissBottomSheet = true
+        case .setFavoriteMessage(let message):
+            if currentState.tabState == .received {
+                newState.recivedMessageList = updateDeleteMessage(in: state.recivedMessageList,
+                                                                  with: message)
+            }
+            else {
+                newState.favoriteMessageList = updateDeleteMessage(in: state.favoriteMessageList,
+                                                                        with: message)
+            }
+
         }
         return newState
     }
