@@ -38,6 +38,11 @@ public final class WSNetworkInterceptor: RequestInterceptor {
     
     public func retry(_ request: Request, for session: Session, dueTo error: any Error, completion: @escaping (RetryResult) -> Void) {
         
+        if request.retryCount >= retryLimit {
+            completion(.doNotRetry)
+            return
+        }
+        
         if let response = request.response, response.statusCode == 401 {
             guard let refreshToken = KeychainManager.shared.get(type: .refreshToken) else {
                 completion(.doNotRetry)
