@@ -49,6 +49,7 @@ public final class WSNetworkInterceptor: RequestInterceptor {
             WSNetworkService().request(endPoint: endPoint)
                 .asObservable()
                 .decodeMap(AccessToken.self)
+                .debug("💙 Refresh Token API를 호출 합니다 💙")
                 .logErrorIfDetected(category: Network.error)
                 .subscribe { token in
                     KeychainManager.shared.set(value: token.accessToken, type: .accessToken)
