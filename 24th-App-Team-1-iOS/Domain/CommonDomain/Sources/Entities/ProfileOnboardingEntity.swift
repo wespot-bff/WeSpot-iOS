@@ -7,74 +7,172 @@
 
 import Foundation
 
-
 public struct ProfileOnboardingEntity: Identifiable {
     public let id: Int
     public let name: String
-    public let components: [ProfileOnboardingComponentsEntity]
+    public let data: [ProfileOnbardingInfoEntity]
     
-    public init(id: Int, name: String, components: [ProfileOnboardingComponentsEntity]) {
+    public init(id: Int, name: String, data: [ProfileOnbardingInfoEntity]) {
         self.id = id
         self.name = name
+        self.data = data
+    }
+}
+
+public struct ProfileOnbardingInfoEntity {
+    public let type: String
+    public let components: [ProfileOnboardingComponentEntity]
+    
+    public init(type: String, components: [ProfileOnboardingComponentEntity]) {
+        self.type = type
         self.components = components
     }
 }
 
 
-public struct ProfileOnboardingComponentsEntity {
+public struct ProfileOnboardingComponentEntity {
     public let componentType: String
-    public let titleText: String?
-    public let imageURL: String?
-    public let width: Int?
-    public let height: Int?
-    public let buttonComponentList: [ProfileButtonComponentListEntity]?
+    public let content: ProfileOnboardingContentEntity
     
-    public init(
-        componentType: String,
-        titleText: String?,
-        imageURL: String?,
-        width: Int?,
-        height: Int?,
-        buttonComponentList: [ProfileButtonComponentListEntity]?
-    ) {
+    public init(componentType: String, content: ProfileOnboardingContentEntity) {
         self.componentType = componentType
-        self.titleText = titleText
-        self.imageURL = imageURL
-        self.width = width
-        self.height = height
-        self.buttonComponentList = buttonComponentList
+        self.content = content
     }
 }
 
-public struct ProfileButtonComponentListEntity {
-    public let text: String
-    public let textColor: String
-    public let pressColor: String
+public struct ProfileOnboardingContentEntity {
+    public let richText: ProfileOnboardingRichContentEntity?
+    public let icons: [ProfileOnboardingIconsContentEntity]?
+    public let paddings: ProfilePaddingsEntity?
+    public let buttons: [ProfileButtonsEntity]?
+    
+    public init(
+        richText: ProfileOnboardingRichContentEntity?,
+        icons: [ProfileOnboardingIconsContentEntity]?,
+        paddings: ProfilePaddingsEntity?,
+        buttons: [ProfileButtonsEntity]?
+    ) {
+        self.richText = richText
+        self.icons = icons
+        self.paddings = paddings
+        self.buttons = buttons
+    }
+}
+
+public struct ProfileButtonsEntity {
+    public let richText: ProfileOnboardingRichContentEntity
     public let buttonColor: String
-    public let onClickAction: ProfileButtonClickActionEntity
+    public let pressColor: String
+    public let onClickAction: ProfileButtonActionEntity
+    public let padding: ProfilePaddingsEntity?
+    
+    public init(
+        richText: ProfileOnboardingRichContentEntity,
+        buttonColor: String,
+        pressColor: String,
+        onClickAction: ProfileButtonActionEntity,
+        padding: ProfilePaddingsEntity?
+    ) {
+        self.richText = richText
+        self.buttonColor = buttonColor
+        self.pressColor = pressColor
+        self.onClickAction = onClickAction
+        self.padding = padding
+    }
+}
+
+public struct ProfileButtonActionEntity {
+    public let type: String
+    public let deepLink: String?
+    
+    public init(type: String, deepLink: String?) {
+        self.type = type
+        self.deepLink = deepLink
+    }
+}
+
+
+public struct ProfilePaddingsEntity {
+    public let start: Int?
+    public let end: Int?
+    public let bottom: Int?
+    
+    public init(
+        start: Int?,
+        end: Int?,
+        bottom: Int?
+    ) {
+        self.start = start
+        self.end = end
+        self.bottom = bottom
+    }
+}
+
+public struct ProfileOnboardingRichContentEntity {
+    public let text: String
+    public let color: String
+    public let fontSize: Int
+    public let align: String
+    public let fontWeight: String
     
     public init(
         text: String,
-        textColor: String,
-        pressColor: String,
-        buttonColor: String,
-        onClickAction: ProfileButtonClickActionEntity
+        color: String,
+        fontSize: Int,
+        align: String,
+        fontWeight: String
     ) {
         self.text = text
-        self.textColor = textColor
-        self.pressColor = pressColor
-        self.buttonColor = buttonColor
+        self.color = color
+        self.fontSize = fontSize
+        self.align = align
+        self.fontWeight = fontWeight
+    }
+}
+
+public struct ProfileOnboardingIconsContentEntity {
+    public let url: String
+    public let width: Int
+    public let height: Int
+    public let onClickAction: ProfileOnboardingActionEntity
+    
+    public init(
+        url: String,
+        width: Int,
+        height: Int,
+        onClickAction: ProfileOnboardingActionEntity
+    ) {
+        self.url = url
+        self.width = width
+        self.height = height
         self.onClickAction = onClickAction
+    }
+    
+}
+
+
+public struct ProfileOnboardingActionEntity {
+    public let type: String
+    public let deepLink: String?
+    
+    public init(type: String, deepLink: String?) {
+        self.type = type
+        self.deepLink = deepLink
     }
 }
 
 
-public struct ProfileButtonClickActionEntity {
-    public let type: String?
-    public let deepLink: String?
-    
-    public init(type: String?, deepLink: String?) {
-        self.type = type
-        self.deepLink = deepLink
+public extension ProfileOnboardingEntity {
+    func component(
+        in sectionType: String,
+        ofType componentType: String
+    ) -> ProfileOnboardingComponentEntity? {
+        guard
+            let section = data.first(where: { $0.type == sectionType }),
+            let comp = section.components.first(where: { $0.componentType == componentType })
+        else {
+            return nil
+        }
+        return comp
     }
 }
