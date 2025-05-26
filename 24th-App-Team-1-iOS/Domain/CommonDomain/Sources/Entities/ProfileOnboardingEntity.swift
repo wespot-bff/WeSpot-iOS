@@ -42,17 +42,20 @@ public struct ProfileOnboardingComponentEntity {
 
 public struct ProfileOnboardingContentEntity {
     public let richText: ProfileOnboardingRichContentEntity?
+    public let url: String?
     public let icons: [ProfileOnboardingIconsContentEntity]?
     public let paddings: ProfilePaddingsEntity?
     public let buttons: [ProfileButtonsEntity]?
     
     public init(
         richText: ProfileOnboardingRichContentEntity?,
+        url: String?,
         icons: [ProfileOnboardingIconsContentEntity]?,
         paddings: ProfilePaddingsEntity?,
         buttons: [ProfileButtonsEntity]?
     ) {
         self.richText = richText
+        self.url = url
         self.icons = icons
         self.paddings = paddings
         self.buttons = buttons

@@ -40,6 +40,7 @@ public extension ProfileOnboardingResponseDTO.ProfileOnboardingInfoResponseDTO {
 
 public extension ProfileOnboardingResponseDTO.ProfileOnboardingInfoResponseDTO.ProfileOnboardingComponentResponseDTO {
     struct ProfileOnboardingContentResponseDTO: Decodable {
+        public let url: String?
         public let richText: ProfileOnboardingRichTextResponseDTO?
         public let icons: [ProfileOnboardingIconsResponseDTO]?
         public let paddings: ProfileOnboardingPaddingResponseDTO?
@@ -115,6 +116,7 @@ public extension ProfileOnboardingResponseDTO.ProfileOnboardingInfoResponseDTO.P
     func toDomain() -> ProfileOnboardingContentEntity {
         return .init(
             richText: richText?.toDomain(),
+            url: url,
             icons: icons?.compactMap { $0.toDomain()},
             paddings: paddings?.toDomain(),
             buttons: buttons?.map { $0.toDomain() }

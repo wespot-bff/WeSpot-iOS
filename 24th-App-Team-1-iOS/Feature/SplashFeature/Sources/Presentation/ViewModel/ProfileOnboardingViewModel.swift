@@ -25,7 +25,7 @@ public final class ProfileOnboardingViewModel: ObservableObject {
         var topComponentText: String = ""
         var subTitleComponentText: String = ""
         var errorDescription: String = ""
-        var imageComponent: ImageComponent?
+        var imageComponent: URL?
         var descriptionComponentText: String = ""
         var chipComponentText: String = ""
         var descriptionImageComponent: ImageComponent?
@@ -68,7 +68,7 @@ public final class ProfileOnboardingViewModel: ObservableObject {
             }
         case .didTappedUpdateProfile:
             guard let currentState = state.componentEntity else { return .none }
-            await handleProfileEditDeepLink(entity: currentState)
+//            await handleProfileEditDeepLink(entity: currentState)
             return .none
         }
     }
@@ -78,15 +78,23 @@ public final class ProfileOnboardingViewModel: ObservableObject {
         switch mutation {
         case let .setComponentEntity(entity):
             newState.componentEntity = entity
-            newState.titleComponentText = transformTitleComponentText(entity: entity)
-            newState.topComponentText = transformTopComponentText(entity: entity)
-            newState.subTitleComponentText = transformSubTitleComponentText(entity: entity)
+            newState.titleComponentText = transformTitle(entity: entity)
+            newState.topComponentText = transformTopBarTitle(entity: entity)
+            newState.subTitleComponentText = transformSubtitle(entity: entity)
             newState.imageComponent = transformImageComponent(entity: entity)
-            newState.chipComponentText = transformChipComponent(entity: entity)
-            newState.descriptionComponentText = transformDescriptionComponent(entity: entity)
-            newState.descriptionImageComponent = transformDescriptionImageComponent(entity: entity)
-            newState.leftButtonComponentText = transformLeftButtonComponent(entity: entity)
-            newState.rightButtonComponentText = transformRightButtonComponent(entity: entity)
+//            newState.chipComponentText = transformChipComponent(entity: entity)
+//            newState.descriptionComponentText = transformDescriptionComponent(entity: entity)
+//            newState.descriptionImageComponent = transformDescriptionImageComponent(entity: entity)
+            newState.leftButtonComponentText = transformSkipTextComponent(entity: entity)
+//            newState.rightButtonComponentText = transformRightButtonComponent(entity: entity)
+            print("프로필 온보딩 컴포넌트 데이터를 확인 합니다 \(newState.componentEntity)")
+            print("프로필 온보딩 타이틀 데이터를 확인 합니다 \(newState.componentEntity)")
+            print("프로필 온보딩 탑 컵포넌트 확인 합니다 \(newState.componentEntity)")
+            print("프로필 온보딩 서브 타이틀 데이터를 확인 합니다 \(newState.componentEntity)")
+            print("프로필 온보딩 이미지 컴포넌트 데이터를 확인 합니다 \(newState.componentEntity)")
+            
+            
+            
         case let .setComponentError(errorDescription):
             newState.errorDescription = errorDescription
         case .none:
@@ -100,94 +108,83 @@ public final class ProfileOnboardingViewModel: ObservableObject {
     
 }
 
-
 extension ProfileOnboardingViewModel {
-    private func transformTitleComponentText(entity: ProfileOnboardingEntity) -> String {
-  
-        guard let titleComponentType = entity.components.first(where: { $0.componentType == "titleComponent" }),
-              let titleText = titleComponentType.titleText else { return "" }
-        return titleText.replacingOccurrences(of: "사진으로 프", with: "사진으로\n프")
+    func transformTitle(entity: ProfileOnboardingEntity) -> String {
+        guard
+            let comp = entity.component(in: "contentSection", ofType: "textComponent")
+        else { return "" }
+        return comp.content.richText?.text.replacingOccurrences(of: "\\n", with: "\n") ?? ""
     }
-    
-    private func transformTopComponentText(entity: ProfileOnboardingEntity) -> String {
-        guard let topComponentType = entity.components.first(where: { $0.componentType == "topBarComponent" }),
-              let topText = topComponentType.titleText else { return "" }
-        print("내비게이션 타이틀 확인 합니다 : \(topText)")
-        return topText
-    }
-    
-    private func transformSubTitleComponentText(entity: ProfileOnboardingEntity) -> String {
-        guard let subtitleComponentType = entity.components.first(where: { $0.componentType == "subTitleComponent"}),
-              let subTitletext = subtitleComponentType.titleText else { return "" }
-        return subTitletext
-    }
-    
-    private func transformImageComponent(entity: ProfileOnboardingEntity) -> ImageComponent? {
-        guard let imageComponentType = entity.components.first(where: { $0.componentType == "imageComponent"}),
-              let imageAbsoluteString = imageComponentType.imageURL,
-              let imageURL = URL(string: imageAbsoluteString),
-              let imageWidth = imageComponentType.width,
-              let imageHeight = imageComponentType.height else { return nil }
-        
-        return (imageURL, imageWidth, imageHeight)
-    }
-    
-    private func transformChipComponent(entity: ProfileOnboardingEntity) -> String {
-        guard let chipComponent = entity.components.first(where: { $0.componentType == "chipComponent"}),
-              let chipText = chipComponent.titleText else { return "" }
-        return chipText
-    }
-    
-    
-    private func transformDescriptionComponent(entity: ProfileOnboardingEntity) -> String {
-        guard let descriptionComponentType = entity.components.first(where: { $0.componentType == "descriptionComponent"}),
-              let descriptionText = descriptionComponentType.titleText else { return "" }
-        return descriptionText.replacingOccurrences(of: "프로필은 반", with: "프로필은\n반")
-    }
-    
-    private func transformDescriptionImageComponent(entity: ProfileOnboardingEntity) -> ImageComponent? {
-        guard let descriptionImageComponentType = entity.components.first(where: { $0.componentType == "descriptionImageComponent"}),
-              let descriptionImageAbsoluteString = descriptionImageComponentType.imageURL,
-              let descriptionImageURL = URL(string: descriptionImageAbsoluteString),
-              let descriptionImageWidth = descriptionImageComponentType.width,
-              let descriptionImageHeight = descriptionImageComponentType.height else { return nil }
-        
-        return (descriptionImageURL, descriptionImageWidth, descriptionImageHeight)
-    }
-    
-    private func transformLeftButtonComponent(entity: ProfileOnboardingEntity) -> String {
-        guard let buttonComponentType = entity.components.first(where: { $0.componentType == "buttonListComponent"}),
-              let leftButton = buttonComponentType.buttonComponentList?.first else { return "" }
-        
-        return leftButton.text
-    }
-    
-    private func transformRightButtonComponent(entity: ProfileOnboardingEntity) -> String {
-        guard let buttonComponentType = entity.components.first(where: { $0.componentType == "buttonListComponent"}),
-              let rightButton = buttonComponentType.buttonComponentList?.last else { return "" }
-        
-        return rightButton.text
-    }
-    
-    @MainActor
-    private func handleProfileEditDeepLink(entity: ProfileOnboardingEntity) async  {
-        
-        
-        guard let buttonComponentType =  entity.components.first(where: { $0.componentType == "buttonListComponent"}),
-              let rightButton = buttonComponentType.buttonComponentList?.last,
-              let deepLink = rightButton.onClickAction.deepLink,
-              let url = URL(string: deepLink),
-              let urlScheme = url.scheme,
-              let urlHost = url.host else { return }
-        
-        let urlPath = url.path
-        
-        print("딥링크 URL을 확인합니다 : \(url) , \(urlScheme) , \(urlHost) , \(urlPath)")
-        
-        if urlScheme == "wespot" && urlHost == "all" && urlPath == "/profile-edit" {
-            NotificationCenter.default.post(name: .showProfileSettingViewController, object: nil)
-        }
 
+    func transformTopBarTitle(entity: ProfileOnboardingEntity) -> String {
+        guard
+            let comp = entity.component(in: "contentSection", ofType: "topBarComponent")
+        else { return "" }
+        return comp.content.richText?.text ?? ""
+    }
+
+    func transformTopBarIconURL(entity: ProfileOnboardingEntity) -> URL? {
+        guard
+            let comp = entity.component(in: "contentSection", ofType: "topBarComponent"),
+            let urlString = comp.content.icons?.first?.url
+        else { return nil }
+        return URL(string: urlString)
     }
     
+    func transformImageComponent(entity: ProfileOnboardingEntity) -> URL? {
+        guard
+            let comp      = entity.component(in: "contentSection", ofType: "imageComponent"),
+            let urlString = comp.content.url,
+            let url       = URL(string: urlString)
+        else { return nil }
+        print("💚이미지 데이터를 확인합니다잉 \(urlString)💚")
+        return url
+    }
+
+    func transformSubtitle(entity: ProfileOnboardingEntity) -> String {
+        guard
+            let section = entity.data.first(where: { $0.type == "contentSection" })
+        else { return "" }
+
+        let textComps = section.components.filter { $0.componentType == "textComponent" }
+        if textComps.count > 1 {
+            return textComps[1].content.richText?.text ?? ""
+        }
+        return ""
+    }
+    
+    func transformChipText(entity: ProfileOnboardingEntity) -> String {
+        guard
+            let comp = entity.component(in: "contentSection", ofType: "chipComponent")
+        else { return "" }
+        return comp.content.richText?.text ?? ""
+    }
+    
+    func transformBackgroundImage(entity: ProfileOnboardingEntity) -> ImageComponent? {
+        guard let comp = entity.component(in: "contentSection", ofType: "imageComponent") else { return nil }
+        
+        return nil
+    }
+
+    func transformSkipTextComponent(entity: ProfileOnboardingEntity) -> String {
+        guard let comp = entity.component(in: "bottomSection", ofType: "buttonsComponent") else { return "" }
+        let richText = comp.content.buttons?.first?.richText.text ?? ""
+        
+        print("💙 바텀 버튼 텍스트 값 확인 \(richText) 💙")
+        return richText
+    }
+    
+    func transformProfileEditComponent(entity: ProfileOnboardingEntity) -> String {
+        guard let comp = entity.component(in: "bottomSection", ofType: "buttonsComponent") else { return "" }
+        let richText = comp.content.buttons?.last?.richText.text ?? ""
+        
+        print("❣️바텀 마지막 버튼 텍스트 값 확인 \(richText) ❣️")
+        return richText
+    }
+    
+    func transformDeepLinkURL(entity: ProfileOnboardingEntity) -> URL? {
+        return nil
+    }
 }
+
+
