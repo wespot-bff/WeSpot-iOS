@@ -45,7 +45,7 @@ public struct ProfileOnboardingView: View {
                     .padding(.bottom, 20)
                     
                     ZStack(alignment: .bottom) {
-                        AsyncImage(url: viewModel.state.imageComponent?.imageURL) { phase in
+                        AsyncImage(url: viewModel.state.topImageComponent) { phase in
                             switch phase {
                             case .empty:
                                 ProgressView()
@@ -101,7 +101,7 @@ public struct ProfileOnboardingView: View {
                         .padding(.bottom, 45)
 
                     ZStack(alignment: .bottom) {
-                        AsyncImage(url: viewModel.state.descriptionImageComponent?.imageURL) { phase in
+                        AsyncImage(url: viewModel.state.bottomImageComponent) { phase in
                             switch phase {
                             case .empty:
                                 ProgressView()

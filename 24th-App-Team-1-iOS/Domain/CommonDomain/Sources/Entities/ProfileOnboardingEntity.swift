@@ -168,14 +168,17 @@ public struct ProfileOnboardingActionEntity {
 public extension ProfileOnboardingEntity {
     func component(
         in sectionType: String,
-        ofType componentType: String
+        ofType componentType: String,
+        at index: Int = 0
     ) -> ProfileOnboardingComponentEntity? {
-        guard
-            let section = data.first(where: { $0.type == sectionType }),
-            let comp = section.components.first(where: { $0.componentType == componentType })
-        else {
+        guard let section = data.first(where: { $0.type == sectionType }) else { return nil }
+        
+        let filtered = section.components
+            .filter { $0.componentType == componentType }
+        guard index >= 0, index < filtered.count else {
             return nil
         }
-        return comp
+        return filtered[index]
     }
+
 }

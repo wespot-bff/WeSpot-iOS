@@ -25,7 +25,8 @@ public final class ProfileOnboardingViewModel: ObservableObject {
         var topComponentText: String = ""
         var subTitleComponentText: String = ""
         var errorDescription: String = ""
-        var imageComponent: URL?
+        var topImageComponent: URL?
+        var bottomImageComponent: URL?
         var descriptionComponentText: String = ""
         var chipComponentText: String = ""
         var descriptionImageComponent: ImageComponent?
@@ -68,7 +69,7 @@ public final class ProfileOnboardingViewModel: ObservableObject {
             }
         case .didTappedUpdateProfile:
             guard let currentState = state.componentEntity else { return .none }
-//            await handleProfileEditDeepLink(entity: currentState)
+            await handleProfileEditDeepLink(entity: currentState)
             return .none
         }
     }
@@ -81,19 +82,12 @@ public final class ProfileOnboardingViewModel: ObservableObject {
             newState.titleComponentText = transformTitle(entity: entity)
             newState.topComponentText = transformTopBarTitle(entity: entity)
             newState.subTitleComponentText = transformSubtitle(entity: entity)
-            newState.imageComponent = transformImageComponent(entity: entity)
-//            newState.chipComponentText = transformChipComponent(entity: entity)
-//            newState.descriptionComponentText = transformDescriptionComponent(entity: entity)
-//            newState.descriptionImageComponent = transformDescriptionImageComponent(entity: entity)
+            newState.descriptionComponentText = transformDescriptionComponent(entity: entity)
+            newState.topImageComponent = transformTopImageComponent(entity: entity)
+            newState.bottomImageComponent = transformBottomImageCommponent(entity: entity)
+            newState.chipComponentText = transformChipText(entity: entity)
             newState.leftButtonComponentText = transformSkipTextComponent(entity: entity)
-//            newState.rightButtonComponentText = transformRightButtonComponent(entity: entity)
-            print("프로필 온보딩 컴포넌트 데이터를 확인 합니다 \(newState.componentEntity)")
-            print("프로필 온보딩 타이틀 데이터를 확인 합니다 \(newState.componentEntity)")
-            print("프로필 온보딩 탑 컵포넌트 확인 합니다 \(newState.componentEntity)")
-            print("프로필 온보딩 서브 타이틀 데이터를 확인 합니다 \(newState.componentEntity)")
-            print("프로필 온보딩 이미지 컴포넌트 데이터를 확인 합니다 \(newState.componentEntity)")
-            
-            
+            newState.rightButtonComponentText = transformProfileEditComponent(entity: entity)
             
         case let .setComponentError(errorDescription):
             newState.errorDescription = errorDescription
@@ -110,40 +104,51 @@ public final class ProfileOnboardingViewModel: ObservableObject {
 
 extension ProfileOnboardingViewModel {
     func transformTitle(entity: ProfileOnboardingEntity) -> String {
-        guard
-            let comp = entity.component(in: "contentSection", ofType: "textComponent")
-        else { return "" }
+        guard let comp = entity.component(in: "contentSection", ofType: "textComponent")
+            else { return "" }
         return comp.content.richText?.text.replacingOccurrences(of: "\\n", with: "\n") ?? ""
     }
 
     func transformTopBarTitle(entity: ProfileOnboardingEntity) -> String {
-        guard
-            let comp = entity.component(in: "contentSection", ofType: "topBarComponent")
-        else { return "" }
+        guard let comp = entity.component(in: "contentSection", ofType: "topBarComponent")
+            else { return "" }
         return comp.content.richText?.text ?? ""
     }
 
     func transformTopBarIconURL(entity: ProfileOnboardingEntity) -> URL? {
-        guard
-            let comp = entity.component(in: "contentSection", ofType: "topBarComponent"),
+        guard let comp = entity.component(in: "contentSection", ofType: "topBarComponent"),
             let urlString = comp.content.icons?.first?.url
         else { return nil }
         return URL(string: urlString)
     }
     
-    func transformImageComponent(entity: ProfileOnboardingEntity) -> URL? {
-        guard
-            let comp      = entity.component(in: "contentSection", ofType: "imageComponent"),
+    func transformTopImageComponent(entity: ProfileOnboardingEntity) -> URL? {
+        guard let comp = entity.component(in: "contentSection", ofType: "imageComponent"),
             let urlString = comp.content.url,
-            let url       = URL(string: urlString)
+            let url = URL(string: urlString)
         else { return nil }
         print("💚이미지 데이터를 확인합니다잉 \(urlString)💚")
         return url
     }
+    
+    func transformBottomImageCommponent(entity: ProfileOnboardingEntity) -> URL? {
+        guard let comp = entity.component(in: "contentSection", ofType: "imageComponent", at: 1),
+              let urlString = comp.content.url,
+              let url = URL(string: urlString)
+          else { return nil }
+        
+        print("💙두번째 이미지 데이터를 확인합니다잉 \(urlString)💙")
+        return url
+    }
+    
+    func transformDescriptionComponent(entity: ProfileOnboardingEntity) -> String {
+        guard let comp = entity.component(in: "contentSection", ofType: "textComponent", at: 2) else { return "" }
+                
+        return comp.content.richText?.text.replacingOccurrences(of: "\\n", with: "\n") ?? ""
+    }
 
     func transformSubtitle(entity: ProfileOnboardingEntity) -> String {
-        guard
-            let section = entity.data.first(where: { $0.type == "contentSection" })
+        guard let section = entity.data.first(where: { $0.type == "contentSection" })
         else { return "" }
 
         let textComps = section.components.filter { $0.componentType == "textComponent" }
@@ -154,23 +159,15 @@ extension ProfileOnboardingViewModel {
     }
     
     func transformChipText(entity: ProfileOnboardingEntity) -> String {
-        guard
-            let comp = entity.component(in: "contentSection", ofType: "chipComponent")
+        guard let comp = entity.component(in: "contentSection", ofType: "chipComponent")
         else { return "" }
         return comp.content.richText?.text ?? ""
-    }
-    
-    func transformBackgroundImage(entity: ProfileOnboardingEntity) -> ImageComponent? {
-        guard let comp = entity.component(in: "contentSection", ofType: "imageComponent") else { return nil }
-        
-        return nil
     }
 
     func transformSkipTextComponent(entity: ProfileOnboardingEntity) -> String {
         guard let comp = entity.component(in: "bottomSection", ofType: "buttonsComponent") else { return "" }
         let richText = comp.content.buttons?.first?.richText.text ?? ""
-        
-        print("💙 바텀 버튼 텍스트 값 확인 \(richText) 💙")
+
         return richText
     }
     
@@ -178,12 +175,22 @@ extension ProfileOnboardingViewModel {
         guard let comp = entity.component(in: "bottomSection", ofType: "buttonsComponent") else { return "" }
         let richText = comp.content.buttons?.last?.richText.text ?? ""
         
-        print("❣️바텀 마지막 버튼 텍스트 값 확인 \(richText) ❣️")
         return richText
     }
     
-    func transformDeepLinkURL(entity: ProfileOnboardingEntity) -> URL? {
-        return nil
+    
+    @MainActor
+    func handleProfileEditDeepLink(entity: ProfileOnboardingEntity) async {
+        guard let comp = entity.component(in: "bottomSection", ofType: "buttonsComponent"),
+              let urlString = comp.content.buttons?.last?.onClickAction.deepLink,
+              let url = URL(string: urlString),
+              let urlScheme = url.scheme,
+              let urlHost = url.host else { return }
+        
+        
+        if urlScheme == "wespot" && urlHost == "all" && url.path == "/profile-edit" {
+            NotificationCenter.default.post(name: .showProfileSettingViewController, object: nil)
+        }
     }
 }
 
