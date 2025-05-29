@@ -117,7 +117,6 @@ public final class ProfileSettingViewReactor: Reactor {
                         
                         let isDisabled = !isChanged || !isValid
                         let errorMessage = isValid ? "" : "20자 이내로 입력 가능해요"
-                        
                         return .concat(
                             .just(.setCheckProfanityValidation(!isValid)),
                             .just(.setErrorDescriptionMessage(errorMessage)),
@@ -134,6 +133,7 @@ public final class ProfileSettingViewReactor: Reactor {
                     .flatMap { isProfileUpdate -> Observable<Mutation> in
                         return .concat(
                             .just(.setLoading(false)),
+                            .just(.setButtonEnabled(false)),
                             .just(.setUpdateUserProfile(isProfileUpdate)),
                             .just(.setLoading(true))
                         )
