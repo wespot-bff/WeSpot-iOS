@@ -1,9 +1,10 @@
 //
 //  CreateReportUserUseCase.swift
-//  CommonDomain
+//  VoteDomain
 //
-//  Created by Kim dohyun on 8/10/24.
+//  Created by 김도현 on 5/30/25.
 //
+
 
 import Foundation
 
@@ -16,14 +17,14 @@ public protocol CreateReportUserUseCaseProtocol {
 
 public final class CreateReportUserUseCase: CreateReportUserUseCaseProtocol {
     
-    public let commonRepositroy: CommonRepositoryProtocol
+    public let repository: VoteRepositoryProtocol
     
-    public init(commonRepositroy: CommonRepositoryProtocol) {
-        self.commonRepositroy = commonRepositroy
+    public init(repository: VoteRepositoryProtocol) {
+        self.repository = repository
     }
     
     public func execute(body: CreateUserReportRequest) -> Single<CreateReportUserEntity?> {
-        return commonRepositroy.createReportUserItem(body: body)
+        return repository.createReportUserItem(body: body)
     }
     
 }

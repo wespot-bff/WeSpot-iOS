@@ -64,18 +64,6 @@ public final class CommonRepository: CommonRepositoryProtocol {
             .asSingle()
     }
     
-    public func createReportUserItem(body: CreateUserReportRequest) -> Single<CreateReportUserEntity?> {
-        let body = CreateUserReportRequestDTO(reportType: body.type, targetId: body.targetId)
-        let endPoint = CommonEndPoint.createUserReport(body)
-        
-        return networkService.request(endPoint: endPoint)
-            .asObservable()
-            .decodeMap(CreateReportUserResponseDTO.self)
-            .logErrorIfDetected(category: Network.error)
-            .map { $0.toDomain() }
-            .asSingle()
-    }
-    
     public func fetchVoteOptions() -> Single<VoteResponseEntity?> {
         let endPoint = CommonEndPoint.fetchVoteOptions
         if let cacheResponse: VoteResponseDTO = WSCacheManager.shared.getResponse(for: WSCacheKey.voteOptions.rawValue) {

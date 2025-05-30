@@ -97,4 +97,16 @@ public final class VoteRepository: VoteRepositoryProtocol {
             .map { $0.toDomain() }
             .asSingle()
     }
+    
+    public func createReportUserItem(body: CreateUserReportRequest) -> Single<CreateReportUserEntity?> {
+        let body = CreateUserReportRequestDTO(reportType: body.type, targetId: body.targetId)
+        let endPoint = VoteEndPoint.createUserReport(body)
+        
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .decodeMap(CreateReportUserResponseDTO.self)
+            .logErrorIfDetected(category: Network.error)
+            .map { $0.toDomain() }
+            .asSingle()
+    }
 }

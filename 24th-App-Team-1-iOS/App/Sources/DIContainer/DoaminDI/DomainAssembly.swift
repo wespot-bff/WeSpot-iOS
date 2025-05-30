@@ -36,8 +36,8 @@ struct DomainAssembly: Assembly {
         }
         
         container.register(CreateReportUserUseCaseProtocol.self) { resolver in
-            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
-            return CreateReportUserUseCase(commonRepositroy: repository)
+            let repository = resolver.resolve(VoteRepositoryProtocol.self)!
+            return CreateReportUserUseCase(repository: repository)
         }
         
         container.register(FetchProfileOnboardingInfoUseCaseProtocol.self) { resolver in

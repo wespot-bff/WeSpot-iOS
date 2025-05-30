@@ -7,7 +7,7 @@
 
 import Foundation
 
-import CommonDomain
+import VoteDomain
 
 public struct CreateReportUserResponseDTO: Decodable {
     public let id: Int

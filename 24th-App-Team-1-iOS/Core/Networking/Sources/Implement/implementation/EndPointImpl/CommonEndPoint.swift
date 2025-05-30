@@ -22,8 +22,6 @@ public enum CommonEndPoint: WSNetworkEndPoint {
     case fetchUserProfile
     // 비속어 검색 API
     case createProfanityCheck(Encodable)
-    // 유저 신고 API
-    case createUserReport(Encodable)
     /// 사용자 프로필 수정 API
     case updateUserProfile(Encodable)
     /// 질문지 조회 API
@@ -41,8 +39,6 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/me")
         case .createProfanityCheck:
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/check-profanity")
-        case .createUserReport:
-            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/reports")
         case .updateUserProfile:
             return WSNetworkSpec(method: .put, url: "\(WSNetworkConfigure.baseURL)/users/me")
         case .fetchVoteOptions:
@@ -62,8 +58,6 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return "/users/me"
         case .createProfanityCheck:
             return "/check-profanity"
-        case .createUserReport:
-            return "/reports"
         case .updateUserProfile:
             return "/users/me"
         case .fetchVoteOptions:
@@ -83,8 +77,6 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return .get
         case .createProfanityCheck:
             return .post
-        case .createUserReport:
-            return .post
         case .updateUserProfile:
             return .put
         case .fetchVoteOptions:
@@ -102,8 +94,6 @@ public enum CommonEndPoint: WSNetworkEndPoint {
         switch self {
         case .createProfanityCheck(let messsage):
             return .requestBody(messsage)
-        case let .createUserReport(body):
-            return .requestBody(body)
         case let .updateUserProfile(body):
             return .requestBody(body)
         case let .fetchProfilePresignedURL(query),
