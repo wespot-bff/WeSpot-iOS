@@ -28,6 +28,10 @@ public class WSLabel: UILabel {
         self.text = text
         self.font = wsFont.font()
         
+        if text != nil {
+            self.sizeToFit()
+        }
+        
     }
     
     required init?(coder: NSCoder) {

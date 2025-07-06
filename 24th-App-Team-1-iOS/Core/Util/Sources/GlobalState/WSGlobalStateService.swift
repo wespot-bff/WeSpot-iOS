@@ -7,10 +7,10 @@
 
 import Foundation
 import CommonDomain
+import DesignSystem
 
 import RxSwift
-
-
+import UIKit
 
 public protocol WSGlobalServiceProtocol {
     var event: PublishSubject<WSGlobalStateType> { get }
@@ -45,4 +45,7 @@ public enum WSGlobalStateType {
     case didUpdateUserBlockButton(id: String)
     case didTappedResignButton(_ isStatus: Bool)
     case didShowSignInViewController(_ isSuccess: Bool)
+    case showToast(_ message: String, type: ToastImagesType)
+    case setAnonymousProfileData(name: String, imageUrl: String, image: UIImage)
+    case anonymousProfileSetupComplete
 }

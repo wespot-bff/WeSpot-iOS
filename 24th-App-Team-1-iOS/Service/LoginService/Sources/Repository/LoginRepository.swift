@@ -34,14 +34,14 @@ public final class LoginRepository: LoginRepositoryProtocol {
             .flatMap { (data, statusCode) -> Single<LoginDomain.LoginResultEnum?> in
                 switch statusCode {
                 case 200:
-                    return Observable.just(data)
+                    return Observable.just(data ?? Data())
                         .decodeMap(SignInUserRepsonseDTO.self)
                         .map { .success200($0.toDomain()) }
                         .asSingle()
                     
                 case 202:
 
-                    return Observable.just(data)
+                    return Observable.just(data ?? Data())
                         .decodeMap(SignUpTokenResponseDTO.self)
                         .map { .success202($0.toDomain()) }
                         .asSingle()

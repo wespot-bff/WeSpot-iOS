@@ -66,9 +66,10 @@ public final class WSTextField: UITextField {
     
     
     // MARK: - Initializer
-    public init(state: TextFieldState = .default, placeholder: String = "Placeholder", title: String? = nil) {
+    public init(state: TextFieldState = .default,
+                placeholder: String = "Placeholder",
+                title: String? = nil) {
         super.init(frame: .zero)
-        
         self.textFieldState = state
         self.titleText = title
         self.placeholderText = placeholder
@@ -97,7 +98,6 @@ public final class WSTextField: UITextField {
         layer.borderColor = UIColor.clear.cgColor
         layer.borderWidth = 1.0
         layer.cornerRadius = 12
-        textColor = DesignSystemAsset.Colors.gray100.color
         placeholder = placeholderText
         attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: [NSAttributedString.Key.foregroundColor: DesignSystemAsset.Colors.gray400.color])
         backgroundColor = DesignSystemAsset.Colors.gray700.color
@@ -161,9 +161,7 @@ public final class WSTextField: UITextField {
         return bounds.inset(by: textFieldState.padding)
     }
     
-    public override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
-        return bounds.inset(by: textFieldState.padding)
-    }
+
     
     // boderUpdate Binder 프로퍼티
     public var borderUpdateBinder: Binder<Bool> {

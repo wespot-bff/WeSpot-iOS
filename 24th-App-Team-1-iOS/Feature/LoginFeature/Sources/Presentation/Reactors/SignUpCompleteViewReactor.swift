@@ -78,13 +78,13 @@ public final class SignUpCompleteViewReactor: Reactor {
         case let .setLoading(isLoading):
             newState.isLoading = isLoading
         case let .setAccountToken(accountEntity):
+            
             break
 //            newState.accountEntity = accountEntity
 //            KeychainManager.shared.set(value: accountEntity.accessToken, type: .accessToken)
 //            KeychainManager.shared.set(value: accountEntity.refreshToken, type: .refreshToken)
 //            
 //            UserDefaultsManager.shared.refreshToken = accountEntity.refreshToken
-//            UserDefaultsManager.shared.userName = accountEntity.name
         case let .setExpiredDate(isExpired):
             newState.isExpired = isExpired
         }

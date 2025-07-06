@@ -119,10 +119,39 @@ struct DomainAssembly: Assembly {
             return FetchMessagesStatusUseCase(repository: repository)
         }
         
+        container.register(AnonymousProfileUseCase.self) { resolver in
+            let repository = resolver.resolve(MessageRepositoryProtocol.self)!
+            let imageUrlUsecase = resolver.resolve(CreatePresigendURLUseCaseProtocol.self)!
+            let updateUserProfileUploadUseCase = resolver.resolve(UpdateUserProfileUploadUseCaseProtocol.self)
+            return AnonymousProfileUseCaseImpl(repository: repository, imageUrlUsecase: imageUrlUsecase,
+                                               updateUserProfileUploadUseCase: updateUserProfileUploadUseCase)
+        }
+        
         container.register(FetchReceivedMessageUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(MessageRepositoryProtocol.self)!
             return FetchReceivedMessageUseCase(repository: repository)
         }
+        
+        container.register(FetchStudentSearchResultUseCase.self) { resolver in
+            let repository = resolver.resolve(MessageRepositoryProtocol.self)!
+            return FetchStudentSearchResultUseCaseImpl(repository: repository)
+        }
+        
+        container.register(WriteMessageUseCase.self) { resolver in
+            let repository = resolver.resolve(MessageRepositoryProtocol.self)!
+            return WriteMessageUseCaseImpl(repository: repository)
+        }
+        
+        container.register(MessageSettingUsecase.self) { resolver in
+            let repository = resolver.resolve(MessageRepositoryProtocol.self)!
+            return MessageSettingUsecaseImpl(repository: repository)
+        }
+        
+        container.register(MessageStorageUseCase.self) { resolver in
+            let repository = resolver.resolve(MessageRepositoryProtocol.self)!
+            return MessageStorageUseCaseImpl(repository: repository)
+        }
+
         
         // Profile
         container.register(FetchUserProfileUseCaseProtocol.self) { resolver in

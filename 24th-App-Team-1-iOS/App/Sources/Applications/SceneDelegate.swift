@@ -26,7 +26,6 @@ import KakaoSDKAuth
 import MessageFeature
 import KeychainSwift
 
-
 public class SceneDelegate: UIResponder, UISceneDelegate {
     
     var window: UIWindow?
@@ -55,7 +54,13 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
             VoteInventoryDetailPresentationAssembly(),
             MessageMainPresentationAssembly(),
             MessagePagePresentationAssembly(),
+            MessageSettingAssembly(),
             MessageHomePresentationAssembly(),
+            MessageWritePresentationAssembly(),
+            MessageStroagePresentationAssembly(),
+            MessageReportPresentationAssembly(),
+            MessageBottomSheetPresentationAssembly(),
+            AnonymousProfileBottomSheetAssembly(),
             AllMainPresentationAssembly(),
             AllMainProfilePresentationAssembly(),
             AllMainProfileWebPresentationAssembly(),
@@ -64,7 +69,6 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
             AllMainProfileUserBlockPresentationAssembly(),
             AllMainProfileAccountSettingPresentationAssembly(),
             AllMainProfileResignNotePresentationAssembly(),
-            MessageReportPresentationAssembly(),
             AllMainProfileResignPresentationAssembly(),
             NotificationPresentationAssembly(),
             DataAssembly(),
@@ -94,6 +98,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
     }
 }
 
+@available(iOS 16.0, *)
 extension SceneDelegate {
     
     //TODO: Coordinator 패턴으로 수정
@@ -188,11 +193,33 @@ extension SceneDelegate {
             }
             
         }
+        
+        NotificationCenter.default.addObserver(forName: .showMessageWriteViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let SearchStudentForMessageWriteViewController = DependencyContainer.shared.injector.resolve(SearchStudentForMessageWriteViewController.self)
+            topViewController?.navigationController?.pushViewController(SearchStudentForMessageWriteViewController, animated: true)
+        }
+        
+        NotificationCenter.default.addObserver(forName: .showMessageSettignsViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let messageSettingViewController = DependencyContainer.shared.injector.resolve(MessageSettingViewController.self)
+            topViewController?.navigationController?.pushViewController(messageSettingViewController, animated: true)
+        }
+        
+        NotificationCenter.default.addObserver(forName: .showInputMessageWirteViewController, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            let topViewController = self.window?.rootViewController?.topMostViewController()
+            let MessageWirteViewController = DependencyContainer.shared.injector.resolve(MessageWriteViewController.self)
+            topViewController?.navigationController?.pushViewController(MessageWirteViewController, animated: true)
+        }
     }
     
 }
 
 
+@available(iOS 16.0, *)
 extension SceneDelegate {
     private func setupMainViewController() {
         let voteMainViewController = DependencyContainer.shared.injector.resolve(VoteMainViewController.self)

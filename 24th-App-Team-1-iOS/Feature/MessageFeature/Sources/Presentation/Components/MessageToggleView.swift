@@ -6,29 +6,26 @@
 //
 
 import UIKit
-import Util
-import DesignSystem
 
 import SnapKit
 import Then
+import DesignSystem
 
 final class MessageToggleView: UIView {
+    //MARK: - Properties
+    let mainButton: UIButton = UIButton()
+    let resultButton: UIButton = UIButton()
+    private let selectedLine: UIView = UIView()
+    private let underLine: UIView = UIView()
     
-    // MARK: - Properties
-    let homeButton = UIButton()
-    let storageButton = UIButton()
-    private let underLine = UIView()
-    private let selectedLine = UIView()
     var isSelected: Bool = true {
         didSet {
-            
+            updateToggleLayout(isSelected)
         }
     }
     
-    // MARK: - Initialize
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         setupUI()
         setupAttributes()
         setupAutoLayout()
@@ -38,19 +35,33 @@ final class MessageToggleView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Functions
+    //MARK: - Configure
     private func setupUI() {
-        
-        addSubviews(homeButton, underLine)
+        addSubviews(mainButton, resultButton, underLine, selectedLine)
     }
     
     private func setupAttributes() {
+        mainButton.do {
+            $0.configuration = .plain()
+            $0.configuration?.baseForegroundColor = DesignSystemAsset.Colors.gray100.color
+            $0.configuration?.attributedTitle = AttributedString(NSAttributedString(string: String.MessageTexts.messageHomeButtonText,
+                                                                                    attributes: [
+                .font: WSFont.Body03.font(),
+            ]))
+            $0.configuration?.baseBackgroundColor = .clear
+        }
         
-        homeButton.do {
-            $0.backgroundColor = UIColor.clear
-            $0.titleLabel?.font = WSFont.Body03.font()
-            $0.setTitle("쪽지 홈", for: .normal)
-            $0.setTitleColor(DesignSystemAsset.Colors.gray100.color, for: .normal)
+        resultButton.do {
+            $0.configuration = .plain()
+            $0.configuration?.baseBackgroundColor = .clear
+            $0.configuration?.baseForegroundColor = DesignSystemAsset.Colors.gray400.color
+            $0.configuration?.attributedTitle = AttributedString(NSAttributedString(string: String.MessageTexts.messageBoxButtonText, attributes: [
+                .font: WSFont.Body03.font(),
+            ]))
+        }
+        
+        selectedLine.do {
+            $0.backgroundColor = DesignSystemAsset.Colors.gray100.color
         }
         
         underLine.do {
@@ -59,17 +70,37 @@ final class MessageToggleView: UIView {
     }
     
     private func setupAutoLayout() {
-        
-        homeButton.snp.makeConstraints {
+        mainButton.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview()
-            $0.width.equalToSuperview()
+            $0.left.equalToSuperview().inset(20)
+            $0.width.equalTo(self).multipliedBy(0.5).offset(-20)
         }
-        
+        resultButton.snp.makeConstraints {
+            $0.verticalEdges.equalToSuperview()
+            $0.right.equalToSuperview().inset(20)
+            $0.width.equalTo(self).multipliedBy(0.5).offset(-20)
+        }
         
         underLine.snp.makeConstraints {
             $0.height.equalTo(1)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview().offset(-1)
+        }
+        
+        selectedLine.snp.makeConstraints {
+            $0.left.equalToSuperview().offset(20)
+            $0.height.equalTo(2)
+            $0.width.equalTo(self).multipliedBy(0.5).offset(-20)
+            $0.bottom.equalToSuperview().offset(-2)
+        }
+    }
+    
+    private func updateToggleLayout(_ isSelected: Bool) {
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) { [weak self] in
+            guard let self else { return }
+            self.selectedLine.frame.origin.x = isSelected ? 20 : (self.frame.size.width - self.selectedLine.frame.size.width) - 20
+            self.mainButton.configuration?.baseForegroundColor =  isSelected ? DesignSystemAsset.Colors.gray100.color :  DesignSystemAsset.Colors.gray400.color
+            self.resultButton.configuration?.baseForegroundColor =  isSelected ? DesignSystemAsset.Colors.gray400.color :  DesignSystemAsset.Colors.gray100.color
         }
     }
 }

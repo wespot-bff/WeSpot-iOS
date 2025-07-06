@@ -19,7 +19,13 @@ public extension Notification.Name {
     static let showVoteCompleteViewController = Notification.Name("showVoteCompleteViewController")
     static let showVoteEffectViewController = Notification.Name("showVoteEffectViewController")
     static let showVoteInventoryViewController = Notification.Name("showVoteInventoryViewController")
+    static let showProfileImageViewController = Notification.Name("showProfileImageViewController")
+    static let showMessageWriteViewController = Notification.Name("showMessageWriteViewController")
+    static let showMessageReportViewController = Notification.Name("showMessageReportViewController")
     static let showProfileSettingViewController = Notification.Name("showProfileSettingViewController")
+    static let showMessageSettignsViewController = Notification.Name("showMessageSettingsViewController")
+    static let showInputMessageWirteViewController = Notification.Name("showInputMessageWirteViewController")
+    static let showDetaillMessageViewController = Notification.Name("showDetaillMessageViewController")
     static let showProfileOnboardingView = Notification.Name("showForceProfileOnboardingView")
     static let dismissProfileOnboardingView = Notification.Name("dismissProfileOnboardingView")
 }

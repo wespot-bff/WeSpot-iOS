@@ -10,7 +10,6 @@ import UIKit
 import DesignSystem
 import ReactorKit
 
-
 open class BaseViewController<R>: UIViewController, ReactorKit.View where R: Reactor {
     //MARK: Properties
     public typealias Reactor = R
@@ -33,10 +32,14 @@ open class BaseViewController<R>: UIViewController, ReactorKit.View where R: Rea
     //MARK: LifeCycle
     open override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
         setupAutoLayout()
         setupAttributes()
+        WSLogger.debug(category: "🏠 ViewDidLoad", message: self.description)
+    }
+    
+    deinit {
+        WSLogger.debug(category: "🧹 Deinit", message: self.description)
     }
     
     //MARK: Configure
@@ -65,16 +68,10 @@ open class BaseViewController<R>: UIViewController, ReactorKit.View where R: Rea
         navigationBar.rx.leftBarButtonItem
             .bind(with: self) { owner, type in
                 switch type {
-                case .leftIcon:
-                    owner.navigationController?.popViewController(animated: true)
-                case .leftWithRightItem:
-                    owner.navigationController?.popViewController(animated: true)
-                case .leftWithCenterItem:
-                    owner.navigationController?.popViewController(animated: true)
-                case .all:
+                case .leftIcon, .leftWithRightItem, .leftWithCenterItem, .all:
                     owner.navigationController?.popViewController(animated: true)
                 default:
-                    break
+                    owner.dismiss(animated: false)
                 }
             }
             .disposed(by: disposeBag)

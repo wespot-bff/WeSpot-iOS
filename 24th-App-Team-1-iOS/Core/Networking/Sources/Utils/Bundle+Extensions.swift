@@ -15,4 +15,11 @@ extension Bundle {
         }
         return url
     }
+    
+    static var baseURLV2: String {
+        guard let url = Bundle.main.object(forInfoDictionaryKey: "BASE_URL_V2") as? String else {
+            return ""
+        }
+        return url
+    }
 }

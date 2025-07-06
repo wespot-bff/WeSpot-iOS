@@ -7,6 +7,7 @@
 
 import Foundation
 
+import Storage
 import CommonDomain
 import ReactorKit
 
@@ -73,6 +74,7 @@ public final class AllMainViewReactor: Reactor {
         case let .setLoading(isLoading):
             newState.isLoading = isLoading
         case let .setUserProfileItem(accountProfileEntity):
+            UserDefaultsManager.shared.userName = accountProfileEntity.name
             newState.accountProfileEntity = accountProfileEntity
         }
         return newState
