@@ -41,7 +41,7 @@ public final class AnonymousProfileReactor: Reactor {
         case inputUserName(String)
         case presentMakeProfilePopup(vc: UIViewController, onProfileCreated: (String, String, Bool, UIImage) -> Void)
         case selectedProfile
-        case fetchProfileList
+        case fetchProfileList(id: Int)
         case setImageTapped(UIViewController)
         case setProfileImage(UIImage)
     }
@@ -66,7 +66,6 @@ public final class AnonymousProfileReactor: Reactor {
         self.router = router
         self.initialState = State()
         print("AnonymousProfileReactor initialized")
-        self.action.onNext(.fetchProfileList)
     }
 }
 
@@ -83,8 +82,8 @@ extension AnonymousProfileReactor {
         case .selectedProfile:
             return Observable.empty()
 
-        case .fetchProfileList:
-            return getProfileList()
+        case .fetchProfileList(let id):
+            return getProfileList(id: id)
         case .setImageTapped(let vc):
             router?.presenSetImagetBottomSheet(vc: vc)
             return Observable.empty()
@@ -149,7 +148,7 @@ extension AnonymousProfileReactor {
     // MARK: - Mutation Logic
 
 extension AnonymousProfileReactor {
-    private func getProfileList() -> Observable<Mutation> {
+    private func getProfileList(id: Int) -> Observable<Mutation> {
         return Observable.create { [weak self] observer in
             guard let self = self else {
                 observer.onCompleted()
@@ -157,7 +156,7 @@ extension AnonymousProfileReactor {
             }
             Task {
                 do {
-                    let entity = try await self.usecase.getAnonymousProfileList(receiverId: 0)
+                    let entity = try await self.usecase.getAnonymousProfileList(receiverId: id)
                     observer.onNext(Mutation.setProfileList(entity))
                 } catch {
                     observer.onNext(Mutation.setError(error.localizedDescription))

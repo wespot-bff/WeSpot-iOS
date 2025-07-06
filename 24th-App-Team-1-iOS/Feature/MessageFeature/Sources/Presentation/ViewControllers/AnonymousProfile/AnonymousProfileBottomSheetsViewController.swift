@@ -41,13 +41,15 @@ final class AnonymousProfileBottomSheetsViewController: BaseViewController<Anony
         return cell
       }
     )
+    private lazy var id: Int = 0
 
     //MARK: - LifeCycle
 
-    convenience init(status: AnonymousProfileStatusEnum, reactor: AnonymousProfileReactor) {
+    convenience init(status: AnonymousProfileStatusEnum, id: Int, reactor: AnonymousProfileReactor) {
         self.init()
         self.reactor = reactor
         self.status = status
+        self.id = id
         if status == .full {
             self.makeProfileButton.isHidden = true
         }
@@ -58,6 +60,7 @@ final class AnonymousProfileBottomSheetsViewController: BaseViewController<Anony
         self.view.backgroundColor = DesignSystemAsset.Colors.gray600.color
         self.navigationBar.isHidden = true
         self.profileTableView.rx.setDelegate(self).disposed(by: disposeBag)
+        self.reactor?.action.onNext(.fetchProfileList(id: self.id))
     }
     
     //MARK: - Functions

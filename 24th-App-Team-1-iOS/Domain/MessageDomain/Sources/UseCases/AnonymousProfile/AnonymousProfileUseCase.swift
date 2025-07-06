@@ -26,7 +26,7 @@ public final class AnonymousProfileUseCaseImpl: AnonymousProfileUseCase {
     }
     
     public func getAnonymousProfileList(receiverId: Int) async throws -> [AnonymousProfileEntity] {
-        let profileList = try await repository.fetchAnonymousProfileList(receiverId: 0)
+        let profileList = try await repository.fetchAnonymousProfileList(receiverId: receiverId)
         return profileList
     }
     

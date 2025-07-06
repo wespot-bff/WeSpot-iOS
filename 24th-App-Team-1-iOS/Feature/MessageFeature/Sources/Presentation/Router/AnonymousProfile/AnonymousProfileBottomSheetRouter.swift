@@ -10,7 +10,7 @@ import UIKit
 import MessageDomain
 
 public protocol AnonymousProfileBottomSheetRouting {
-    func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profileImg: UIImage) -> Void)
+    func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, id: Int, vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profileImg: UIImage) -> Void)
     func dismissAnonymousProfileBottomSheet(vc: UIViewController)
     func presenSetImagetBottomSheet(vc: UIViewController)
     func popUpmakeAnonyProfile(vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profileImg: UIImage) -> Void)
@@ -25,10 +25,10 @@ public class AnonymousProfileBottomSheetRouter: AnonymousProfileBottomSheetRouti
         self.reactor = reactor
     }
     
-    public func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, vc: UIViewController, onProfileCreated: @escaping (String, String, Bool, UIImage) -> Void) {
+    public func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, id: Int, vc: UIViewController, onProfileCreated: @escaping (String, String, Bool, UIImage) -> Void) {
         Task { @MainActor in
             print(state)
-            let bottomSheet = AnonymousProfileBottomSheetsViewController(status: state, reactor: reactor)
+            let bottomSheet = AnonymousProfileBottomSheetsViewController(status: state, id: id, reactor: reactor)
             bottomSheet.onProfileCreated = onProfileCreated
             bottomSheet.modalPresentationStyle = .pageSheet
             if let sheet = bottomSheet.sheetPresentationController {

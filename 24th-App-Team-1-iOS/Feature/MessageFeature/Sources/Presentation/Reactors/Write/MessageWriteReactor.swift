@@ -159,7 +159,7 @@ extension MessageWriteReactor {
                 .flatMap { statusMutation -> Observable<Mutation> in
                     guard case let .setBottomSheet(status) = statusMutation else { return .empty() }
                     
-                    self.bottomSheetRouter?.presentAnonymousProfileBottomSheet(status, vc: vc, onProfileCreated: { name, imageUrl, isAnonymous, profileImg in
+                    self.bottomSheetRouter?.presentAnonymousProfileBottomSheet(status, id: id, vc: vc, onProfileCreated: { name, imageUrl, isAnonymous, profileImg in
                         print("Anonymous Profile Created: \(name), \(imageUrl)")
                         self.globalState.event.onNext(.setAnonymousProfileData(name: name, imageUrl: imageUrl, image: profileImg))
                         self.globalState.event.onNext(.anonymousProfileSetupComplete)
