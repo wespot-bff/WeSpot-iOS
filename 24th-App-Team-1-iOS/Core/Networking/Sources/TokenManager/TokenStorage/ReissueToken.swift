@@ -8,7 +8,7 @@
 import Foundation
 
 struct ReissueToken: Encodable {
-    let token: String
+    let refreshToken: String
 }
 
 struct AccessToken: Decodable {
@@ -17,7 +17,7 @@ struct AccessToken: Decodable {
     let expiredAt: String
     
     
-    private enum Codingkeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case accessToken
         case refreshToken
         case expiredAt = "refreshTokenExpiredAt"

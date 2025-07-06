@@ -10,15 +10,15 @@ import UIKit
 /// WSNavigationTypeProperty로 각 **WSNavigationType**에 맞게 UI를 구성할 수 있습니다.
 public struct WSNavigationTypeProperty: Equatable {
     /// leftBarButtonItem UI를 구성하기 위한 프로퍼티 입니다.
-    var leftItem: UIImage?
+    public var leftItem: UIImage?
     /// centernItem UI를 구성하기 위한 프러퍼티 입니다.
-    var centerItem: String?
+    public var centerItem: String?
     /// rightBarButtonItem Image UI를 구성하기 위한 프로퍼티 입니다.
-    var rightImageItem: UIImage?
+    public var rightImageItem: UIImage?
     /// rightBarButtonItem  Text UI를 구성하기 위한 프로퍼티 입니다.
-    var rightTextItem: String?
+    public var rightTextItem: String?
     /// rightBarButtonItem Text Color를 구성하기 위한 프로퍼티 입니다.
-    var rightTextItemColor: UIColor?
+    public var rightTextItemColor: UIColor?
 }
 
 
@@ -33,7 +33,7 @@ public enum WSNavigationType: Equatable {
     case leftWithRightItem(UIImage, String, UIImage)
     case all(UIImage, String?, String?, UIColor)
     
-    var items: WSNavigationTypeProperty {
+    public var items: WSNavigationTypeProperty {
         switch self {
         case .default:
             return .init(

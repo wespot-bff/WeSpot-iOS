@@ -152,6 +152,9 @@ public final class VoteInventoryDetailViewController: BaseViewController<VoteInv
         
         detailFaceView.do {
             $0.image = DesignSystemAsset.Images.imgResultCharacter.image
+            $0.contentMode = .scaleAspectFill
+            $0.layer.cornerRadius = 60
+            $0.clipsToBounds = true
         }
         
         detailDescrptionLabel.do {

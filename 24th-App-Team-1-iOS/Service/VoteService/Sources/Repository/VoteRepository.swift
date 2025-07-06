@@ -10,6 +10,7 @@ import Foundation
 import Networking
 import Util
 import VoteDomain
+import Storage
 
 import RxSwift
 import RxCocoa
@@ -43,6 +44,7 @@ public final class VoteRepository: VoteRepositoryProtocol {
         return networkService.request(endPoint: endPoint)
             .asObservable()
             .logErrorIfDetected(category: Network.error)
+            .do { _ in WSCacheManager.shared.claer(for: WSCacheKey.voteOptions.rawValue) }
             .decodeMap(CreateVoteResponseDTO.self)
             .map { $0.toDomain() }
             .asSingle()
@@ -91,6 +93,18 @@ public final class VoteRepository: VoteRepositoryProtocol {
         return networkService.request(endPoint: endPoint)
             .asObservable()
             .decodeMap(VoteIndividualResponseDTO.self)
+            .logErrorIfDetected(category: Network.error)
+            .map { $0.toDomain() }
+            .asSingle()
+    }
+    
+    public func createReportUserItem(body: CreateUserReportRequest) -> Single<CreateReportUserEntity?> {
+        let body = CreateUserReportRequestDTO(reportType: body.type, targetId: body.targetId)
+        let endPoint = VoteEndPoint.createUserReport(body)
+        
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .decodeMap(CreateReportUserResponseDTO.self)
             .logErrorIfDetected(category: Network.error)
             .map { $0.toDomain() }
             .asSingle()

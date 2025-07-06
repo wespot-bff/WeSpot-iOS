@@ -33,6 +33,9 @@ public enum VoteEndPoint: WSNetworkEndPoint {
     case fetchIndividualVotes(Int, Encodable)
     /// 내가 받은 투표 목록 조회
     case fetchVoteSent(Encodable)
+    /// 유저 신고 API
+    case createUserReport(Encodable)
+    
     
     public var spec: WSNetworkSpec {
         switch self {
@@ -50,6 +53,8 @@ public enum VoteEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes/received/options/\(id)")
         case .fetchVoteSent:
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/votes/sent")
+        case .createUserReport:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/reports")
         }
     }
     
@@ -67,6 +72,8 @@ public enum VoteEndPoint: WSNetworkEndPoint {
             return .requestQuery(sentQuery)
         case let .fetchIndividualVotes(_, individualQuery):
             return .requestQuery(individualQuery)
+        case let .createUserReport(body):
+            return .requestBody(body)
         default:
             return .none
         }

@@ -26,6 +26,15 @@ struct SplashPresentationAssembly: Assembly {
             let reactor = resolver.resolve(SplashViewReactor.self, argument: accessToken)!
             return SplashViewController(reactor: reactor)
         }
+        
+        container.register(ProfileOnboardingView.self) { resolver in
+            let viewModel = resolver.resolve(ProfileOnboardingViewModel.self)!
+            return ProfileOnboardingView(viewModel: viewModel)
+        }
+        
+        container.register(ProfileOnboardingViewModel.self) { _ in
+            return ProfileOnboardingViewModel()
+        }
     }
     
 }

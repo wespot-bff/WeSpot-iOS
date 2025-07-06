@@ -106,20 +106,23 @@ public final class VoteProcessViewReactor: Reactor {
             
         case let .didTappedQuestionItem(row):
 
-            let index = UserDefaultsManager.shared.voteRequest.count
-            guard let request = currentState.voteResponseEntity?.response[index] else {
+            var index = currentState.processCount - 1
+            guard let response = currentState.voteResponseEntity?.response else {
                 return .empty()
             }
             
             let voteOption = CreateVoteItemReqeuest(
-                userId: request.userInfo.id,
-                voteOptionId: request.voteInfo[row].id
+                userId: response[index].userInfo.id,
+                voteOptionId: response[index].voteInfo[row].id
             )
-            
-            if index < request.voteInfo.count - 1 {
+                
+            if let existingIndex = UserDefaultsManager.shared.voteRequest.firstIndex(where: { $0.userId == voteOption.userId }) {
+                UserDefaultsManager.shared.voteRequest[existingIndex] = voteOption
+            } else {
                 UserDefaultsManager.shared.voteRequest.append(voteOption)
             }
-            let isEnabled = UserDefaultsManager.shared.voteRequest.count == request.voteInfo.count - 1 ? true : false
+            
+            let isEnabled = UserDefaultsManager.shared.voteRequest.count == response.count
             return .just(.setResultButtonEnabled(isEnabled))
             
         case .didTappedResultButton:
@@ -146,8 +149,7 @@ public final class VoteProcessViewReactor: Reactor {
                 }
         case .didTappedLeftBarButtonItem:
             guard UserDefaultsManager.shared.voteRequest.isEmpty else {
-                let index = UserDefaultsManager.shared.voteRequest.count - 1
-                UserDefaultsManager.shared.voteRequest.remove(at: index)
+                UserDefaultsManager.shared.voteRequest.removeLast()
                 return .empty()
             }
             return .empty()

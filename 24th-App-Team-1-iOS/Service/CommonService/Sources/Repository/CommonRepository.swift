@@ -10,6 +10,7 @@ import Networking
 import CommonDomain
 import Util
 import Extensions
+import Storage
 
 import FirebaseRemoteConfig
 import Firebase
@@ -20,6 +21,7 @@ public final class CommonRepository: CommonRepositoryProtocol {
     
     
     private let networkService: WSNetworkServiceProtocol = WSNetworkService()
+    private let networkAsyncService: WSNetworkAsyncServiceProtocol = WSNetworkAsyncService()
     private let dataSources: RemoteConfig = RemoteConfig.remoteConfig()
     
     public init() { }
@@ -62,24 +64,19 @@ public final class CommonRepository: CommonRepositoryProtocol {
             .asSingle()
     }
     
-    public func createReportUserItem(body: CreateUserReportRequest) -> Single<CreateReportUserEntity?> {
-        let body = CreateUserReportRequestDTO(reportType: body.type, targetId: body.targetId)
-        let endPoint = CommonEndPoint.createUserReport(body)
-        
-        return networkService.request(endPoint: endPoint)
-            .asObservable()
-            .decodeMap(CreateReportUserResponseDTO.self)
-            .logErrorIfDetected(category: Network.error)
-            .map { $0.toDomain() }
-            .asSingle()
-    }
-    
     public func fetchVoteOptions() -> Single<VoteResponseEntity?> {
         let endPoint = CommonEndPoint.fetchVoteOptions
+        if let cacheResponse: VoteResponseDTO = WSCacheManager.shared.getResponse(for: WSCacheKey.voteOptions.rawValue) {
+            return .just(cacheResponse.toDomain())
+        }
+        
         return networkService.request(endPoint: endPoint)
             .asObservable()
             .logErrorIfDetected(category: Network.error)
             .decodeMap(VoteResponseDTO.self)
+            .do(onNext: { response in
+                WSCacheManager.shared.save(response: response, for: WSCacheKey.voteOptions.rawValue)
+            })
             .map { $0.toDomain() }
             .asSingle()
     }
@@ -119,5 +116,12 @@ public final class CommonRepository: CommonRepositoryProtocol {
         } else {
             throw WSRemoteConfigError.invalidFirebaseConfigure
         }
+    }
+    
+    public func fetchProfileOnbardingItem(query: ProfileOnboardingQuery) async throws -> ProfileOnboardingEntity {
+        let query = ProfileOnbardingInfoRequestDTO(publishNotificationType: query.publishNotificationType)
+        let endPoint = CommonEndPoint.fetchProfileOnboarding(query)
+        let responseDTO: ProfileOnboardingResponseDTO = try await networkAsyncService.request(endPoint: endPoint)
+        return responseDTO.toDomain()
     }
 }

@@ -16,4 +16,5 @@ public protocol VoteRepositoryProtocol {
     func fetchVoteReceiveItems(query: VoteReceiveRequestQuery) -> Single<VoteRecevieEntity?>
     func fetchVoteSentItems(query: VoteSentRequestQuery) -> Single<VoteSentEntity?>
     func fetchVoteIndividualItem(id: Int, query: VoteIndividualQuery) -> Single<VoteIndividualEntity?>
+    func createReportUserItem(body: CreateUserReportRequest) -> Single<CreateReportUserEntity?>
 }

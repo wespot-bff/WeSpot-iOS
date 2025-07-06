@@ -101,7 +101,7 @@ public final class SignInViewReactor: Reactor {
             KeychainManager.shared.set(value: userInfo.refreshToken,
                                        type: .refreshToken)
             
-            NotificationCenter.default.post(name: .showVoteMainViewController, object: nil)
+            NotificationCenter.default.post(name: .dismissProfileOnboardingView, object: nil)
         }
         return newState
     }

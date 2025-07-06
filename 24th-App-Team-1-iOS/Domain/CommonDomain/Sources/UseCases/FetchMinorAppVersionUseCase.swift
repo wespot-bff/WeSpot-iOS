@@ -52,13 +52,15 @@ extension FetchMinorAppVersionUseCase {
        let componentsA = versionA.split(separator: ".").map { Int($0) ?? 0 }
        let componentsB = versionB.split(separator: ".").map { Int($0) ?? 0 }
         
-       let minorA = componentsA.indices.contains(1) ? componentsA[1] : 0
-       let minorB = componentsB.indices.contains(1) ? componentsB[1] : 0
-       
-       
-       if minorA < minorB { return .orderedAscending }
-       if minorA > minorB { return .orderedDescending }
-       return .orderedSame
+        let maxVersion = max(componentsA.count, componentsB.count)
+        
+        for i in 0..<maxVersion {
+            let minorA = i < componentsA.count ? componentsA[i] : 0
+            let minorB = i < componentsB.count ? componentsB[i] : 0
+            if minorA < minorB { return .orderedAscending }
+            if minorA > minorB { return .orderedDescending }
+        }
+        return .orderedSame
    }
 }
 

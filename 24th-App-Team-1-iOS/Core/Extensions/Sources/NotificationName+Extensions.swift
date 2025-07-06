@@ -26,5 +26,6 @@ public extension Notification.Name {
     static let showMessageSettignsViewController = Notification.Name("showMessageSettingsViewController")
     static let showInputMessageWirteViewController = Notification.Name("showInputMessageWirteViewController")
     static let showDetaillMessageViewController = Notification.Name("showDetaillMessageViewController")
-
+    static let showProfileOnboardingView = Notification.Name("showForceProfileOnboardingView")
+    static let dismissProfileOnboardingView = Notification.Name("dismissProfileOnboardingView")
 }

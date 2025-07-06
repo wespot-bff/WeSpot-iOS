@@ -33,14 +33,14 @@ enum Const {
     static let voteResultTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 0 : 32
     static let voteResultItemHeight: CGFloat = Device.isTouchIDCapableDevice ? 330 : 392
     
-    static let voteResultRankViewWidth: CGFloat = Device.isTouchIDCapableDevice ? 86 : 98
-    static let voteResultRankViewHeight: CGFloat = Device.isTouchIDCapableDevice ? 31 : 36
+    static let voteResultRankViewWidth: CGFloat = Device.isTouchIDCapableDevice ? 86 : 102
+    static let voteResultRankViewHeight: CGFloat = Device.isTouchIDCapableDevice ? 31 : 38
     static let voteResultRankViewTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 16 : 18
     static let voteResultRankViewLeftSpacing: CGFloat = Device.isTouchIDCapableDevice ? 20 : 20
     static let voteResultRankViewFont: WSFont = Device.isTouchIDCapableDevice ? .Header02 : .Header01
     static let voteRankImageViewSize: CGFloat = Device.isTouchIDCapableDevice ? 26 : 30
     static let voteRankImageViewLeftSpacing: CGFloat = Device.isTouchIDCapableDevice ? 10 : 12
-    static let voteRankLabelLeftSpacing: CGFloat = Device.isTouchIDCapableDevice ? 10 : 12
+    static let voteRankLabelLeftSpacing: CGFloat = Device.isTouchIDCapableDevice ? 10 : 8
     static let voteRankLabelHeight: CGFloat = Device.isTouchIDCapableDevice ? 21 : 30
     
     static let voteResultDescriptionLabelTopSpacing: CGFloat = Device.isTouchIDCapableDevice ? 8 : 12

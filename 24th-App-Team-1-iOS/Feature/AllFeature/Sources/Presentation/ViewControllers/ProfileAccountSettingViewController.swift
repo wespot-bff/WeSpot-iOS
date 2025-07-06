@@ -95,9 +95,9 @@ public final class ProfileAccountSettingViewController: BaseViewController<Profi
                     WSAlertBuilder(showViewController: self)
                         .setAlertType(type: .message)
                         .setTitle(title: "로그아웃 하시나요?", titleAlignment: .left)
-                        .setConfirm(text: "닫기")
-                        .setCancel(text: "로그아웃")
-                        .action(.cancel) {
+                        .setConfirm(text: "로그아웃")
+                        .setCancel(text: "닫기")
+                        .action(.confirm) {
                             self.reactor?.action.onNext(.didTappedLogoutButton)
                         }
                         .show()

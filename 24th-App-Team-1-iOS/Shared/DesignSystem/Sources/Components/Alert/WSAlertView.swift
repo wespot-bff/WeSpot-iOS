@@ -47,7 +47,7 @@ public final class WSAlertView: UIViewController {
         case .cancel:
             buttonStackView.addArrangedSubview(cancelButton)
         case .all:
-            buttonStackView.addArrangedSubviews(confirmButton, cancelButton)
+            buttonStackView.addArrangedSubviews(cancelButton, confirmButton)
         }
         
         switch alertType {
