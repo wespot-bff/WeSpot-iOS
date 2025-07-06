@@ -5,8 +5,6 @@
 //  Created by eunseou on 8/8/24.
 //
 
-import Foundation
-
 import RxSwift
 
 public protocol MessageRepositoryProtocol {
@@ -25,4 +23,5 @@ public protocol MessageRepositoryProtocol {
     func fetchDetailMessage(messageId: Int) -> Single<MessageRoomDetailEntity>
     func replyMessage(id: Int, content: String) -> RxSwift.Single<Bool>
     func fetchBlockMessgeList() async throws -> [MessageRoomEntity]
+    func messageNoti(status: Bool) -> Single<Bool>
 }

@@ -7,8 +7,11 @@
 
 import UIKit
 
+import AllDomain
+import AllService
 import MessageDomain
 import MessageService
+import NotificationService
 
 public protocol MessageSettingRouting {
     func goToSetting(_ list: MessageDomain.MessageSettingListEnum, _ vc: UIViewController)
@@ -16,8 +19,11 @@ public protocol MessageSettingRouting {
 public class MessageSettingRouter: MessageSettingRouting {
     public func goToSetting(_ list: MessageDomain.MessageSettingListEnum, _ vc: UIViewController) {
         let usecase = MessageSettingUsecaseImpl(repository: messageRepository())
+        let notiUsecase = FetchUserAlarmSettingUseCase(profileRepository: ProfileRepository())
+        let uploadUsecase = UpdateUserAlarmSettingUseCase(profileRepository: ProfileRepository())
         let reactor = MessageSettingReactor(usecase: usecase,
-                                            router: self)
+                                            router: self,
+                                            notiUsecase: notiUsecase, uploadNotiUsecase: uploadUsecase)
         switch list {
         case .blockList:
             let blockListVC = BlockMessageListViewContoller(reactor: reactor)

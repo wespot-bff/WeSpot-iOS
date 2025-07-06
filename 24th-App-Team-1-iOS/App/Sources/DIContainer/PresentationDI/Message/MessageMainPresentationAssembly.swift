@@ -150,8 +150,13 @@ struct MessageSettingAssembly: Assembly {
             let router = MessageSettingRouter()
             let usecase = resolver.resolve(MessageSettingUsecase.self)!
 
-            return MessageSettingReactor(usecase: usecase,
-                                         router: router)
+
+            return MessageSettingReactor(
+               usecase: usecase,
+               router: router,
+               notiUsecase: nil,
+               uploadNotiUsecase: nil
+            )
         }
         
         // MessageSettingViewController 등록 (문제 없어 보임)

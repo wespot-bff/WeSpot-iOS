@@ -16,6 +16,20 @@ import RxCocoa
 
 public final class messageRepository: MessageRepositoryProtocol {
     
+    
+    public func messageNoti(status: Bool) -> RxSwift.Single<Bool> {
+        let query = MessageStatusToggleRequestDTO(isEnableMessage: status)
+        let endPoint = MessageEndPoint.messageEnable(query)
+        return networkService.requestWithStatusCode(endPoint: endPoint)
+            .flatMap { response -> Single<Bool> in
+                if response.statusCode == 204 {
+                    return Single.just(true)
+                } else  {
+                    return Single.just(false)
+                }
+            }
+    }
+    
     public func fetchBlockMessgeList() async throws -> [MessageRoomEntity] {
         let endPoint = MessageEndPoint.fetchBlockMessageList
         let data = try await networkService.requestAsync(endPoint: endPoint)

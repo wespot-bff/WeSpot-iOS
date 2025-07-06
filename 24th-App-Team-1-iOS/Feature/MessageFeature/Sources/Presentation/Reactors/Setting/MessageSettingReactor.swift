@@ -6,6 +6,7 @@
 //
 
 import MessageDomain
+import AllDomain
 import Extensions
 import Util
 
@@ -19,6 +20,8 @@ public final class MessageSettingReactor: Reactor {
     
     public var router: MessageSettingRouting?
     private let usecase: MessageSettingUsecase
+    private let notiUsecase: FetchUserAlarmSettingUseCaseProtocol?
+    private let uploadNotiUsecase: UpdateUserAlarmSettingUseCaseProtocol?
 
     // MARK: - Properties
     
@@ -28,28 +31,43 @@ public final class MessageSettingReactor: Reactor {
     public struct State {
         var settingList: [MessageSettingListEnum] = [.blockList, .incomingOutgoing, .alert]
         var blockList: [MessageRoomEntity] = []
-        var messageAlertState: Bool = true
-        var notificationState: Bool = true
+        @Pulse var notificationState: UserAlarmEntity?
+        @Pulse var messageNotiStatus: Bool = false
+        @Pulse var error: String = ""
+        @Pulse var isLoading: Bool = false
+        @Pulse var messageAlertState: Bool = false
         @Pulse var compelteUnBlock: Bool = false
     }
     
     public enum Action {
         case routeToList(MessageSettingListEnum, UIViewController)
         case unblcockMessage(Int)
+        case toggleMessageStatus(Bool)
+        case toggleNotificationStatus(Bool)
         case fetchBlockList
+        case fetchMessageStatus
+        case fetchNotificationStatus
         
     }
 
     public enum Mutation {
         case setBlockList([MessageRoomEntity])
+        case setMessageStatus(Bool)
+        case setNotificationStatus(UserAlarmEntity)
         case removeItem(id: Int)
+        case setError(String)
     }
     
     // MARK: - Init
     
-    public init(usecase: MessageSettingUsecase, router: MessageSettingRouting?) {
+    public init(usecase: MessageSettingUsecase,
+                router: MessageSettingRouting?,
+                notiUsecase: FetchUserAlarmSettingUseCaseProtocol?,
+                uploadNotiUsecase: UpdateUserAlarmSettingUseCaseProtocol?) {
         self.router = router
         self.usecase = usecase
+        self.notiUsecase = notiUsecase
+        self.uploadNotiUsecase = uploadNotiUsecase
         self.initialState = State()
     }
 }
@@ -85,11 +103,48 @@ extension MessageSettingReactor {
                 .asObservable()
                 .flatMap { isSuccess -> Observable<Mutation> in
                     if isSuccess {
-                        // ✅ 성공했다면, "id를 가진 아이템을 제거하라"는 Mutation을 방출합니다.
                         return .just(.removeItem(id: id))
                     } else {
-                        //  실패했다면 아무런 상태 변경도 하지 않습니다.
+                        return .just(.setError("수신 및 발신 알림 끄기가 실패했습니다."))
+                    }
+                }
+        case .toggleMessageStatus(let isOn):
+            return usecase.messsageStatus(status: isOn)
+                .asObservable()
+                .flatMap {
+                    isSuccess -> Observable<Mutation> in
+                    if isSuccess {
+                        return .just(.setMessageStatus(isOn))
+                    } else {
                         return .empty()
+                    }
+                }
+        case .fetchMessageStatus:
+            return usecase.fetchMessageStatus()
+                .asObservable()
+                .flatMap {  entity -> Observable<Mutation> in
+                    let isOn = entity.isReceivedAllowed
+                    return .just(.setMessageStatus(isOn))
+                }
+        case .fetchNotificationStatus:
+            return notiUsecase!.execute()
+                .asObservable()
+                .flatMap { entity -> Observable<Mutation> in
+                    let status = entity?.isEnableMessageNotification
+                    return .just(.setNotificationStatus(entity ?? UserAlarmEntity(isEnableVoteNotification: false, isEnableMessageNotification: false, isEnableMarketingNotification: false)))
+                }
+                
+        case .toggleNotificationStatus(let status):
+            let query = UpdateUserProfileAlarmRequest(isEnableVoteNotification: currentState.notificationState?.isEnableVoteNotification ?? false,
+                                                      isEnableMessageNotification: status,
+                                                      isEnableMarketingNotification: currentState.notificationState?.isEnableMarketingNotification ?? false)
+            return uploadNotiUsecase!.execute(body: query)
+                .asObservable()
+                .flatMap { isSuccess -> Observable<Mutation> in
+                    if isSuccess {
+                        return Observable.empty()
+                    } else {
+                        return Observable.empty()
                     }
                 }
         }
@@ -98,12 +153,17 @@ extension MessageSettingReactor {
     public func reduce(state: State, mutation: Mutation) -> State {
         var newState = state
         switch mutation {
-
         case .setBlockList(let list):
             newState.blockList = list
         case .removeItem(let id):
             newState.blockList = state.blockList.filter { $0.id != id }
             newState.compelteUnBlock = true
+        case .setMessageStatus(let status):
+            newState.messageAlertState = status
+        case .setError(let errorMsg):
+            newState.error = errorMsg
+        case .setNotificationStatus(let status):
+            newState.notificationState = status
         }
         return newState
     }

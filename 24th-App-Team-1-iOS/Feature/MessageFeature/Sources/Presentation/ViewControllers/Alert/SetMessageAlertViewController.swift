@@ -122,7 +122,7 @@ final class SetMessageAlertViewController: BaseViewController<MessageSettingReac
             reactor.state
                 .map {$0.notificationState}
                 .bind(with: self) { owner, state in
-                    owner.alertStateSwitch.isOn = state
+                    owner.alertStateSwitch.isOn = state?.isEnableMessageNotification ?? true
                 }
                 .disposed(by: self.disposeBag)
         default:
@@ -131,6 +131,25 @@ final class SetMessageAlertViewController: BaseViewController<MessageSettingReac
     }
     
     private func bindAction(reactor: Reactor) {
-
+        reactor.action.onNext(.fetchMessageStatus)
+        reactor.action.onNext(.fetchNotificationStatus)
+        switch viewType {
+        case .blockList:
+            break
+        case .incomingOutgoing:
+            alertStateSwitch.rx.isOn
+                .observe(on: MainScheduler.instance)
+                .bind(with: self) { owner, isOn in
+                    reactor.action.onNext(.toggleMessageStatus(isOn))
+                }
+                .disposed(by: self.disposeBag)
+        case .alert:
+            alertStateSwitch.rx.isOn
+                .observe(on: MainScheduler.instance)
+                .bind(with: self) { owner, isOn in
+                    reactor.action.onNext(.toggleNotificationStatus(isOn))
+                }
+                .disposed(by: self.disposeBag)
+        }
     }
 }

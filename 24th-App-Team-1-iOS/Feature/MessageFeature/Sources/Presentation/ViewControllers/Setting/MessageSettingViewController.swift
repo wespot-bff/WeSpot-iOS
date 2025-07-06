@@ -19,7 +19,6 @@ import ReactorKit
 
 public final class MessageSettingViewController: BaseViewController<MessageSettingReactor> {
     
-
     private let listTableView = UITableView().then {
         $0.backgroundColor = .clear
         $0.separatorStyle = .none
