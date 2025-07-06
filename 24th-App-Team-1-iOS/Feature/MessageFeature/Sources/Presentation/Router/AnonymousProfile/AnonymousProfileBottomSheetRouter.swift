@@ -10,10 +10,10 @@ import UIKit
 import MessageDomain
 
 public protocol AnonymousProfileBottomSheetRouting {
-    func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool) -> Void)
+    func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profileImg: UIImage) -> Void)
     func dismissAnonymousProfileBottomSheet(vc: UIViewController)
     func presenSetImagetBottomSheet(vc: UIViewController)
-    func popUpmakeAnonyProfile(vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool) -> Void)
+    func popUpmakeAnonyProfile(vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profileImg: UIImage) -> Void)
     func goToWriteMessage(reactor: MessageWriteReactor, vc: UIViewController)
 
 }
@@ -25,7 +25,7 @@ public class AnonymousProfileBottomSheetRouter: AnonymousProfileBottomSheetRouti
         self.reactor = reactor
     }
     
-    public func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, vc: UIViewController, onProfileCreated: @escaping (String, String, Bool) -> Void) {
+    public func presentAnonymousProfileBottomSheet(_ state: AnonymousProfileStatusEnum, vc: UIViewController, onProfileCreated: @escaping (String, String, Bool, UIImage) -> Void) {
         Task { @MainActor in
             print(state)
             let bottomSheet = AnonymousProfileBottomSheetsViewController(status: state, reactor: reactor)
@@ -70,7 +70,7 @@ public class AnonymousProfileBottomSheetRouter: AnonymousProfileBottomSheetRouti
         }
     }
     
-    public func popUpmakeAnonyProfile(vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool) -> Void) {
+    public func popUpmakeAnonyProfile(vc: UIViewController, onProfileCreated: @escaping (_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profileImg: UIImage) -> Void) {
         let popup = MakeAnonymousProfilePopupViewController()
         popup.reactor = reactor
         

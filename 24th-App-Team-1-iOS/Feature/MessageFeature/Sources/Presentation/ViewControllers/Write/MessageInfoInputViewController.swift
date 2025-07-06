@@ -260,10 +260,10 @@ extension MessageInfoInputViewController {
             .disposed(by: disposeBag)
         
         reactor.state
-            .map {$0.profileImageURL}
-            .bind(with: self) {  this, url in
-                print("보내는 사람 이미지 URL: \(url)")
-                this.posterImageView.kf.setImage(with: URL(string: url), placeholder: DesignSystemAsset.Images.icBasicProfile.image)
+            .map {$0.profileImage}
+            .bind(with: self) {  this, img in
+                print("보내는 사람 이미지 URL: \(img)")
+                this.posterImageView.image = img ?? DesignSystemAsset.Images.icDefaultProfile.image
             }
             .disposed(by: disposeBag)
             

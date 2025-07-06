@@ -17,7 +17,7 @@ import RxCocoa
 import RxDataSources
 
 final class AnonymousProfileBottomSheetsViewController: BaseViewController<AnonymousProfileReactor> {
-    public var onProfileCreated: ((_ name: String, _ imageUrl: String, _ isAnonymous: Bool) -> Void)?
+    public var onProfileCreated: ((_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profile: UIImage) -> Void)?
     private let titleLabel = WSLabel(wsFont: .Body01, text: String.MessageTexts.anonymousProfileTitle)
     private let desLabel = WSLabel(wsFont: .Body06, text: String.MessageTexts.anonymousProfileDes).then {
         $0.textColor = DesignSystemAsset.Colors.gray300.color
@@ -129,7 +129,11 @@ final class AnonymousProfileBottomSheetsViewController: BaseViewController<Anony
             .modelSelected(AnonymousProfileEntity.self)
             .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
             .bind(with: self) { this, item in
-                this.onProfileCreated?(item.name, item.image, item.isAnonymous)
+                let image = DesignSystemAsset.Images.icDefaultProfile.image
+                this.onProfileCreated?(item.name,
+                                       item.image,
+                                       item.isAnonymous,
+                                       image)
                 this.dismiss(animated: true, completion: nil)
             }
             .disposed(by: disposeBag)

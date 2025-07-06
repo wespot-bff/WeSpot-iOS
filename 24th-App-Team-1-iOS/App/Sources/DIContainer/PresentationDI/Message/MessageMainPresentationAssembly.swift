@@ -45,9 +45,7 @@ struct AnonymousProfileBottomSheetAssembly: Assembly {
         // 1) Reactor 등록 (router는 일단 nil)
         container.register(AnonymousProfileReactor.self) { resolver in
             let usecase = resolver.resolve(AnonymousProfileUseCase.self)!
-            let  imageUrlUsecase = resolver.resolve(CreatePresigendURLUseCaseProtocol.self)!
             return AnonymousProfileReactor(usecase: usecase,
-                                           imageUrlUsecase: imageUrlUsecase,
                                            router: nil)
         }
         // Reactor 생성 완료 후 Router 주입

@@ -16,7 +16,7 @@ import RxSwift
 import RxCocoa
 
 final class MakeAnonymousProfilePopupViewController: BaseViewController<AnonymousProfileReactor> {
-    public var onProfileCreated: ((_ name: String, _ imageUrl: String, _ isAnonymous: Bool) -> Void)?
+    public var onProfileCreated: ((_ name: String, _ imageUrl: String, _ isAnonymous: Bool, _ profileImg: UIImage) -> Void)?
     private let contentView = UIView().then {
         $0.backgroundColor = DesignSystemAsset.Colors.gray600.color
         $0.layer.cornerRadius = 20
@@ -45,6 +45,7 @@ final class MakeAnonymousProfilePopupViewController: BaseViewController<Anonymou
     private let nickNameTextField = WSTextField(state: .default, placeholder: "닉네임을 입력해 주세요").then {
         $0.backgroundColor = .clear
         $0.borderStyle = .none
+        $0.textColor = .white
     }
     private let underline = UIView().then {
         $0.backgroundColor = DesignSystemAsset.Colors.gray400.color
@@ -171,7 +172,7 @@ final class MakeAnonymousProfilePopupViewController: BaseViewController<Anonymou
         makeProfileButton.rx.tap
             .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
             .bind(with: self) { this, _ in
-                this.onProfileCreated?(reactor.currentState.userName, reactor.currentState.profileImageURL, true)
+                this.onProfileCreated?(reactor.currentState.userName, reactor.currentState.profileImageURL, true, reactor.currentState.profileImage)
                 this.presentingViewController?.presentingViewController?.dismiss(animated: true)
             }
             .disposed(by: disposeBag)

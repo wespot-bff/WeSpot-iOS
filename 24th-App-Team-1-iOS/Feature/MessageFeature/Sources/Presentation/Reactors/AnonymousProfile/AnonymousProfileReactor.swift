@@ -20,7 +20,6 @@ public final class AnonymousProfileReactor: Reactor {
     // MARK: - UseCase
     
     private let usecase: AnonymousProfileUseCase
-    private let imageUrlUsecase: CreatePresigendURLUseCaseProtocol
     public var router: AnonymousProfileBottomSheetRouting?
 
     // MARK: - Properties
@@ -40,12 +39,11 @@ public final class AnonymousProfileReactor: Reactor {
     
     public enum Action {
         case inputUserName(String)
-        case presentMakeProfilePopup(vc: UIViewController, onProfileCreated: (String, String, Bool) -> Void)
+        case presentMakeProfilePopup(vc: UIViewController, onProfileCreated: (String, String, Bool, UIImage) -> Void)
         case selectedProfile
         case fetchProfileList
         case setImageTapped(UIViewController)
         case setProfileImage(UIImage)
-        case uploadProfile
     }
 
     public enum Mutation {
@@ -54,17 +52,17 @@ public final class AnonymousProfileReactor: Reactor {
         case setImage(UIImage)
         case setUserName(String)
         case setProfileImageURL(String)
+        case setProfileImage(UIImage)
         case setCreationComplete(name: String, imageUrl: String)
+        
 
     }
     
     // MARK: - Init
     
     public init(usecase: AnonymousProfileUseCase,
-                imageUrlUsecase: CreatePresigendURLUseCaseProtocol,
                 router: AnonymousProfileBottomSheetRouting?) {
         self.usecase = usecase
-        self.imageUrlUsecase = imageUrlUsecase
         self.router = router
         self.initialState = State()
         print("AnonymousProfileReactor initialized")
@@ -91,21 +89,35 @@ extension AnonymousProfileReactor {
             router?.presenSetImagetBottomSheet(vc: vc)
             return Observable.empty()
         case .setProfileImage(let profileImage):
-            let query = CreateProfilePresignedURLQuery(imageExtension: "jpeg")
-            return imageUrlUsecase.execute(query: query)
-                .asObservable()
-                .withUnretained(self)
-                .flatMap { owner, presignedInfo -> Observable<Mutation> in
-                    guard let entity = presignedInfo else {
-                        return .empty()
-                    }
-                    
-                    return Observable.just(.setProfileImageURL(entity.presignedURL))
+            let updateUIImage = Observable.just(Mutation.setImage(profileImage))
+
+            guard let imageData = profileImage.jpegData(compressionQuality: 0.5) else {
+                return .empty()
+            }
+
+
+            let uploadImage = Observable<Mutation>.create { [weak self] observer in
+                guard let self = self else {
+                    observer.onCompleted()
+                    return Disposables.create()
                 }
+                Task {
+                    do {
+                        let resultURL = try await self.usecase.uploadAnonymousProfileImage(imageData: imageData)
+                        observer.onNext(Mutation.setProfileImageURL(resultURL))
+                    } catch {
+                        observer.onNext(Mutation.setError(error.localizedDescription))
+                    }
+                    observer.onCompleted()
+                }
+                return Disposables.create()
+            }
+
+            return .concat([updateUIImage, uploadImage])
+        
+                
         case .inputUserName(let text):
             return Observable.just(Mutation.setUserName(text))
-        case .uploadProfile:
-            return Observable.empty()
         }
     }
     
@@ -122,9 +134,12 @@ extension AnonymousProfileReactor {
         case .setUserName(let name):
             newState.userName = name
         case .setProfileImageURL(let url):
+            print("Profile Image URL: \(url)")
             newState.profileImageURL = url
         case .setCreationComplete(name: let name, imageUrl: let imageUrl):
             newState.creationComplete = (name, imageUrl)
+        case .setProfileImage(let image):
+            newState.profileImage = image
         }
         return newState
     }

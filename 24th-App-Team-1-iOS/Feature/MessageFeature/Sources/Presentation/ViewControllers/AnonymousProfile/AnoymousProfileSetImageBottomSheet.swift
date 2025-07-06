@@ -113,7 +113,7 @@ extension AnoymousProfileSetImageBottomSheet: UIImagePickerControllerDelegate & 
         
         // 이미지 피커를 닫고, 현재 바텀시트도 닫습니다.
         picker.dismiss(animated: true) {
-            self.navigationController?.popViewController(animated: true)
+            self.dismiss(animated: true)
         }
     }
 

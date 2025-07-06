@@ -116,7 +116,10 @@ struct DomainAssembly: Assembly {
         
         container.register(AnonymousProfileUseCase.self) { resolver in
             let repository = resolver.resolve(MessageRepositoryProtocol.self)!
-            return AnonymousProfileUseCaseImpl(repository: repository)
+            let imageUrlUsecase = resolver.resolve(CreatePresigendURLUseCaseProtocol.self)!
+            let updateUserProfileUploadUseCase = resolver.resolve(UpdateUserProfileUploadUseCaseProtocol.self)
+            return AnonymousProfileUseCaseImpl(repository: repository, imageUrlUsecase: imageUrlUsecase,
+                                               updateUserProfileUploadUseCase: updateUserProfileUploadUseCase)
         }
         
         container.register(FetchReceivedMessageUseCaseProtocol.self) { resolver in

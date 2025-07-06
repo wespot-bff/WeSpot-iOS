@@ -45,6 +45,7 @@ public final class MessageWriteReactor: Reactor {
         @Pulse var anonymousProfileStatus: AnonymousProfileStatusEnum = .oneOrNone
         @Pulse var successDelete: Bool?
         var profileImageURL: String = ""
+        var profileImage: UIImage?
         var userName: String = ""
         
         var isReply: Bool = false
@@ -61,7 +62,7 @@ public final class MessageWriteReactor: Reactor {
         case loadMoreUsers
         case sendMessageTapped
         case presentAnonymousBottomSheet(Int, UIViewController)
-        case setAnonymousProfile(name: String, imageUrl: String)
+        case setAnonymousProfile(name: String, imageUrl: String, image: UIImage)
         case anonymousProfileCreationCompleted
         case setMessageRoom(MessageRoomEntity)
         
@@ -83,7 +84,7 @@ public final class MessageWriteReactor: Reactor {
         case postMessage(Bool)
         case setAnonymous(Bool)
         case setBottomSheet(AnonymousProfileStatusEnum)
-        case setAnonymousProfile(name: String, imageUrl: String)
+        case setAnonymousProfile(name: String, imageUrl: String, image: UIImage)
         case completeSenderProfileSetup(Bool)
         case setRoom(MessageRoomEntity)
         case setDetailMessage(MessageDetailEntity)
@@ -109,8 +110,8 @@ public final class MessageWriteReactor: Reactor {
             .asObservable()
             .flatMap { globalEvent -> Observable<Action> in // globalEvent로 이름 변경
                 switch globalEvent { // globalAction 대신 globalEvent 사용
-                case .setAnonymousProfileData(let name, let imageUrl):
-                    return .just(.setAnonymousProfile(name: name, imageUrl: imageUrl))
+                case .setAnonymousProfileData(let name, let imageUrl, let image):
+                    return .just(.setAnonymousProfile(name: name, imageUrl: imageUrl, image: image))
                 case .anonymousProfileSetupComplete:
                     return .just(.anonymousProfileCreationCompleted)
                 default:
@@ -158,17 +159,18 @@ extension MessageWriteReactor {
                 .flatMap { statusMutation -> Observable<Mutation> in
                     guard case let .setBottomSheet(status) = statusMutation else { return .empty() }
                     
-                    self.bottomSheetRouter?.presentAnonymousProfileBottomSheet(status, vc: vc, onProfileCreated: { name, imageUrl, isAnonymous in
+                    self.bottomSheetRouter?.presentAnonymousProfileBottomSheet(status, vc: vc, onProfileCreated: { name, imageUrl, isAnonymous, profileImg in
                         print("Anonymous Profile Created: \(name), \(imageUrl)")
-                        self.globalState.event.onNext(.setAnonymousProfileData(name: name, imageUrl: imageUrl))
+                        self.globalState.event.onNext(.setAnonymousProfileData(name: name, imageUrl: imageUrl, image: profileImg))
                         self.globalState.event.onNext(.anonymousProfileSetupComplete)
                         NotificationCenter.default.post(name: .showInputMessageWirteViewController, object: nil)
                     })
                     return .empty()
                 }
             
-        case .setAnonymousProfile(let name, let imageUrl):
-            return Observable.just(.setAnonymousProfile(name: name, imageUrl: imageUrl))
+        case .setAnonymousProfile(let name, let imageUrl, let image):
+            return Observable.just(.setAnonymousProfile(name: name, imageUrl: imageUrl, image: image))
+    
             
         case .anonymousProfileCreationCompleted:
             return .just(.completeSenderProfileSetup(true))
@@ -239,11 +241,11 @@ extension MessageWriteReactor {
         case .setBottomSheet(let status):
             newState.anonymousProfileStatus = status
             
-        case .setAnonymousProfile(let name, let imageUrl):
+        case .setAnonymousProfile(let name, let imageUrl, let image):
             newState.userName = name
             newState.profileImageURL = imageUrl
             newState.isAnonymous = true
-            
+            newState.profileImage = image
         case .completeSenderProfileSetup(let completed):
             newState.completSetSenderProfile = completed
             newState.isReply = false
