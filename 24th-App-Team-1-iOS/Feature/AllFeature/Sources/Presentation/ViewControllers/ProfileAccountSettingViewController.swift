@@ -97,7 +97,7 @@ public final class ProfileAccountSettingViewController: BaseViewController<Profi
                         .setTitle(title: "로그아웃 하시나요?", titleAlignment: .left)
                         .setConfirm(text: "로그아웃")
                         .setCancel(text: "닫기")
-                        .action(.cancel) {
+                        .action(.confirm) {
                             self.reactor?.action.onNext(.didTappedLogoutButton)
                         }
                         .show()
