@@ -39,6 +39,8 @@ extension TargetDependency {
 }
 
 extension TargetDependency.SPM {
+    //MARK: SwiftUI
+    public static let tca: TargetDependency =  .external(name: "ComposableArchitecture")
     //MARK: Rx
     public static let rxSwift: TargetDependency = .external(name: "RxSwift")
     public static let rxCocoa: TargetDependency = .external(name: "RxCocoa")

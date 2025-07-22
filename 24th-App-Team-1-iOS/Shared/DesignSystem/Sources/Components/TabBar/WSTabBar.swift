@@ -16,6 +16,7 @@ final public class WSTabBar: UIView {
     // MARK: - Properties
     private let topBorder = UIView()
     private let stackView = UIStackView()
+    public let communityButton = WSTabBarButton(type: .community)
     public let voteButton = WSTabBarButton(type: .vote)
     public let messageButton = WSTabBarButton(type: .message)
     public let allButton = WSTabBarButton(type: .all)
@@ -37,7 +38,7 @@ final public class WSTabBar: UIView {
     private func setupUI() {
         
         addSubviews(stackView, topBorder)
-        stackView.addArrangedSubviews(voteButton, messageButton, allButton)
+        stackView.addArrangedSubviews(communityButton, voteButton, messageButton, allButton)
     }
     
     private func setupAttributes() {

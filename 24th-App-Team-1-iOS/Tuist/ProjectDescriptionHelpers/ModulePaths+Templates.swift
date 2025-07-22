@@ -51,6 +51,7 @@ extension ModulePaths {
         case VoteFeature
         case MessageFeature
         case NotificationFeature
+        case CommunityFeature
     }
 }
 
