@@ -47,7 +47,7 @@ public struct NoticeSearchView: View {
                                   placeholder: "글 제목, 내용을 검색해 주세요")
                         .padding(.horizontal, 20)
                         .padding(.top, 12)
-                        .background(DesignSystemAsset.Colors.gray800.swiftUIColor)
+                        .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
                     ) {
 
                     }
@@ -56,7 +56,7 @@ public struct NoticeSearchView: View {
                     NotificationCenter.default.post(name: .hideTabBar, object: nil)
                 }
             }
-            .background(DesignSystemAsset.Colors.gray800.swiftUIColor)
+            .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

@@ -59,6 +59,7 @@ extension ModulePaths {
     public enum Domain: String, ModulePathProtocol {
         case SplashDomain
         case CommonDomain
+        case CommunityDomain
         case LoginDomain
         case AllDomain
         case MessageDomain
@@ -71,6 +72,7 @@ extension ModulePaths {
     public enum Service: String, ModulePathProtocol {
         case SplashService
         case CommonService
+        case CommunityService
         case LoginService
         case VoteService
         case AllService

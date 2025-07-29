@@ -11,9 +11,12 @@ let communityFeature = Project.makeProject(
             module: .CommunityFeature,
             dependencies: [
                 .SPM.tca,
+                .domain(module: .CommunityDomain),
+                .service(module: .CommunityService),
                 .shared(module: .DesignSystem),
                 .core(module: .Util)
             ]
         )
     ]
 )
+

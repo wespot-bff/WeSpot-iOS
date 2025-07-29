@@ -9,54 +9,10 @@ import SwiftUI
 import DesignSystem
 import ComposableArchitecture
 
-import SwiftUI
-
-struct WSNavigationBarView: View {
-    let onSearch: () -> Void
-    let onNotice: () -> Void
-    let onMenu: () -> Void
-
-    var body: some View {
-        GeometryReader { geo in
-            let topInset = geo.safeAreaInsets.top
-
-            VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-
-                    HStack(spacing: 4) {
-                        Button(action: onSearch) {
-                            DesignSystemAsset.Images.icCommunitySesarchFiled.swiftUIImage
-                        }
-                        Button(action: onNotice) {
-                            DesignSystemAsset.Images.notice.swiftUIImage
-                        }
-                        Button(action: onMenu) {
-                            DesignSystemAsset.Images.icTabbarAllUnselected.swiftUIImage
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, topInset + 8)
-                .padding(.bottom, 12)
-                
-                Spacer()
-            }
-            .background(DesignSystemAsset.Colors.gray800.swiftUIColor)
-            .ignoresSafeArea(edges: .top)
-        }
-
-        .frame(height: UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0
-               + 8
-               + 44
-               + 12)
-    }
-}
-
-
 
 public struct MainNoticeBoardView: View {
     @State private var showSearch = false
+    @State private var showWrite = false
 
     public init() { }
 
@@ -88,19 +44,14 @@ public struct MainNoticeBoardView: View {
                             }
                         }
                     }
-                    .background(DesignSystemAsset.Colors.gray800.swiftUIColor)
+                    .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
                     .ignoresSafeArea()
 
-                    WSNavigationBarView(
-                        onSearch:  { showSearch = true },
-                        onNotice:  { },
-                        onMenu:    { }
-                    )
                     VStack {
                         Spacer()
                         HStack {
                             Spacer()
-                            Button(action: { }) {
+                            Button(action: { showWrite = true }) {
                                 DesignSystemAsset.Images.icCommunityPencilFiled.swiftUIImage
                                     .resizable()
                                     .scaledToFit()
@@ -123,7 +74,37 @@ public struct MainNoticeBoardView: View {
                         label: { EmptyView() }
                     )
                     .hidden()
+                    
+                    NavigationLink(
+                        destination: PostWriteView(store: .init(initialState: PostWriteFeature.State(), reducer: {PostWriteFeature()})),
+                        isActive: $showWrite,
+                        label: { EmptyView()}
+                    )
                 }
+                .wsNavigationBar(
+                    left:  { EmptyView() },
+                    title: { EmptyView() },
+                    right: {
+                      HStack(spacing: 4) {
+                        Button { showSearch = true } label: {
+                          DesignSystemAsset.Images.icCommunitySesarchFiled.swiftUIImage
+                            .foregroundColor(.white)
+                        }
+                        Button {
+                            
+                        } label: {
+                          DesignSystemAsset.Images.notice.swiftUIImage
+                            .foregroundColor(.white)
+                        }
+                        Button {
+                            
+                        } label: {
+                          DesignSystemAsset.Images.icTabbarAllUnselected.swiftUIImage
+                            .foregroundColor(.white)
+                        }
+                      }
+                    }
+                  )
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarHidden(true)
             }
@@ -171,16 +152,6 @@ private struct CategorySelectorView: View {
         }
     }
 }
-
-private struct CategorySelectorView_Previews: PreviewProvider {
-    static var previews: some View {
-        CategorySelectorView()
-            .background(Color.black.opacity(0.9))
-            .previewLayout(.sizeThatFits)
-    }
-}
-
-
 
 private struct VoteBannerView: View {
     let question: String

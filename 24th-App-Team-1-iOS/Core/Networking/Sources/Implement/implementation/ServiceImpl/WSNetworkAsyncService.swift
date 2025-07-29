@@ -11,6 +11,7 @@ import Alamofire
 
 public final class WSNetworkAsyncService: WSNetworkAsyncServiceProtocol {
     
+    
     private static let session: Session = {
         let networkMonitor: WSNetworkMonitor = WSNetworkMonitor()
         let networkConfigure: URLSessionConfiguration = URLSessionConfiguration.af.default
@@ -40,5 +41,19 @@ public final class WSNetworkAsyncService: WSNetworkAsyncServiceProtocol {
                 }
         }
     }
-
+    
+    public func upload(endPoint: any Alamofire.URLRequestConvertible, binaryData: Data) async throws -> Bool {
+        return try await withCheckedThrowingContinuation { continuation in
+            WSNetworkAsyncService.session.upload(binaryData, with: endPoint)
+                .validate(statusCode: 200..<300)
+                .response { response in
+                    switch response.result {
+                    case let .success(response):
+                        continuation.resume(returning: true)
+                    case let .failure(error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+        }
+    }
 }
