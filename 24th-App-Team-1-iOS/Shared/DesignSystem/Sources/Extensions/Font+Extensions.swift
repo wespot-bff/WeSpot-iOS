@@ -33,7 +33,11 @@ extension Font {
             return DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 14)
         case "Body06":
             return DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12)
-        case "captionL":
+        case "Body07":
+            return DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 13)
+        case "Body12":
+            return DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 10)
+        case "Badge":
             return DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12)
         case "captionM":
             return DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11)

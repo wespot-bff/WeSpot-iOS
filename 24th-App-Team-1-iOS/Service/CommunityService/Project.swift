@@ -15,6 +15,7 @@ let communityService = Project.makeProject(
         .service(
             module: .CommunityService,
             dependencies: [
+                .domain(module: .CommunityDomain),
                 .core(module: .Networking),
                 .shared(module: .ThirdPartyLib)
             ]

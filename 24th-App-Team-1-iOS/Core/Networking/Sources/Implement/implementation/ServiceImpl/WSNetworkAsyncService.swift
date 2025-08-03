@@ -27,6 +27,24 @@ public final class WSNetworkAsyncService: WSNetworkAsyncServiceProtocol {
     
     public init() { }
     
+    
+    public func requestEmptyResponse(endPoint: any URLRequestConvertible) async throws -> Bool {
+        return try await withCheckedThrowingContinuation { continuation in
+            WSNetworkAsyncService.session.request(endPoint)
+                .validate(statusCode: 200..<300)
+                .response { response in
+                    print("데이터를 확인합니다잉 : \(response)")
+                    switch response.result {
+                    case let .success(response):
+                        continuation.resume(returning: true)
+                    case let .failure(error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+            
+        }
+    }
+    
     public func request<T: Decodable>(endPoint: any URLRequestConvertible) async throws -> T {
         
         return try await withCheckedThrowingContinuation { continuation in

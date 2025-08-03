@@ -28,6 +28,14 @@ private enum FetchPostImagePresignedURLUseCaseKey: DependencyKey {
       )
 }
 
+private enum UpdatePostLikeUseCaseKey: DependencyKey {
+    static let liveValue: UpdatePostLikeUseCaseProtocol = UpdatePostLikeUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum UpdatePostScrapUseCaseKey: DependencyKey {
+    static let liveValue: UpdatePostScrapUseCaseProtocol = UpdatePostScrapUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
 private enum UploadPostImageItemUseCaseKey: DependencyKey {
     static let liveValue: UploadPostImageItemUseCaseProtocol = UploadPostImageItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
 }
@@ -36,6 +44,18 @@ private enum UploadPostItemUseCaseKey: DependencyKey {
     static let liveValue: UploadPostItemUseCaseProtocol = UploadPostItemUseCase(
         communityRepository: CommunityRepositoryKey.liveValue
       )
+}
+
+private enum FetchPostAllItemListUseCaseKey: DependencyKey {
+    static let liveValue: FetchPostAllItemUseCaseProtocol = FetchPostAllItemUseCase(
+        communityRepository: CommunityRepositoryKey.liveValue
+    )
+}
+
+private enum FetchPostItemListUseCaseKey: DependencyKey {
+    static let liveValue: FetchPostItemListUseCaseProtocol = FetchPostItemListUseCase(
+        communityRepository: CommunityRepositoryKey.liveValue
+    )
 }
 
 
@@ -55,6 +75,26 @@ private enum FetchCategoryDetailItemUseCaseKey: DependencyKey {
 
 
 public extension DependencyValues {
+    var updatePostLikeUseCase: UpdatePostLikeUseCaseProtocol {
+        get { self[UpdatePostLikeUseCaseKey.self]}
+        set { self[UpdatePostLikeUseCaseKey.self] = newValue }
+    }
+    
+    var updatePostScrapUseCase: UpdatePostScrapUseCaseProtocol {
+        get { self[UpdatePostScrapUseCaseKey.self]}
+        set { self[UpdatePostScrapUseCaseKey.self] = newValue}
+    }
+    
+    var fetchPostAllItemListUseCase: FetchPostAllItemUseCaseProtocol {
+        get { self[FetchPostAllItemListUseCaseKey.self] }
+        set { self[FetchPostAllItemListUseCaseKey.self] = newValue}
+    }
+    
+    var fetchPostItemListUseCase: FetchPostItemListUseCaseProtocol {
+        get { self[FetchPostItemListUseCaseKey.self] }
+        set { self[FetchPostItemListUseCaseKey.self] = newValue}
+    }
+    
     var uploadPostImageItemUseCase: UploadPostImageItemUseCaseProtocol {
         get { self[UploadPostImageItemUseCaseKey.self]}
         set { self[UploadPostImageItemUseCaseKey.self] = newValue}
@@ -84,15 +124,39 @@ public extension DependencyValues {
 
 
 public final class CommunityRepository: CommunityRepositoryProtocol {
-    public func fetchPostDetailItems(query: CommunityDomain.FetchPostDetailItemRequestQuery) {
-        
-    }
     
         
     private let networkService: WSNetworkAsyncService = WSNetworkAsyncService()
     
     public init() {}
     
+    public func updatePostLike(_ postId: Int) async throws -> Bool {
+        let endPoint = CommunityEndPoint.updatePostLike("\(postId)")
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        print("성공 확인합니다2 : \(response)")
+        return response
+    }
+    
+    public func updatePostScrap(_ postId: Int) async throws -> Bool {
+        let endPoint = CommunityEndPoint.updatePostScrap("\(postId)")
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        print("성공 확인합니다 : \(response)")
+        return response
+    }
+    
+    public func fetchPostAllItems(query: FetchPostAllItemRequestQuery) async throws -> PostListEntity {
+        let query = FetchPostAllRequestDTO(majorCategoryName: query.majorCategoryName, countOfPostsViewed: query.countOfPostsViewed, inquirySize: query.inquirySize, cursorId: query.cursorId)
+        let endPoint = CommunityEndPoint.fetchPostAll(query)
+        let responseDTO: PostListResponseDTO = try await networkService.request(endPoint: endPoint)
+        return responseDTO.toDomain()
+    }
+    
+    public func fetchPostDetailItems(query: CommunityDomain.FetchPostDetailItemRequestQuery) async throws -> CommunityDomain.PostListEntity {
+        let query = FetchPostDetailItemRequestDTO(categoryId: query.categoryId, inquirySize: query.inquirySize, cursorId: query.cursorId)
+        let endPoint = CommunityEndPoint.fetchPostDetails(query)
+        let responseDTO: PostListResponseDTO = try await networkService.request(endPoint: endPoint)
+        return responseDTO.toDomain()
+    }
     
     public func fetchCategoryItems() async throws -> [FilterChipEntity] {
         let endPoint = CommunityEndPoint.fetchCategoryChips
@@ -140,7 +204,7 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
         let endPoint = CommunityEndPoint.uploadPost(requestDTO)
         print("서버 요청 보내는 값 확인 합니다 \(endPoint)")
         do {
-            _ = try await networkService.request(endPoint: endPoint) as EmptyResponseDTO
+            _ = try await networkService.requestEmptyResponse(endPoint: endPoint)
             return true
         } catch {
             print("🛑 uploadPostItem failed:", error)

@@ -243,7 +243,7 @@ extension SceneDelegate {
         let allMainViewController = DependencyContainer.shared.injector.resolve(AllMainViewController.self)
         let allNavigationContoller = UINavigationController(rootViewController: allMainViewController)
     
-        let communityView = MainNoticeBoardView()
+        let communityView = MainNoticeBoardView(store: .init(initialState: MainNoticeBoardFeature.State(), reducer: { MainNoticeBoardFeature()}))
         let communityHostingController = UIHostingController(rootView: communityView)
         let cmmunityNavigationController = UINavigationController(rootViewController: communityHostingController)
         cmmunityNavigationController.setNavigationBarHidden(true, animated: false)

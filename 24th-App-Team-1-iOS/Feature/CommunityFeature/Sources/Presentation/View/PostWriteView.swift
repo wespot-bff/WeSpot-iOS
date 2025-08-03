@@ -27,9 +27,7 @@ struct PostWriteView: View {
     
     public init(store: StoreOf<PostWriteFeature>) {
         self.store = store
-        self._viewStore = StateObject(wrappedValue:
-                                        ViewStore(store, observe: \.self)
-        )
+        self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
     }
     
     var body: some View {
@@ -225,6 +223,12 @@ struct PostWriteView: View {
                             }
                         }
                     )
+                }
+                .onChange(of: viewStore.didUploadSuccess) { didSuccess in
+                    if didSuccess {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                    
                 }
                 .onAppear {
                     NotificationCenter.default.post(name: .hideTabBar, object: nil)

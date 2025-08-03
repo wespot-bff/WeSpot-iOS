@@ -26,6 +26,7 @@ public struct PostWriteFeature {
         var chipDetails: [CategoryDetailEntity] = []
         var isShowingCategorySheet = false
         var selectedCategory: CategoryChipsEntity? = nil
+        var didUploadSuccess = false
         var postTitle: String = ""
         var postDescription: String = ""
         var uiImages: [UIImage] = []
@@ -66,7 +67,7 @@ public struct PostWriteFeature {
         case detailsResponse(TaskResult<[CategoryDetailEntity]>)
     }
     
-    public init() {}
+    public init() {} 
     
     // MARK: – Reducer
     public var body: some ReducerOf<Self> {
@@ -181,6 +182,10 @@ public struct PostWriteFeature {
             case .binding:
                 return .none
             case let .internal(.postUploadResponse(success)):
+                print("게시글 업로드 성공 여부 값 입니다 : \(success)")
+                if success {
+                  state.didUploadSuccess = true
+                }
                 return .none
             }
         }

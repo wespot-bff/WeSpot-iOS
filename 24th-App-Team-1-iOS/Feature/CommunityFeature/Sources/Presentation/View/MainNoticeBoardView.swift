@@ -8,36 +8,67 @@
 import SwiftUI
 import DesignSystem
 import ComposableArchitecture
+import CommunityDomain
+import Extensions
 
 
 public struct MainNoticeBoardView: View {
     @State private var showSearch = false
     @State private var showWrite = false
-
-    public init() { }
-
+    @Perception.Bindable
+    var store: StoreOf<MainNoticeBoardFeature>
+    @StateObject private var viewStore: ViewStore<MainNoticeBoardFeature.State, MainNoticeBoardFeature.Action>
+    public init(store: StoreOf<MainNoticeBoardFeature>) {
+        self.store = store
+        self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
+    }
+    
     public var body: some View {
         GeometryReader { geo in
             let topInset     = geo.safeAreaInsets.top
             let navBarHeight = topInset + 8 + 44 + 12
-
+            
             NavigationView {
                 ZStack(alignment: .top) {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 0) {
                             Color.clear
                                 .frame(height: navBarHeight)
-
-                            CategorySelectorView()
-                                .padding(.horizontal, 20)
-                                .padding(.bottom, 16)
-
+                            
+                            CategorySelectorWithDropdown(
+                                chips: viewStore.filterChips, selected: viewStore.selectedChip) { chip in
+                                    viewStore.send(.view(.didSelectChip(chip)))
+                                } onDropdownTap: {
+                                    viewStore.send(.view(.didTappedCategoryButton))
+                                }
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 16)
+                            
                             LazyVStack(alignment: .leading, spacing: 16) {
-                                ForEach(0..<20, id: \.self) { _ in
-                                    PostView()
-                                        .padding(.horizontal, 20)
+                                if let list = viewStore.postListItems {
+                                    ForEach(list.items, id: \.id) { element in
+                                        switch element {
+                                        case .post(let post):
+                                            if let content = post.content {
+                                                PostView(content: content) {
+                                                    
+                                                } onTapLike: {
+                                                    viewStore.send(.view(.didTappedLike(post.id)))
+                                                } onTapScrap: {
+                                                    viewStore.send(.view(.didTappedScrap(post.id)))
+                                                }
+                                                .padding(.horizontal, 20)
+                                            }
+                                        case .vote(let vote):
+                                            VoteBannerView(voteEntity: vote)
+                                                .padding(.horizontal, 20)
+                                        case .hotPost(let hotpost):
+                                            HotPostBannerView(hotPostEntity: hotpost)
+                                        }
+                                    }
                                 }
                             }
+
                             .padding(.vertical, 16)
                             .safeAreaInset(edge: .bottom) {
                                 Color.clear.frame(height: 80)
@@ -46,7 +77,7 @@ public struct MainNoticeBoardView: View {
                     }
                     .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
                     .ignoresSafeArea()
-
+                    
                     VStack {
                         Spacer()
                         HStack {
@@ -81,33 +112,53 @@ public struct MainNoticeBoardView: View {
                         label: { EmptyView()}
                     )
                 }
+                .onAppear {
+                    store.send(.view(.onAppear))
+                }
                 .wsNavigationBar(
                     left:  { EmptyView() },
                     title: { EmptyView() },
                     right: {
-                      HStack(spacing: 4) {
-                        Button { showSearch = true } label: {
-                          DesignSystemAsset.Images.icCommunitySesarchFiled.swiftUIImage
-                            .foregroundColor(.white)
+                        HStack(spacing: 4) {
+                            Button { showSearch = true } label: {
+                                DesignSystemAsset.Images.icCommunitySesarchFiled.swiftUIImage
+                                    .foregroundColor(.white)
+                            }
+                            Button {
+                                
+                            } label: {
+                                DesignSystemAsset.Images.notice.swiftUIImage
+                                    .foregroundColor(.white)
+                            }
+                            Button {
+                                
+                            } label: {
+                                DesignSystemAsset.Images.icTabbarAllUnselected.swiftUIImage
+                                    .foregroundColor(.white)
+                            }
                         }
-                        Button {
-                            
-                        } label: {
-                          DesignSystemAsset.Images.notice.swiftUIImage
-                            .foregroundColor(.white)
-                        }
-                        Button {
-                            
-                        } label: {
-                          DesignSystemAsset.Images.icTabbarAllUnselected.swiftUIImage
-                            .foregroundColor(.white)
-                        }
-                      }
                     }
-                  )
+                )
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarHidden(true)
             }
+            .sheet(
+                isPresented: viewStore.binding(
+                    get: \.isShowingCategorySheet,
+                    send: { $0 ? .view(.didTappedCategoryButton) : .view(.dismissCategorySheet) }
+                )
+            ) {
+                CategoryBottomSheetView(
+                    sections: viewStore.chipDetails,
+                    onSelect: { chip in
+                        let _ = print("데이터 확인 \(chip)")
+                        viewStore.send(.view(.didSelectDetailChip(chip)))
+                    }
+                )
+                .presentationCornerRadius(25)
+                .presentationDetents([.height(423)])
+            }
+            
             .onAppear {
                 NotificationCenter.default.post(name: .showTabBar, object: nil)
             }
@@ -118,32 +169,78 @@ public struct MainNoticeBoardView: View {
 
 
 
+
+
+
+struct CategorySelectorWithDropdown: View {
+    let chips: [FilterChipEntity]
+    let selected: FilterChipEntity?
+    let onSelect: (FilterChipEntity) -> Void
+    let onDropdownTap: () -> Void
+
+    var body: some View {
+        ZStack {
+            CategorySelectorView(chips: chips, selected: selected, onSelect: onSelect)
+                .padding(.trailing, 60)
+
+            HStack {
+                Spacer()
+                ZStack {
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: Color(hex: "1B1C1E").opacity(1.0), location: 0.0),
+                                    .init(color: Color(hex: "1B1C1E").opacity(0.73), location: 0.73),
+                                    .init(color: Color(hex: "1B1C1E").opacity(0.0), location: 1.0)
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 78, height: 43)
+                    
+                    Button {
+                        onDropdownTap()
+                    } label: {
+                        Circle()
+                            .fill(DesignSystemAsset.Colors.gray700.swiftUIColor)
+                            .frame(width: 31, height: 31)
+                            .overlay(
+                                DesignSystemAsset.Images.icCommuntyDownArrowFiled.swiftUIImage
+                            )
+                    }
+                }
+            }
+        }
+        .frame(height: 52)
+    }
+}
+
 private struct CategorySelectorView: View {
-    let categories: [String] = ["전체", "카테고리1", "카테고리2", "카테고리3", "카테고리4"]
-    @State private var selected: String = "전체"
+    let chips: [FilterChipEntity]
+    let selected: FilterChipEntity?
+    let onSelect: (FilterChipEntity) -> Void
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
-                ForEach(categories, id: \.self) { category in
-                    let isSelected = selected == category
-                    let foregroundColor: Color = isSelected ? DesignSystemAsset.Colors.white.swiftUIColor : DesignSystemAsset.Colors.gray400.swiftUIColor
-                    let backgroundColor: Color = isSelected ? DesignSystemAsset.Colors.gray500.swiftUIColor : Color.clear
+                ForEach(chips, id: \.self) { chip in
+                    let isSelected = chip == selected
+                    let foregroundColor: Color = isSelected ? DesignSystemAsset.Colors.gray900.swiftUIColor : .token(chip.textHexColor)
+                    let backgroundColor: Color = isSelected ? DesignSystemAsset.Colors.gray200.swiftUIColor : DesignSystemAsset.Colors.gray700.swiftUIColor
                     Button(action: {
-                        selected = category
+                        onSelect(chip)
                     }) {
-                        Text(category)
-                            .font(.subheadline)
+                        Text(chip.text)
+                            .font(.typography(chip.typography))
                             .foregroundColor(foregroundColor)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(
                                 Capsule()
                                     .fill(backgroundColor)
-                            ).overlay {
-                                Capsule()
-                                    .stroke(selected == category ? Color.clear : DesignSystemAsset.Colors.gray400.swiftUIColor, lineWidth: 1)
-                            }
+                            )
                     }
                 }
             }
@@ -153,8 +250,114 @@ private struct CategorySelectorView: View {
     }
 }
 
+
+private struct HotPostBannerView: View {
+    let hotPostEntity: HotPostItem
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 4) {
+                AsyncImage(url: URL(string: hotPostEntity.titleIconURL))
+                
+                Text(hotPostEntity.titleText.text)
+                    .font(.typography(hotPostEntity.titleText.typography))
+                    .foregroundColor(.token(hotPostEntity.titleText.color))
+                    .lineLimit(hotPostEntity.titleText.maxLine)
+            }
+            .padding(.horizontal, 20)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(hotPostEntity.innerPosts) { inner in
+                        HotPostInnerCardView(inner: inner)
+                    }
+                }
+                .padding(.horizontal, 4)
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+}
+
+private struct HotPostInnerCardView: View {
+    let inner: HotPostInner
+
+    var body: some View {
+        let profileWidth = CGFloat(inner.profileImageSizeWidth ?? 24)
+        let profileHeight = CGFloat(inner.profileImageSizeHeight ?? 24)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 6) {
+                AsyncImage(url: URL(string: inner.profileImageURL)) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(width: profileWidth, height: profileWidth)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: profileWidth, height: profileHeight)
+                            .clipShape(Circle())
+                    default:
+                        Circle()
+                            .fill(.gray.opacity(0.3))
+                            .frame(width: profileWidth, height: profileHeight)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(inner.nickname.text)
+                        .font(.typography(inner.nickname.typography))
+                        .foregroundColor(.token(inner.nickname.color))
+
+                }
+
+                Spacer()
+            }
+
+            if !inner.title.text.isEmpty {
+                Text(inner.title.text)
+                    .font(.typography(inner.title.typography))
+                    .foregroundColor(.token(inner.title.color))
+                    .lineLimit(1)
+            } else {
+                Text(inner.description.text)
+                    .font(.typography(inner.title.typography))
+                    .foregroundColor(.token(inner.title.color))
+                    .lineLimit(2)
+            }
+            
+            if !inner.title.text.isEmpty {
+                Text(inner.description.text)
+                    .font(.typography(inner.description.typography))
+                    .foregroundColor(.token(inner.description.color))
+                    .lineLimit(2)
+            }
+            
+            
+            Text(inner.createdAt.text)
+                .font(.typography(inner.createdAt.typography))
+                .foregroundColor(.token(inner.createdAt.color))
+                .padding(.bottom, 12)
+        }
+        .padding(12)
+        .frame(width: 240)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color(hex:inner.gradationStart), Color(hex:inner.gradationEnd)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+    }
+}
+
+
+
 private struct VoteBannerView: View {
-    let question: String
+    let voteEntity: VoteComponent
     
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
@@ -167,30 +370,28 @@ private struct VoteBannerView: View {
                     .background(Capsule().fill(Color.orange))
                 
                 HStack {
-                    Text(question)
-                        .font(.body)
+                    Text(voteEntity.text.text)
+                        .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                         .foregroundColor(.black)
                         .fixedSize(horizontal: false, vertical: true)
                     
                     Spacer()
                     
                     Button(action: {}) {
-                        DesignSystemAsset.Images.icCommunityArrowFiled.swiftUIImage
-                            .font(.headline)
-                            .foregroundColor(.white)
+                        AsyncImage(url: URL(string: voteEntity.actionIconURL))
                             .frame(width: 36, height: 36)
                             .background(Circle().fill(Color.black.opacity(0.8)))
                     }
                 }
-
+                
             }
         }
         .padding(16)
         .background(
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 1.00, green: 0.87, blue: 0.72),
-                    Color(red: 0.98, green: 0.78, blue: 0.60)
+                    Color(hex: voteEntity.gradientStart),
+                    Color(hex: voteEntity.gradientEnd)
                 ]),
                 startPoint: .leading,
                 endPoint: .trailing
@@ -206,93 +407,175 @@ private struct VoteBannerView: View {
 
 
 struct PostView: View {
+    let content: PostContent
+    let onTapComment: () -> Void
+    let onTapLike:    () -> Void
+    let onTapScrap:   () -> Void
+    @State private var isExpanded = false
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
-                AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=2070&auto=format&fit=crop")) { state in
+                AsyncImage(url: URL(string: content.header.profileImageURL)) { state in
                     switch state {
                     case .empty: ProgressView()
                     case .success(let image): image.resizable()
                     @unknown default: EmptyView()
                     }
                 }
-                .frame(width: 36, height: 36)
+                .frame(width: CGFloat(content.header.profileImageWidth),
+                       height: CGFloat(content.header.profileImageHeight))
                 .clipShape(Circle())
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("금융")
-                            .font(.caption)
-                            .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                    if let category = content.header.category {
+                        
+                        
+                        HStack(spacing: 4) {
+                            Text(category.text)
+                                .font(.typography(category.typography))
+                                .foregroundColor(.token(category.textColor))
+                            AsyncImage(url: URL(string: category.iconURL))
+                                .foregroundColor(.token(category.iconColor))
+                        }
                     }
+                    
                     HStack(spacing: 6) {
-                        Text("익명의 글쓴이")
-                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                            .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
-                        Text("방금")
-                            .font(.footnote)
-                            .font(.subheadline)
-                            .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+                        Text(content.header.nickname.text)
+                            .font(.typography(content.header.nickname.typography))
+                            .foregroundColor(.token(content.header.nickname.color))
+                        Text(content.header.createdAt.text.formattedRelative())
+                            .font(.typography(content.header.createdAt.typography))
+                            .foregroundColor(.token(content.header.createdAt.color))
                     }
                 }
                 
                 Spacer()
             }
-            Text("강한 3파가 나간 후 땅바닥을 찍고 230불까지 도달한 후 날봉기준 10일선을 지키고 마감했네요. 엔비디아, TSMC는 진고점과 10%도 차이가 나지 않는 범위 안에 있고, 브로드컴은 ATH를 찍고 살짝 내려오고 있습니다만, 과연 여기서 금리인하를 할것인지 어찌고 저찌고 블라블라블라블라블라블블라블...")
-                .font(DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                .foregroundColor(DesignSystemAsset.Colors.white.swiftUIColor)
-                .lineLimit(5)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Button("더 보기") {
+            
+            VStack(alignment: .leading, spacing: 4) {
+
+                Text(content.info.title.text)
+                    .font(.typography(content.info.title.typography))
+                    .foregroundColor(.token(content.info.title.color))
+                    .lineLimit(content.info.title.maxLine)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, maxHeight: 21, alignment: .leading)
+                
+                Text(content.info.description.text)
+                    .font(.typography(content.info.description.typography))
+                    .foregroundColor(.token(content.info.description.color))
+                    .lineLimit(content.info.description.maxLine)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, maxHeight: 120, alignment: .leading)
+            }
+            .padding(.top, 12)
+            
+            Button(content.info.seeMore.text) {
                 
             }
-            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+            .font(.typography(content.info.seeMore.typography))
             .frame(maxWidth: .infinity, maxHeight: 18, alignment: .leading)
-            .foregroundColor(DesignSystemAsset.Colors.primary300.swiftUIColor)
+            .foregroundColor(.token(content.info.seeMore.color))
+            
+            if let section = content.contentSection {
+                switch section {
+                case .images(let images) where !images.isEmpty:
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(Array(images.enumerated()), id: \.offset) { _, image in
+                                AsyncImage(url: URL(string: image.url)) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                            .frame(width: 120, height: 120)
+                                    case .success(let img):
+                                        img
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 120, height: 120)
+                                            .clipped()
+                                            .cornerRadius(12)
+                                    case .failure:
+                                        Color.gray
+                                            .frame(width: 120, height: 120)
+                                            .overlay(
+                                                Image(systemName: "photo")
+                                            )
+                                            .cornerRadius(12)
+                                    @unknown default:
+                                        EmptyView()
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    }
+                default:
+                    EmptyView()
+                }
+            }
+            
             
             HStack(spacing: 24) {
-                Button(action: {
-
-                }) {
-                    HStack(spacing: 4) {
-                        DesignSystemAsset.Images.icCommunityCommentFiled.swiftUIImage
-                        Text("10,0000")
-                            .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
-                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                ForEach(content.footer.reactions, id: \.type) { reaction in
+                    Button {
+                        switch reaction.type {
+                        case "Chat": onTapComment()
+                        case "Like": onTapLike()
+                        default:     break
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            AsyncImage(url: URL(string: reaction.iconURL)) { state in
+                                switch state {
+                                case .empty:    ProgressView().frame(width: 16, height: 16)
+                                case .success(let image):
+                                    image
+                                        .renderingMode(.template)
+                                        .foregroundColor(reaction.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  Color(hex: reaction.iconColor))
+                                        .scaledToFit()
+                                        .frame(width: 14, height: 14)
+                                @unknown default: EmptyView()
+                                }
+                            }
+                            .frame(width: 14, height: 14)
+                            Text(reaction.count.text)
+                                .font(.typography(reaction.count.typography))
+                                .foregroundColor(.token(reaction.count.color))
+                            
+                        }
                     }
                 }
                 
-                Button(action: {
-                    
-                }) {
-                    HStack(spacing: 4) {
-                        DesignSystemAsset.Images.icCommunityLikeFiled.swiftUIImage
-                        Text("10,0000")
-                            .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
-                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                    }
-                }
                 
                 Spacer()
-                
                 Button(action: {
- 
+                    onTapScrap()
                 }) {
                     HStack(spacing: 4) {
-                        DesignSystemAsset.Images.icCommunityBookmarkFiled.swiftUIImage
+                        AsyncImage(url: URL(string: content.footer.scrap.iconURL)) { state in
+                            switch state {
+                            case .empty:    ProgressView().frame(width: 16, height: 16)
+                            case .success(let image):
+                                image
+                                    .renderingMode(.template)
+                                    .foregroundColor(content.footer.scrap.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  Color(hex: content.footer.scrap.iconColor))
+                                    .scaledToFit()
+                                    .frame(width: 14, height: 14)
+                            @unknown default: EmptyView()
+                            }
+                        }
+                        
                         Text("스크랩")
-                            .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
                             .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                            .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
                     }
                 }
+                
             }
+                
             Divider()
-                .background(DesignSystemAsset.Colors.gray600.swiftUIColor)   // 선 색 지정
+                .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                 .padding(.vertical, 4)
             
         }
@@ -301,6 +584,3 @@ struct PostView: View {
     }
 }
 
-#Preview {
-    MainNoticeBoardView()
-}

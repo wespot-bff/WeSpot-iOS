@@ -18,21 +18,9 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
         return accessToken
     }
     
-    /// 게시글 상세 조회 API
-    /// Parameter : postID(String)
-//    case fetchPostDetail(Encodable)
-    /// 카테고리 칩으로 게시글 조회 할때 API
-    /// Parameter :
-    /// - majorCategoryName(String)
-    /// - inquirySize(String)
-    /// - cursorId(String)
-//    case fetchFiterChipSearch(Encodable)
-    /// 내가 작성한 글 목록 조회 API
-    /// Parameter
-    /// - inquirySize(Int)
-    ///
-//    case fetchWritten(Encodable)
-    
+    case updatePostLike(String)
+    case updatePostScrap(String)
+    case fetchPostAll(Encodable)
     case fetchPostDetails(Encodable)
     case uploadPost(Encodable)
     case uploadPostImage(String)
@@ -42,6 +30,12 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     
     public var spec: WSNetworkSpec {
         switch self {
+        case let .updatePostLike(postId):
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/like")
+        case let .updatePostScrap(postId):
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/scrap")
+        case .fetchPostAll:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post")
         case .fetchCategoryChips:
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/category")
         case .fetchCategoryDetailChips:
@@ -59,6 +53,8 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     
     public var parameters: WSRequestParameters {
         switch self {
+        case let .fetchPostAll(query):
+            return .requestQuery(query)
         case .fetchCategoryChips:
             return .none
         case .fetchCategoryDetailChips:
