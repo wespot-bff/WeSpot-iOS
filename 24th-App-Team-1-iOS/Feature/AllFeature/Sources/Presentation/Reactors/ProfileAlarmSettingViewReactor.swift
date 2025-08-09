@@ -28,6 +28,8 @@ public final class ProfileAlarmSettingViewReactor: Reactor {
         case didChangeVoteStatus(Bool)
         case didChangeSentStatus(Bool)
         case didChangeEventStatus(Bool)
+        case didChangeMessageStatus(Bool)
+        case didChangeCommunityStatus(Bool)
     }
     
     public enum Mutation {
@@ -119,6 +121,10 @@ public final class ProfileAlarmSettingViewReactor: Reactor {
                     )
                 }
             
+        case let .didChangeMessageStatus(isOn):
+            return .empty()
+        case let .didChangeCommunityStatus(isOn):
+            return .empty()
         }
     }
     
