@@ -41,14 +41,18 @@ public struct WSNavigationBarModifier<LeftView: View,
 
     private let left: (() -> LeftView)?
     private let title: (() -> TitleView)?
+    private let backgound: Color
     private let right: (() -> RightView)?
     
-    init(left: (() -> LeftView)? = nil,
+    public init(left: (() -> LeftView)? = nil,
          title: (() -> TitleView)? = nil,
-         right: (() -> RightView)? = nil) {
+         right: (() -> RightView)? = nil,
+         background: Color? = nil
+    ) {
         self.left  = left
         self.title = title
         self.right = right
+        self.backgound = background ?? DesignSystemAsset.Colors.gray900.swiftUIColor
     }
     
     public func body(content: Content) -> some View {
@@ -89,7 +93,7 @@ public struct WSNavigationBarModifier<LeftView: View,
                 .padding(.top, statusBar + 8 + 44 + 12)
                 .frame(height: 60)
                 .edgesIgnoringSafeArea(.top)
-                .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
+                .background(backgound)
         }
     }
 }

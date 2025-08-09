@@ -50,7 +50,7 @@ public struct HotPostItemDTO: Decodable {
             id: id,
             titleIconURL: content.title.icon.url,
             titleText: content.title.text.toDomain(),
-            innerPosts: content.posts.map { $0.toDomain() }
+            innerPosts: content.posts.compactMap { $0.toDomain()}
         )
     }
 
@@ -75,23 +75,29 @@ public struct HotPostItemDTO: Decodable {
         }
 
         struct InfoSectionDTO: Decodable {
-            let title: StyledTextDTO
-            let description: StyledTextDTO
+            let title: StyledTextDTO?
+            let description: StyledTextDTO?
         }
 
         let headerSection: HeaderSectionDTO
-        let infoSection: InfoSectionDTO
+        let infoSection: InfoSectionDTO?
         let createdAt: StyledTextDTO
         let gradation: GradationDTO
 
-        func toDomain() -> HotPostInner {
+        func toDomain() -> HotPostInner? {
+            guard
+              let info = infoSection,
+              let title = info.title,
+              let description = info.description
+            else { return nil }
+            
             return HotPostInner(
                 profileImageURL: headerSection.profileImage.url,
                 profileImageSizeWidth: headerSection.profileImage.width ?? 0,
                 profileImageSizeHeight: headerSection.profileImage.height ?? 0,
                 nickname: headerSection.nickname.toDomain(),
-                title: infoSection.title.toDomain(),
-                description: infoSection.description.toDomain(),
+                title: title.toDomain(),
+                description: description.toDomain(),
                 createdAt: createdAt.toDomain(),
                 gradationStart: gradation.startColor.value,
                 gradationEnd: gradation.endColor.value,

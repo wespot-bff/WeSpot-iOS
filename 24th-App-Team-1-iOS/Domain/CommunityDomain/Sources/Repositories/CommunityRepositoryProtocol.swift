@@ -13,6 +13,10 @@ public protocol CommunityRepositoryProtocol {
     func fetchCategoryItems() async throws -> [FilterChipEntity]
     func fetchCategoryDetailImtes() async throws -> [CategoryDetailEntity]
     func uploadPostItem(body: UploadPostItemRequest) async throws -> Bool
+    func fetchMyPostCommentItem() async throws -> PostListEntity
+    func fetchMyPostScrapItem() async throws -> PostListEntity
+    func fetchMyPostWrittenItem() async throws -> PostListEntity
+    func fetchSearchPostItems(query: FetchPostSearchKeywordQuery) async throws -> PostListEntity
     func fetchPostImagePresignedURL(query: CreatePostImagePresignedURLQuery) async throws -> CreatePostImagePresignedURLEntity
     func fetchPostDetailItems(query: FetchPostDetailItemRequestQuery) async throws -> PostListEntity
     func fetchPostAllItems(query: FetchPostAllItemRequestQuery) async throws -> PostListEntity

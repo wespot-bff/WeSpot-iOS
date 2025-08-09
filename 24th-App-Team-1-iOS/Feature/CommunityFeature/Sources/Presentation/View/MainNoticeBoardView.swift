@@ -15,9 +15,12 @@ import Extensions
 public struct MainNoticeBoardView: View {
     @State private var showSearch = false
     @State private var showWrite = false
+    @State private var showMyCategory = false
     @Perception.Bindable
     var store: StoreOf<MainNoticeBoardFeature>
     @StateObject private var viewStore: ViewStore<MainNoticeBoardFeature.State, MainNoticeBoardFeature.Action>
+    @State private var showCategoryPost = false
+    @State private var selectedDetailChip: CategoryChipsEntity? = nil
     public init(store: StoreOf<MainNoticeBoardFeature>) {
         self.store = store
         self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
@@ -56,6 +59,11 @@ public struct MainNoticeBoardView: View {
                                                     viewStore.send(.view(.didTappedLike(post.id)))
                                                 } onTapScrap: {
                                                     viewStore.send(.view(.didTappedScrap(post.id)))
+                                                }
+                                                .onAppear {
+                                                    let _ = print("확인 하빈다 \(element.id) == \(list.items.last?.id)")
+                                                  guard element.id == list.items.last?.id else { return }
+                                                  viewStore.send(.view(.loadNextPage))
                                                 }
                                                 .padding(.horizontal, 20)
                                             }
@@ -100,7 +108,28 @@ public struct MainNoticeBoardView: View {
                         }
                     }
                     NavigationLink(
-                        destination: NoticeSearchView(),
+                      destination: Group {
+                        if let chip = selectedDetailChip {
+                            CategoryPostView(store: .init(initialState: CategoryPostFeature.State(category: chip) , reducer: { CategoryPostFeature()}))
+                        } else {
+                          EmptyView()
+                        }
+                      },
+                      isActive: $showCategoryPost,
+                      label: { EmptyView() }
+                    )
+                    .hidden()
+                    
+                    NavigationLink(
+                        destination: MyCategoryPostView(),
+                        isActive: $showMyCategory,
+                        label: { EmptyView() }
+                    )
+                    .hidden()
+                    
+                    
+                    NavigationLink(
+                        destination: NoticeSearchView(store: .init(initialState: NoticeSearchFeature.State(), reducer: {NoticeSearchFeature()})),
                         isActive: $showSearch,
                         label: { EmptyView() }
                     )
@@ -113,6 +142,7 @@ public struct MainNoticeBoardView: View {
                     )
                 }
                 .onAppear {
+                    NotificationCenter.default.post(name: .showTabBar, object: nil)
                     store.send(.view(.onAppear))
                 }
                 .wsNavigationBar(
@@ -131,7 +161,7 @@ public struct MainNoticeBoardView: View {
                                     .foregroundColor(.white)
                             }
                             Button {
-                                
+                                showMyCategory = true
                             } label: {
                                 DesignSystemAsset.Images.icTabbarAllUnselected.swiftUIImage
                                     .foregroundColor(.white)
@@ -151,16 +181,13 @@ public struct MainNoticeBoardView: View {
                 CategoryBottomSheetView(
                     sections: viewStore.chipDetails,
                     onSelect: { chip in
-                        let _ = print("데이터 확인 \(chip)")
                         viewStore.send(.view(.didSelectDetailChip(chip)))
+                        selectedDetailChip = chip
+                        showCategoryPost = true
                     }
                 )
                 .presentationCornerRadius(25)
                 .presentationDetents([.height(423)])
-            }
-            
-            .onAppear {
-                NotificationCenter.default.post(name: .showTabBar, object: nil)
             }
             .navigationViewStyle(StackNavigationViewStyle())
         }
@@ -227,7 +254,7 @@ private struct CategorySelectorView: View {
             HStack(spacing: 12) {
                 ForEach(chips, id: \.self) { chip in
                     let isSelected = chip == selected
-                    let foregroundColor: Color = isSelected ? DesignSystemAsset.Colors.gray900.swiftUIColor : .token(chip.textHexColor)
+                    let foregroundColor: Color = isSelected ? DesignSystemAsset.Colors.gray900.swiftUIColor : DesignSystemAsset.Colors.gray300.swiftUIColor
                     let backgroundColor: Color = isSelected ? DesignSystemAsset.Colors.gray200.swiftUIColor : DesignSystemAsset.Colors.gray700.swiftUIColor
                     Button(action: {
                         onSelect(chip)
@@ -268,7 +295,8 @@ private struct HotPostBannerView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(hotPostEntity.innerPosts) { inner in
+                    let innerPosts = hotPostEntity.innerPosts.compactMap { $0 }
+                    ForEach(innerPosts) { inner in
                         HotPostInnerCardView(inner: inner)
                     }
                 }
@@ -314,25 +342,21 @@ private struct HotPostInnerCardView: View {
 
                 Spacer()
             }
-
-            if !inner.title.text.isEmpty {
-                Text(inner.title.text)
-                    .font(.typography(inner.title.typography))
-                    .foregroundColor(.token(inner.title.color))
-                    .lineLimit(1)
-            } else {
-                Text(inner.description.text)
-                    .font(.typography(inner.title.typography))
-                    .foregroundColor(.token(inner.title.color))
-                    .lineLimit(2)
+            
+            if let innerTitle = inner.title {
+                if !innerTitle.text.isEmpty {
+                    Text(innerTitle.text)
+                        .font(.typography(innerTitle.typography))
+                        .foregroundColor(.token(innerTitle.color))
+                        .lineLimit(1)
+                } else {
+                    Text(inner.description.text)
+                        .font(.typography(inner.description.typography))
+                        .foregroundColor(.token(inner.description.color))
+                        .lineLimit(2)
+                }
             }
             
-            if !inner.title.text.isEmpty {
-                Text(inner.description.text)
-                    .font(.typography(inner.description.typography))
-                    .foregroundColor(.token(inner.description.color))
-                    .lineLimit(2)
-            }
             
             
             Text(inner.createdAt.text)
@@ -454,12 +478,15 @@ struct PostView: View {
             
             VStack(alignment: .leading, spacing: 4) {
 
-                Text(content.info.title.text)
-                    .font(.typography(content.info.title.typography))
-                    .foregroundColor(.token(content.info.title.color))
-                    .lineLimit(content.info.title.maxLine)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, maxHeight: 21, alignment: .leading)
+                if let contentTitle = content.info.title {
+                    Text(contentTitle.text)
+                        .font(.typography(contentTitle.typography))
+                        .foregroundColor(.token(contentTitle.color))
+                        .lineLimit(contentTitle.maxLine)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, maxHeight: 21, alignment: .leading)
+                }
+                
                 
                 Text(content.info.description.text)
                     .font(.typography(content.info.description.typography))

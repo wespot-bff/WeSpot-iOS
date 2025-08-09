@@ -84,10 +84,22 @@ public struct HeaderSectionDTO: Decodable {
 }
 
 public struct InfoSectionDTO: Decodable {
-    let title: StyledTextDTO
+    let title: StyledTextDTO?
     let description: StyledTextDTO
     let seeMore: StyledTextDTO
     let maxLine: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case title, description, seeMore, maxLine
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.title       = try c.decodeIfPresent(StyledTextDTO.self, forKey: .title)
+        self.description = try c.decode(StyledTextDTO.self,  forKey: .description)
+        self.seeMore     = try c.decode(StyledTextDTO.self,  forKey: .seeMore)
+        self.maxLine     = try c.decode(Int.self,            forKey: .maxLine)
+    }
 }
 
 public enum ContentSectionDTO: Decodable {
@@ -214,7 +226,7 @@ extension HeaderSectionDTO {
 extension InfoSectionDTO {
     func toDomain() -> InfoSectionEntity {
         return InfoSectionEntity(
-            title: title.toDomain(),
+            title: title?.toDomain(),
             description: description.toDomain(),
             seeMore: seeMore.toDomain(),
             maxLine: maxLine

@@ -69,9 +69,9 @@ public struct HotPostItem: Identifiable, Equatable {
     public let id: Int
     public let titleIconURL: String
     public let titleText: StyledText
-    public let innerPosts: [HotPostInner]
+    public let innerPosts: [HotPostInner?]
     
-    public init(id: Int, titleIconURL: String, titleText: StyledText, innerPosts: [HotPostInner]) {
+    public init(id: Int, titleIconURL: String, titleText: StyledText, innerPosts: [HotPostInner?]) {
         self.id = id
         self.titleIconURL = titleIconURL
         self.titleText = titleText
@@ -86,7 +86,7 @@ public struct HotPostInner: Identifiable ,Equatable {
     public let profileImageSizeWidth: Int?
     public let profileImageSizeHeight: Int?
     public let nickname: StyledText
-    public let title: StyledText
+    public let title: StyledText?
     public let description: StyledText
     public let createdAt: StyledText
     public let gradationStart: String
@@ -99,7 +99,7 @@ public struct HotPostInner: Identifiable ,Equatable {
         profileImageSizeWidth: Int?,
         profileImageSizeHeight: Int?,
         nickname: StyledText,
-        title: StyledText,
+        title: StyledText?,
         description: StyledText,
         createdAt: StyledText,
         gradationStart: String,
@@ -207,12 +207,12 @@ public struct HeaderEntity: Equatable {
 }
 
 public struct InfoSectionEntity: Equatable {
-    public let title: StyledText
+    public let title: StyledText?
     public let description: StyledText
     public let seeMore: StyledText
     public let maxLine: Int
     
-    public init(title: StyledText, description: StyledText, seeMore: StyledText, maxLine: Int) {
+    public init(title: StyledText?, description: StyledText, seeMore: StyledText, maxLine: Int) {
         self.title = title
         self.description = description
         self.seeMore = seeMore

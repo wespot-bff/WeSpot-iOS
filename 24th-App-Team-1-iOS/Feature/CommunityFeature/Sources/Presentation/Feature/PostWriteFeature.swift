@@ -34,6 +34,20 @@ public struct PostWriteFeature {
         var photoImageData: [Data] = []
         var uploadImageRequests: [UploadPostImageItemReqeuest] = []
         var preSignedURLEntity: [CreatePostImagePresignedURLEntity] = []
+        
+        var titleTooLong: Bool {
+          postTitle.count > 40
+        }
+        var descriptionTooLong: Bool {
+          postDescription.count > 1200
+        }
+        var canSubmit: Bool {
+          selectedCategory != nil
+          && !postDescription.isEmpty
+          && !descriptionTooLong
+          && !titleTooLong
+        }
+        
     }
     
     // MARK: – Action

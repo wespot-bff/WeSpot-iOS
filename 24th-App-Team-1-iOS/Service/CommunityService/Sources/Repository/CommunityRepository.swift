@@ -58,6 +58,29 @@ private enum FetchPostItemListUseCaseKey: DependencyKey {
     )
 }
 
+private enum FetchSearchPostItemUseCaseKey: DependencyKey {
+    static let liveValue: FetchSearchPostItemUseCaseProtocol =
+    FetchSearchPostItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum FetchMyScrapItemUseCaseKey: DependencyKey {
+    static var liveValue: FetchMyScrapItemUseCaseProtocol {
+        FetchMyScrapItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+    }
+}
+
+private enum FetchMyPostCommnetItemUseCaseKey: DependencyKey {
+    static var liveValue: FetchMyPostCommnetItemUseCaseProtocol {
+        return FetchMyPostCommnetItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+    }
+}
+
+private enum FetchMyPostWrittenItemUseCaseKey: DependencyKey {
+    static var liveValue: FetchMyPostWrittenItemUseCaseProtocol {
+        FetchMyPostWrittenItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+    }
+}
+
 
 private enum FetchCategoryItemUseCaseKey: DependencyKey {
   static let liveValue: FetchCategoryItemUseCaseProtocol =
@@ -75,6 +98,26 @@ private enum FetchCategoryDetailItemUseCaseKey: DependencyKey {
 
 
 public extension DependencyValues {
+    var fetchMyPostWrittenItemUseCase: FetchMyPostWrittenItemUseCaseProtocol {
+        get { self[FetchMyPostWrittenItemUseCaseKey.self] }
+        set { self[FetchMyPostWrittenItemUseCaseKey.self] = newValue }
+    }
+    
+    var fetchMyPostCommnetItemUseCase: FetchMyPostCommnetItemUseCaseProtocol {
+        get { self[FetchMyPostCommnetItemUseCaseKey.self]}
+        set { self[FetchMyPostCommnetItemUseCaseKey.self] = newValue}
+    }
+    
+    var fetchMyScrapItemUseCase: FetchMyScrapItemUseCaseProtocol {
+        get { self[FetchMyScrapItemUseCaseKey.self]}
+        set { self[FetchMyScrapItemUseCaseKey.self] = newValue}
+    }
+    
+    var fetchSearchPostItemUseCase: FetchSearchPostItemUseCaseProtocol {
+        get { self[FetchSearchPostItemUseCaseKey.self]}
+        set { self[FetchSearchPostItemUseCaseKey.self] = newValue}
+    }
+    
     var updatePostLikeUseCase: UpdatePostLikeUseCaseProtocol {
         get { self[UpdatePostLikeUseCaseKey.self]}
         set { self[UpdatePostLikeUseCaseKey.self] = newValue }
@@ -129,6 +172,32 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
     private let networkService: WSNetworkAsyncService = WSNetworkAsyncService()
     
     public init() {}
+    
+    public func fetchMyPostCommentItem() async throws -> PostListEntity {
+        let endPoint = CommunityEndPoint.fetchMyCommnetPost
+        let response: PostListResponseDTO = try await networkService.request(endPoint: endPoint)
+        return response.toDomain()
+    }
+    
+    public func fetchMyPostScrapItem() async throws -> PostListEntity {
+        let endPoint = CommunityEndPoint.fetchMyScrapPost
+        let response: PostListResponseDTO = try await networkService.request(endPoint: endPoint)
+        return response.toDomain()
+    }
+    
+    public func fetchMyPostWrittenItem() async throws -> PostListEntity {
+        let endPoint = CommunityEndPoint.fetchMyWrittenPost
+        let response: PostListResponseDTO = try await networkService.request(endPoint: endPoint)
+        return response.toDomain()
+    }
+    
+    
+    public func fetchSearchPostItems(query: FetchPostSearchKeywordQuery) async throws -> PostListEntity {
+        let query = FetchPostSearchKeywordRequestDTO(keyword: query.keyword)
+        let endPoint = CommunityEndPoint.fetchSearchPost(query)
+        let response: PostListResponseDTO = try await networkService.request(endPoint: endPoint)
+        return response.toDomain()
+    }
     
     public func updatePostLike(_ postId: Int) async throws -> Bool {
         let endPoint = CommunityEndPoint.updatePostLike("\(postId)")

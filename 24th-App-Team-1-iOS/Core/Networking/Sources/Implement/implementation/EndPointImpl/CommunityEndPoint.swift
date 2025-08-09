@@ -18,6 +18,7 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
         return accessToken
     }
     
+    case fetchSearchPost(Encodable)
     case updatePostLike(String)
     case updatePostScrap(String)
     case fetchPostAll(Encodable)
@@ -26,10 +27,21 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     case uploadPostImage(String)
     case fetchCategoryChips
     case fetchCategoryDetailChips
+    case fetchMyWrittenPost
+    case fetchMyScrapPost
+    case fetchMyCommnetPost
     case fetchPostImagePresignedURL(Encodable)
     
     public var spec: WSNetworkSpec {
         switch self {
+        case .fetchMyWrittenPost:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/written")
+        case .fetchMyScrapPost:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/scrapped")
+        case .fetchMyCommnetPost:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/commented")
+        case .fetchSearchPost:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/search")
         case let .updatePostLike(postId):
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/like")
         case let .updatePostScrap(postId):
@@ -53,6 +65,8 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     
     public var parameters: WSRequestParameters {
         switch self {
+        case let .fetchSearchPost(query):
+            return .requestQuery(query)
         case let .fetchPostAll(query):
             return .requestQuery(query)
         case .fetchCategoryChips:

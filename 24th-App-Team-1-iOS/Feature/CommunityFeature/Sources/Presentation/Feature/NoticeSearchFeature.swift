@@ -1,177 +1,75 @@
 //
-//  MainNoticeBoardFeature.swift
+//  NoticeSearchFeature.swift
 //  CommunityFeature
 //
-//  Created by 김도현 on 7/29/25.
+//  Created by 김도현 on 8/3/25.
 //
 
 import ComposableArchitecture
-import CommunityDomain
-import CommunityService
 
+import CommunityDomain
+
+private enum SearchID { static let keyword = "search-keyword" }
 
 @Reducer
-public struct MainNoticeBoardFeature {
-    @Dependency(\.fetchCategoryItemUseCase) var fetchCategoryItemUseCase: FetchCategoryItemUseCaseProtocol
-    @Dependency(\.fetchPostAllItemListUseCase) var fetchPostItemListUseCase: FetchPostAllItemUseCaseProtocol
-    @Dependency(\.fetchPostItemListUseCase) var fetchPostDetailListUseCase: FetchPostItemListUseCaseProtocol
+public struct NoticeSearchFeature {
+    @Dependency(\.fetchSearchPostItemUseCase) var fetchSearchPostItemUseCase: FetchSearchPostItemUseCaseProtocol
     @Dependency(\.updatePostScrapUseCase) var updatePostScrapUseCase: UpdatePostScrapUseCaseProtocol
     @Dependency(\.updatePostLikeUseCase) var updatePostLikeUseCase: UpdatePostLikeUseCaseProtocol
-    @Dependency(\.fetchCategoryDetailItemUseCase) var fetchCategoryDetailUseCase: FetchCategoryDetailItemUseCaseProtocol
-    
-    
-    
-    @ObservableState
+
     public struct State: Equatable {
-        var filterChips: [FilterChipEntity] = []
-        var postListItems: PostListEntity? = nil
+        var postListEntity: PostListEntity? = nil
         var rawPostListItems: PostListEntity? = nil
-        var selectedChip: FilterChipEntity? = nil
-        var isScrap: Bool = false
-        var isLike: Bool = false
+        var searchKeyword: String = ""
         var overrides: [Int: PostLocalOverride] = [:]
-        var isShowingCategorySheet: Bool = false
-        var chipDetails: [CategoryDetailEntity] = []
-        var selectedCategory: CategoryChipsEntity? = nil
-        var isLoadingPage = false
-        var nextCursor: Int? = nil
-        var hasNext: Bool = false
-        
-        public init(filterChips: [FilterChipEntity] = [], postListItems: PostListEntity? = nil) {
-            self.filterChips = filterChips
-            self.postListItems = postListItems
-        }
     }
-    
+
     public enum Action: ViewAction {
         case view(View)
         case inner(Inner)
         case binding(BindingAction<State>)
-        case `internal`(Internal)
     }
-    
+
     @CasePathable
     public enum View: BindableAction, Equatable {
-        case loadNextPage
         case binding(BindingAction<State>)
-        case didTappedCategoryButton
-        case didSelectDetailChip(CategoryChipsEntity)
-        case didSelectChip(FilterChipEntity)
-        case didTappedLike(Int)
-        case didTappedScrap(Int)
-        case dismissCategorySheet
+        case didSearchKeyword(String)
         case likeResponseSuccess(postId: Int)
         case likeResponseFailure(postId: Int, errorMessage: String)
         case scrapResponseSuccess(postId: Int)
         case scrapResponseFailure(postId: Int, errorMessage: String)
-        case onAppear
+        case didTappedLike(Int)
+        case didTappedScrap(Int)
     }
-    
-    
-    public enum Internal {
-        
-    }
-    
+
     public enum Inner {
-        case filterChipsResponse(TaskResult<[FilterChipEntity]>)
-        case postListResponse( TaskResult<PostListEntity> )
-        case detailsResponse(TaskResult<[CategoryDetailEntity]>)
+        case postListResponse(TaskResult<PostListEntity>)
     }
-    
-    public init() {}
-    
-    
+
     public var body: some ReducerOf<Self> {
         BindingReducer(action: /Action.view)
-        
+
         Reduce { state, action in
             switch action {
-            case .view(.onAppear):
-                return .run { send in
-                    let query = FetchPostAllItemRequestQuery(majorCategoryName: "", inquirySize: 10)
-                    async let chips = fetchCategoryItemUseCase.execute()
-                    async let posts = fetchPostItemListUseCase.execute(query:query)
-                    do {
-                        let (chips, posts) = try await (chips, posts)
-                        await send(.inner(.filterChipsResponse(.success(chips))))
-                        await send(.inner(.postListResponse(.success(posts))))
-                    } catch {
-                        await send(.inner(.filterChipsResponse(.failure(error))))
-                        await send(.inner(.postListResponse(.failure(error))))
-                    }
+            case .view(.didSearchKeyword(let keyword)):
+                state.searchKeyword = keyword
+                
+                guard !keyword.isEmpty, keyword.count >= 2 else {
+                    return .none
                 }
-                
-            case .view(.didTappedCategoryButton):
-                state.isShowingCategorySheet = true
-                return .run { send in
-                    async let detailUsecase = fetchCategoryDetailUseCase.execute()
-                    do {
-                        let detailsResponse = try await detailUsecase
-                        await send(.inner(.detailsResponse(.success(detailsResponse))))
-                    } catch {
-                        await send(.inner(.detailsResponse(.failure(error))))
-                    }
-                    
-                }
-                
-            case .view(.dismissCategorySheet):
-                state.isShowingCategorySheet = false
-                return .none
-                
-            case .view(.didSelectDetailChip(let chip)):
-                state.selectedCategory = chip
-                state.isShowingCategorySheet = false
 
                 return .run { send in
-                    let query = FetchPostDetailItemRequestQuery(categoryId: chip.id, inquirySize: 10, cursorId: 10)
-                    async let postsUsecase = fetchPostDetailListUseCase.execute(query: query)
-
+                    try await Task.sleep(nanoseconds: 300_000_000)
+                    let query = FetchPostSearchKeywordQuery(keyword: keyword)
                     do {
-                        let posts = try await postsUsecase
+                        let posts = try await fetchSearchPostItemUseCase.execute(query: query)
                         await send(.inner(.postListResponse(.success(posts))))
                     } catch {
                         await send(.inner(.postListResponse(.failure(error))))
                     }
                 }
-
-            case .view(.binding):
-                return .none
-                
-            case .inner(.filterChipsResponse(.success(let chips))):
-                state.filterChips = chips
-
-                if state.selectedChip == nil {
-                    if let allCateogory = chips.first(where: { $0.text == "전체" }) {
-                        state.selectedChip = allCateogory
-                        return .run { send in
-                            let query = FetchPostAllItemRequestQuery(majorCategoryName: allCateogory.text, inquirySize: 20)
-                            do {
-                                let posts = try await fetchPostItemListUseCase.execute(query: query)
-                                await send(.inner(.postListResponse(.success(posts))))
-                            } catch {
-                                await send(.inner(.postListResponse(.failure(error))))
-                            }
-                        }
-                    }
-                }
-                return .none
-                
-            case .inner(.filterChipsResponse(.failure)):
-                return .none
-                
-                
-                
+                .cancellable(id: SearchID.keyword, cancelInFlight: true)
             case .inner(.postListResponse(.success(let posts))):
-                state.nextCursor = posts.lastCursorId
-                state.hasNext = posts.hasNext
-                
-                if var raw = state.rawPostListItems {
-                    raw.items += posts.items
-                    state.rawPostListItems = raw
-                } else {
-                    state.rawPostListItems = posts
-                }
-                
                 var merged = posts
                 merged.items = merged.items.map { element in
                     switch element {
@@ -196,7 +94,6 @@ public struct MainNoticeBoardFeature {
                                 newFooter.reactions[likeIdx] = like
                             }
                             
-                            // 스크랩 병합
                             if let isScrapped = override.isScrapped {
                                 let old = newFooter.scrap
                                 newFooter.scrap = Scrap(
@@ -224,50 +121,17 @@ public struct MainNoticeBoardFeature {
                         return element
                     }
                 }
-                state.postListItems = merged
+                state.postListEntity = merged
                 return .none
-                
-                
+
             case .inner(.postListResponse(.failure)):
-                
                 return .none
-                
+
+            case .view(.binding):
+                return .none
+
             case .binding:
                 return .none
-            case let .view(.didSelectChip(chip)):
-                
-                state.selectedChip = chip
-                return .run { send in
-                    let query = FetchPostAllItemRequestQuery(majorCategoryName: chip.text, inquirySize: 10, cursorId: nil)
-                    do {
-                        let posts = try await fetchPostItemListUseCase.execute(query: query)
-                        await send(.inner(.postListResponse(.success(posts))))
-                    } catch {
-                        await send(.inner(.postListResponse(.failure(error))))
-                    }
-                }
-            case .view(.scrapResponseFailure(let postId, _)):
-                if var override = state.overrides[postId] {
-                    if let isScrapped = override.isScrapped {
-                        override.isScrapped = !isScrapped
-                        state.overrides[postId] = override
-                    }
-                }
-                applyOverrides(to: &state)
-                return .none
-                
-                
-            case .view(.likeResponseFailure(let postId, _)):
-                if var override = state.overrides[postId] {
-                    if let isLiked = override.isLiked {
-                        override.isLiked = !isLiked
-                        override.likeCountDelta += isLiked ? -1 : 1
-                        state.overrides[postId] = override
-                    }
-                }
-                applyOverrides(to: &state)
-                return .none
-                
             case .view(.didTappedLike(let postId)):
                 if var override = state.overrides[postId] {
                     let wasLiked = override.isLiked ?? false
@@ -312,40 +176,36 @@ public struct MainNoticeBoardFeature {
                 }
             case .view(.likeResponseSuccess(postId: let postId)):
                 return .none
+            case .view(.likeResponseFailure(postId: let postId, errorMessage: let errorMessage)):
+                if var override = state.overrides[postId] {
+                    if let isLiked = override.isLiked {
+                        override.isLiked = !isLiked
+                        override.likeCountDelta += isLiked ? -1 : 1
+                        state.overrides[postId] = override
+                    }
+                }
+                applyOverrides(to: &state)
+                return .none
             case .view(.scrapResponseSuccess(postId: let postId)):
                 return .none
-            case .inner(.detailsResponse(.failure)):
-                return .none
-            case .inner(.detailsResponse(.success(let chipDetails))):
-                state.chipDetails = chipDetails
-                return .none
-            case .view(.loadNextPage):
-              guard !state.isLoadingPage, state.hasNext else { return .none }
-              state.isLoadingPage = true
-
-              let query = FetchPostAllItemRequestQuery(
-                majorCategoryName: state.selectedChip?.text ?? "",
-                inquirySize: 20,
-                cursorId: state.nextCursor
-              )
-
-              return .run { send in
-                do {
-                  let response = try await fetchPostItemListUseCase.execute(query: query)
-                  await send(.inner(.postListResponse(.success(response))))
-                } catch {
-                  await send(.inner(.postListResponse(.failure(error))))
+            case .view(.scrapResponseFailure(postId: let postId, errorMessage: let errorMessage)):
+                if var override = state.overrides[postId] {
+                    if let isScrapped = override.isScrapped {
+                        override.isScrapped = !isScrapped
+                        state.overrides[postId] = override
+                    }
                 }
-              }
+                applyOverrides(to: &state)
+                return .none
             }
         }
     }
 }
 
 
-extension MainNoticeBoardFeature {
+extension NoticeSearchFeature {
     func toggleLike(in state: inout State, postId: Int) {
-        guard var list = state.postListItems else { return }
+        guard var list = state.postListEntity else { return }
         for (index, element) in list.items.enumerated() {
             if case .post(var post) = element, post.id == postId, var content = post.content {
                 var reactions = content.footer.reactions
@@ -379,7 +239,7 @@ extension MainNoticeBoardFeature {
                     content.footer = FooterSectionEntity(reactions: reactions, scrap: content.footer.scrap)
                     post = PostItem(id: post.id, type: post.type, content: content)
                     list.items[index] = .post(post)
-                    state.postListItems = PostListEntity(items: list.items, lastCursorId: list.lastCursorId, hasNext: list.hasNext)
+                    state.postListEntity = PostListEntity(items: list.items, lastCursorId: list.lastCursorId, hasNext: list.hasNext)
                     return
                 }
             }
@@ -388,7 +248,7 @@ extension MainNoticeBoardFeature {
     
     func applyOverrides(to state: inout State) {
         guard let raw = state.rawPostListItems else {
-            state.postListItems = nil
+            state.postListEntity = nil
             return
         }
         var merged = raw
@@ -435,7 +295,6 @@ extension MainNoticeBoardFeature {
                 }
             }
         }
-        state.postListItems = merged
+        state.postListEntity = merged
     }
-    
 }

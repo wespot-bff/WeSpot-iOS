@@ -5,15 +5,16 @@
 //  Created by 김도현 on 7/22/25.
 //
 
+import ComposableArchitecture
 import SwiftUI
 import DesignSystem
-
+import CommunityDomain
 
 
 struct SearchBar: View {
     @Binding var text: String
     var placeholder: String = ""
-
+    
     var body: some View {
         HStack {
             DesignSystemAsset.Images.icCommunitySesarchFiled.swiftUIImage
@@ -35,21 +36,56 @@ struct SearchBar: View {
     }
 }
 
+
+@ViewAction(for: NoticeSearchFeature.self)
 public struct NoticeSearchView: View {
-    @State private var searchText = ""
+    @Perception.Bindable
+    public var store: StoreOf<NoticeSearchFeature>
+    @StateObject private var viewStore: ViewStore<NoticeSearchFeature.State, NoticeSearchFeature.Action>
+
     @Environment(\.presentationMode) private var presentationMode
+    
+    public init(store: StoreOf<NoticeSearchFeature>) {
+        self.store = store
+        self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
+    }
+    
     public var body: some View {
         GeometryReader { geo in
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     Section(header:
-                        SearchBar(text: $searchText,
-                                  placeholder: "글 제목, 내용을 검색해 주세요")
-                        .padding(.horizontal, 20)
-                        .padding(.top, 12)
-                        .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
+                                SearchBar(
+                                    text: viewStore.binding(
+                                        get: \.searchKeyword,
+                                        send: { .view(.didSearchKeyword($0)) }
+                                    ),
+                                    placeholder: "글 제목, 내용을 검색해 주세요"
+                                )
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 12)
+                                    .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
                     ) {
-
+                        
+                        if let list = viewStore.postListEntity {
+                            ForEach(list.items.compactMap { element in
+                                if case .post(let post) = element {
+                                    return post
+                                }
+                                return nil
+                            }, id: \.id) { post in
+                                if let content = post.content {
+                                    PostView(content: content) {
+                                    } onTapLike: {
+                                        viewStore.send(.view(.didTappedLike(post.id)))
+                                    } onTapScrap: {
+                                        viewStore.send(.view(.didTappedScrap(post.id)))
+                                    }
+                                    .padding(.top, 24)
+                                    .padding(.horizontal, 20)
+                                }
+                            }
+                        }
                     }
                 }
                 .onAppear {

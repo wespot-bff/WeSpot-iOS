@@ -79,12 +79,17 @@ struct PostWriteView: View {
                             }
                             
                             TextField(
-                                "(선택) 제목을 입력해주세요",
-                                text: viewStore.binding(
-                                    get: \.postTitle,
-                                    send: { newValue in .view(.titleChanged(newValue)) }
-                                )
+                              "(선택) 제목을 입력해주세요",
+                              text: viewStore.binding(
+                                get: \.postTitle,
+                                send: { .view(.titleChanged($0)) }
+                              )
                             )
+                            .onChange(of: viewStore.postTitle) { new in
+                              if new.count > 40 {
+                                viewStore.send(.view(.titleChanged(String(new.prefix(40)))))
+                              }
+                            }
                             .focused($isTextFieldFocused)
                             .padding(.horizontal, 16)
                             .frame(height: 56)
@@ -96,16 +101,28 @@ struct PostWriteView: View {
                             LimitedTextEditor(
                                 text: viewStore.binding(
                                     get: \.postDescription,
-                                    send: { newValue in .view(.descriptionChanged(newValue)) }
+                                    send: { .view(.descriptionChanged($0)) }
                                 ),
                                 placeholder: "어떤 생각을 하고 계신가요?\n학교 친구들과 함께 생각을 나눠보세요",
                                 maxLength: 1200
                             )
+                            .onChange(of: viewStore.postDescription) { new in
+                              if new.count > 1200 {
+                                viewStore.send(.view(.descriptionChanged(String(new.prefix(1200)))))
+                              }
+                            }
                             .focused($isTextFieldFocused)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 12)
                             
                             HStack {
+                                if viewStore.descriptionTooLong {
+                                  Text("1200자 이내로 입력해 주세요.")
+                                    .font(DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                                    .foregroundColor(DesignSystemAsset.Colors.destructive.swiftUIColor)
+                                    .padding(.horizontal, 20)
+                                }
+                                
                                 Spacer()
                                 Text("\(viewStore.postDescription.count) / 1200")
                                     .font(DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 13))
@@ -193,15 +210,18 @@ struct PostWriteView: View {
                             }) {
                                 Text("게시하기")
                                     .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
-                                    .foregroundColor(DesignSystemAsset.Colors.gray900.swiftUIColor) // 검은 글자
+                                    .foregroundColor(viewStore.canSubmit ? DesignSystemAsset.Colors.gray900.swiftUIColor : DesignSystemAsset.Colors.gray300.swiftUIColor)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                             }
-                            .frame(height: 52) // 높이 56 고정
-                            .frame(maxWidth: .infinity) // 가로 꽉 채우기
-                            .background(DesignSystemAsset.Colors.primary300.swiftUIColor) // 노란색 배경
-                            .cornerRadius(12) // 모서리 둥글게
+                            .frame(height: 52)
+                            .frame(maxWidth: .infinity)
+                            .background(viewStore.canSubmit
+                                        ? DesignSystemAsset.Colors.primary300.swiftUIColor
+                                        : DesignSystemAsset.Colors.gray500.swiftUIColor)
+                            .disabled(!viewStore.canSubmit)
+                            .cornerRadius(12)
                             .padding(.top, 37)
-                            .padding(.horizontal, 20) // 좌우 20 여백
+                            .padding(.horizontal, 20)
                         }
                         
                     }
