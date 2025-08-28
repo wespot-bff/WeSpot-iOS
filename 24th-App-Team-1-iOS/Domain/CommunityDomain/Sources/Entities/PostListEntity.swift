@@ -10,11 +10,17 @@ public struct PostLocalOverride: Equatable {
     public var isLiked: Bool?
     public var likeCountDelta: Int
     public var isScrapped: Bool?
+    public var isNotified: Bool?
     
-    public init(isLiked: Bool? = nil, likeCountDelta: Int, isScrapped: Bool? = nil) {
+    public init(
+        isLiked: Bool? = nil,
+        likeCountDelta: Int,
+        isScrapped: Bool? = nil,
+        isNotified: Bool? = nil) {
         self.isLiked = isLiked
         self.likeCountDelta = likeCountDelta
         self.isScrapped = isScrapped
+        self.isNotified = isNotified
     }
 }
 
@@ -137,18 +143,47 @@ public struct PostItem: Identifiable, Equatable {
     public let id: Int
     public let type: PostType
     public let content: PostContent?
+    public let isMyPost: Bool?
     
-    public init(id: Int, type: PostType, content: PostContent? = nil) {
+    public init(id: Int, type: PostType, content: PostContent? = nil, isMyPost: Bool = false) {
         self.id = id
         self.type = type
         self.content = content
+        self.isMyPost = isMyPost
     }
 }
 
 public enum PostType: String, Equatable {
     case postItem = "PostItem"
-    // case other…
 }
+
+
+
+public struct CommentEntity: Equatable {
+    public let id: Int
+    public let isMine: Bool
+    public let profileImageURL: URL?
+    public let nickname: String
+    public let content: String
+    public var likeCount: Int
+    public var isLiked: Bool
+    public let isReported: Bool
+    public let createdAt: String
+    
+    
+    public init(id: Int, isMine: Bool, profileImageURL: URL?, nickname: String, content: String, likeCount: Int, isLiked: Bool, isReported: Bool, createdAt: String) {
+        self.id = id
+        self.isMine = isMine
+        self.profileImageURL = profileImageURL
+        self.nickname = nickname
+        self.content = content
+        self.likeCount = likeCount
+        self.isLiked = isLiked
+        self.isReported = isReported
+        self.createdAt = createdAt
+    }
+}
+
 
 public struct PostContent: Equatable {
     public let category: CategoryItemEntity?
@@ -156,9 +191,9 @@ public struct PostContent: Equatable {
     public let info: InfoSectionEntity
     public let contentSection: ContentSectionEntity?
     public var footer: FooterSectionEntity
-    public let button: Button?
+    public let button: ButtonEntity?
     
-    public init(category: CategoryItemEntity?, header: HeaderEntity, info: InfoSectionEntity, contentSection: ContentSectionEntity?, footer: FooterSectionEntity, button: Button?) {
+    public init(category: CategoryItemEntity?, header: HeaderEntity, info: InfoSectionEntity, contentSection: ContentSectionEntity?, footer: FooterSectionEntity, button: ButtonEntity?) {
         self.category = category
         self.header = header
         self.info = info
@@ -193,9 +228,9 @@ public struct HeaderEntity: Equatable {
     public let nickname: StyledText
     public let createdAt: StyledText
     public let category: CategoryItemEntity?
-    public let button: Button?
+    public let button: ButtonEntity?
     
-    public init(profileImageURL: String, profileImageWidth: Int, profileImageHeight: Int ,nickname: StyledText , createdAt: StyledText, category: CategoryItemEntity?, button: Button? = nil) {
+    public init(profileImageURL: String, profileImageWidth: Int, profileImageHeight: Int ,nickname: StyledText , createdAt: StyledText, category: CategoryItemEntity?, button: ButtonEntity? = nil) {
         self.profileImageURL = profileImageURL
         self.profileImageWidth = profileImageWidth
         self.profileImageHeight = profileImageHeight
@@ -232,8 +267,6 @@ public struct ImageResource: Equatable {
         self.url = url
         self.size = size
     }
-    
-
 }
 
 public struct FooterSectionEntity: Equatable {
@@ -274,15 +307,32 @@ public struct Scrap: Equatable {
     }
 }
 
-public struct Button: Equatable {
-    public let title: StyledText
-    public let action: String
+public struct ButtonEntity: Equatable {
+    public let type: String?
+    public let title: StyledText?
+    public let action: String?
+    public let icon: IconEntity?
+    public var isSelected: Bool?
     
-    public init(title: StyledText, action: String) {
+    public init(type: String?, title: StyledText?, action: String?, icon: IconEntity?, isSelected: Bool?) {
+        self.type = type
         self.title = title
         self.action = action
+        self.icon = icon
+        self.isSelected = isSelected
     }
 }
+
+public struct IconEntity: Equatable {
+    public let url: String
+    public let color: String
+    
+    public init(url: String, color: String) {
+        self.url = url
+        self.color = color
+    }
+}
+
 
 public struct StyledText: Equatable {
     public let text: String

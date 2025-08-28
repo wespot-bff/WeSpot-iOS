@@ -344,47 +344,6 @@ public struct MainNoticeBoardFeature {
 
 
 extension MainNoticeBoardFeature {
-    func toggleLike(in state: inout State, postId: Int) {
-        guard var list = state.postListItems else { return }
-        for (index, element) in list.items.enumerated() {
-            if case .post(var post) = element, post.id == postId, var content = post.content {
-                var reactions = content.footer.reactions
-                
-                if let likeIndex = reactions.firstIndex(where: { $0.type == "Like" }) {
-                    var like = reactions[likeIndex]
-                    let wasSelected = like.selected
-                    like.selected.toggle()
-                    
-                    if var currentCount = Int(like.count.text.replacingOccurrences(of: ",", with: "")) {
-                        if like.selected && !wasSelected {
-                            currentCount += 1
-                        } else if !like.selected && wasSelected {
-                            currentCount -= 1
-                            if currentCount < 0 { currentCount = 0 }
-                        }
-                        like = Reaction(
-                            type: like.type,
-                            iconURL: like.iconURL,
-                            iconColor: like.iconColor,
-                            count: StyledText(
-                                text: "\(currentCount)",
-                                color: like.count.color,
-                                typography: like.count.typography,
-                                maxLine: like.count.maxLine
-                            ),
-                            selected: like.selected
-                        )
-                        reactions[likeIndex] = like
-                    }
-                    content.footer = FooterSectionEntity(reactions: reactions, scrap: content.footer.scrap)
-                    post = PostItem(id: post.id, type: post.type, content: content)
-                    list.items[index] = .post(post)
-                    state.postListItems = PostListEntity(items: list.items, lastCursorId: list.lastCursorId, hasNext: list.hasNext)
-                    return
-                }
-            }
-        }
-    }
     
     func applyOverrides(to state: inout State) {
         guard let raw = state.rawPostListItems else {

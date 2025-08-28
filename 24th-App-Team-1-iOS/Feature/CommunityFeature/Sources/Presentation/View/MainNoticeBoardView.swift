@@ -44,8 +44,8 @@ public struct MainNoticeBoardView: View {
                                 } onDropdownTap: {
                                     viewStore.send(.view(.didTappedCategoryButton))
                                 }
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 16)
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 16)
                             
                             LazyVStack(alignment: .leading, spacing: 16) {
                                 if let list = viewStore.postListItems {
@@ -53,19 +53,29 @@ public struct MainNoticeBoardView: View {
                                         switch element {
                                         case .post(let post):
                                             if let content = post.content {
-                                                PostView(content: content) {
-                                                    
-                                                } onTapLike: {
-                                                    viewStore.send(.view(.didTappedLike(post.id)))
-                                                } onTapScrap: {
-                                                    viewStore.send(.view(.didTappedScrap(post.id)))
+                                                
+                                                NavigationLink(
+                                                    destination: FeedDetailView(
+                                                        store: .init(
+                                                            initialState: FeedDetailFeature.State(postId: String(post.id)),
+                                                            reducer: { FeedDetailFeature() }
+                                                        )
+                                                    )
+                                                ) {
+                                                    PostView(content: content) {
+                                                        
+                                                        
+                                                    } onTapLike: {
+                                                        viewStore.send(.view(.didTappedLike(post.id)))
+                                                    } onTapScrap: {
+                                                        viewStore.send(.view(.didTappedScrap(post.id)))
+                                                    }
+                                                    .onAppear {
+                                                        guard element.id == list.items.last?.id else { return }
+                                                        viewStore.send(.view(.loadNextPage))
+                                                    }
+                                                    .padding(.horizontal, 20)
                                                 }
-                                                .onAppear {
-                                                    let _ = print("확인 하빈다 \(element.id) == \(list.items.last?.id)")
-                                                  guard element.id == list.items.last?.id else { return }
-                                                  viewStore.send(.view(.loadNextPage))
-                                                }
-                                                .padding(.horizontal, 20)
                                             }
                                         case .vote(let vote):
                                             VoteBannerView(voteEntity: vote)
@@ -76,7 +86,7 @@ public struct MainNoticeBoardView: View {
                                     }
                                 }
                             }
-
+                            
                             .padding(.vertical, 16)
                             .safeAreaInset(edge: .bottom) {
                                 Color.clear.frame(height: 80)
@@ -108,15 +118,15 @@ public struct MainNoticeBoardView: View {
                         }
                     }
                     NavigationLink(
-                      destination: Group {
-                        if let chip = selectedDetailChip {
-                            CategoryPostView(store: .init(initialState: CategoryPostFeature.State(category: chip) , reducer: { CategoryPostFeature()}))
-                        } else {
-                          EmptyView()
-                        }
-                      },
-                      isActive: $showCategoryPost,
-                      label: { EmptyView() }
+                        destination: Group {
+                            if let chip = selectedDetailChip {
+                                CategoryPostView(store: .init(initialState: CategoryPostFeature.State(category: chip) , reducer: { CategoryPostFeature()}))
+                            } else {
+                                EmptyView()
+                            }
+                        },
+                        isActive: $showCategoryPost,
+                        label: { EmptyView() }
                     )
                     .hidden()
                     
@@ -204,12 +214,12 @@ struct CategorySelectorWithDropdown: View {
     let selected: FilterChipEntity?
     let onSelect: (FilterChipEntity) -> Void
     let onDropdownTap: () -> Void
-
+    
     var body: some View {
         ZStack {
             CategorySelectorView(chips: chips, selected: selected, onSelect: onSelect)
                 .padding(.trailing, 60)
-
+            
             HStack {
                 Spacer()
                 ZStack {
@@ -280,7 +290,7 @@ private struct CategorySelectorView: View {
 
 private struct HotPostBannerView: View {
     let hotPostEntity: HotPostItem
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 4) {
@@ -292,7 +302,7 @@ private struct HotPostBannerView: View {
                     .lineLimit(hotPostEntity.titleText.maxLine)
             }
             .padding(.horizontal, 20)
-
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     let innerPosts = hotPostEntity.innerPosts.compactMap { $0 }
@@ -309,7 +319,7 @@ private struct HotPostBannerView: View {
 
 private struct HotPostInnerCardView: View {
     let inner: HotPostInner
-
+    
     var body: some View {
         let profileWidth = CGFloat(inner.profileImageSizeWidth ?? 24)
         let profileHeight = CGFloat(inner.profileImageSizeHeight ?? 24)
@@ -332,14 +342,14 @@ private struct HotPostInnerCardView: View {
                             .frame(width: profileWidth, height: profileHeight)
                     }
                 }
-
+                
                 VStack(alignment: .leading, spacing: 2) {
                     Text(inner.nickname.text)
                         .font(.typography(inner.nickname.typography))
                         .foregroundColor(.token(inner.nickname.color))
-
+                    
                 }
-
+                
                 Spacer()
             }
             
@@ -458,8 +468,24 @@ struct PostView: View {
                             Text(category.text)
                                 .font(.typography(category.typography))
                                 .foregroundColor(.token(category.textColor))
-                            AsyncImage(url: URL(string: category.iconURL))
-                                .foregroundColor(.token(category.iconColor))
+                            AsyncImage(url: URL(string: category.iconURL)) { state in
+                                switch state {
+                                case .empty:
+                                    ProgressView()
+                                        .frame(width: 16, height: 16)
+                                case .success(let image):
+                                    image
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .scaledToFit()
+                                case .failure(_):
+                                    EmptyView()
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                            .frame(width: 16, height: 16)
+                            .foregroundColor(.token(category.iconColor))
                         }
                     }
                     
@@ -477,7 +503,7 @@ struct PostView: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-
+                
                 if let contentTitle = content.info.title {
                     Text(contentTitle.text)
                         .font(.typography(contentTitle.typography))
@@ -549,27 +575,30 @@ struct PostView: View {
                         switch reaction.type {
                         case "Chat": onTapComment()
                         case "Like": onTapLike()
-                        default:     break
+                        default: break
                         }
                     } label: {
                         HStack(spacing: 4) {
                             AsyncImage(url: URL(string: reaction.iconURL)) { state in
                                 switch state {
-                                case .empty:    ProgressView().frame(width: 16, height: 16)
+                                case .empty:
+                                    ProgressView()
+                                        .frame(width: 14, height: 14)
                                 case .success(let image):
                                     image
                                         .renderingMode(.template)
-                                        .foregroundColor(reaction.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  Color(hex: reaction.iconColor))
+                                        .resizable()
                                         .scaledToFit()
-                                        .frame(width: 14, height: 14)
-                                @unknown default: EmptyView()
+                                        .foregroundColor(reaction.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor : Color(hex: reaction.iconColor))
+                                @unknown default:
+                                    EmptyView()
                                 }
                             }
                             .frame(width: 14, height: 14)
+                            
                             Text(reaction.count.text)
                                 .font(.typography(reaction.count.typography))
                                 .foregroundColor(.token(reaction.count.color))
-                            
                         }
                     }
                 }
@@ -586,12 +615,13 @@ struct PostView: View {
                             case .success(let image):
                                 image
                                     .renderingMode(.template)
-                                    .foregroundColor(content.footer.scrap.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  Color(hex: content.footer.scrap.iconColor))
+                                    .resizable()
                                     .scaledToFit()
-                                    .frame(width: 14, height: 14)
+                                    .foregroundColor(content.footer.scrap.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  Color(hex: content.footer.scrap.iconColor))
                             @unknown default: EmptyView()
                             }
                         }
+                        .frame(width: 14, height: 14)
                         
                         Text("스크랩")
                             .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
@@ -600,7 +630,7 @@ struct PostView: View {
                 }
                 
             }
-                
+            
             Divider()
                 .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                 .padding(.vertical, 4)

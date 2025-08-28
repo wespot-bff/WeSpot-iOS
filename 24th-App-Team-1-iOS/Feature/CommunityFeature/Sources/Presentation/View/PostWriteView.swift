@@ -143,6 +143,7 @@ struct PostWriteView: View {
                             .padding(.horizontal, 20)
                             
                             LazyHGrid(rows: [GridItem(.fixed(80))], spacing: 16) {
+                                let _ = print("이미지 갯수 : \(viewStore.uiImages)")
                                 if viewStore.uiImages.count < 3 {
                                     PhotosPicker(
                                         selection: viewStore.binding(
@@ -165,6 +166,7 @@ struct PostWriteView: View {
                                 }
                                 
                                 ForEach(Array(viewStore.uiImages.enumerated()), id: \.offset) { idx, uiImage in
+                                    let _ = print("바인딩 된 이미지 : \(uiImage)")
                                     ZStack(alignment: .topTrailing) {
                                         Image(uiImage: uiImage)
                                             .resizable()
@@ -173,7 +175,6 @@ struct PostWriteView: View {
                                             .clipped()
                                             .cornerRadius(16)
                                         
-                                        // 선택 취소(X) 버튼
                                         Button {
                                             viewStore.send( .view(.onPhotosChanged(
                                                 viewStore.photoItems.enumerated()

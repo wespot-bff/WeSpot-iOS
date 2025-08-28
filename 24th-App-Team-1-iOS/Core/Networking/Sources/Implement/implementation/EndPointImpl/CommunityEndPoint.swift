@@ -31,6 +31,14 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     case fetchMyScrapPost
     case fetchMyCommnetPost
     case fetchPostImagePresignedURL(Encodable)
+    case fetchPostDetail(String)
+    case updateCommentNotification(String)
+    case createComment(Encodable)
+    case fetchComment(Encodable)
+    case createCommentReport(String)
+    case createCommentLike(String)
+    case updatePostBlock(String)
+    case updatePostReport(String)
     
     public var spec: WSNetworkSpec {
         switch self {
@@ -60,6 +68,22 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .put, url: presignedURL)
         case .fetchPostDetails(_):
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/details")
+        case let .fetchPostDetail(postId):
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)")
+        case let .updateCommentNotification(postId):
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/notification/comment")
+        case let .createCommentReport(commentId):
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/comment/\(commentId)/report")
+        case let .createCommentLike(commentId):
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/comment/\(commentId)/like")
+        case let .updatePostBlock(postId):
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/block")
+        case let .updatePostReport(postId):
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/report")
+        case .createComment:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/comment")
+        case .fetchComment:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/comment")
         }
     }
     
@@ -73,11 +97,15 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
             return .none
         case .fetchCategoryDetailChips:
             return .none
+        case let .createComment(body):
+            return .requestBody(body)
         case let .uploadPost(body):
             return .requestBody(body)
         case let .fetchPostImagePresignedURL(query):
             return .requestQuery(query)
         case let .fetchPostDetails(query):
+            return .requestQuery(query)
+        case let .fetchComment(query):
             return .requestQuery(query)
         default:
             return .none

@@ -75,14 +75,23 @@ public struct NoticeSearchView: View {
                                 return nil
                             }, id: \.id) { post in
                                 if let content = post.content {
-                                    PostView(content: content) {
-                                    } onTapLike: {
-                                        viewStore.send(.view(.didTappedLike(post.id)))
-                                    } onTapScrap: {
-                                        viewStore.send(.view(.didTappedScrap(post.id)))
+                                    NavigationLink(
+                                        destination: FeedDetailView(
+                                            store: .init(
+                                                initialState: FeedDetailFeature.State(postId: String(post.id)),
+                                                reducer: { FeedDetailFeature() }
+                                            )
+                                        )
+                                    ) {
+                                        PostView(content: content) {
+                                        } onTapLike: {
+                                            viewStore.send(.view(.didTappedLike(post.id)))
+                                        } onTapScrap: {
+                                            viewStore.send(.view(.didTappedScrap(post.id)))
+                                        }
+                                        .padding(.top, 24)
+                                        .padding(.horizontal, 20)
                                     }
-                                    .padding(.top, 24)
-                                    .padding(.horizontal, 20)
                                 }
                             }
                         }

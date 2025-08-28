@@ -13,11 +13,11 @@ import CommunityDomain
 
 public struct CreatePostImagePresignedURLResponseDTO: Decodable {
     public let presignedURL: String
-    public let imageURL: String
+    public let imageName: String
     
     private enum CodingKeys: String, CodingKey {
         case presignedURL = "url"
-        case imageURL = "imageUrl"
+        case imageName = "imageName"
     }
 }
 
@@ -25,7 +25,7 @@ extension CreatePostImagePresignedURLResponseDTO {
     public func toDomain() -> CreatePostImagePresignedURLEntity {
         return .init(
             presignedURL: presignedURL,
-            imageURL: imageURL
+            imageName: imageName
         )
     }
     

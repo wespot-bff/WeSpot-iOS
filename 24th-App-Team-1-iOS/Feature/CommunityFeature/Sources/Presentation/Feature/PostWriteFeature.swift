@@ -110,6 +110,7 @@ public struct PostWriteFeature {
                             bianryData.append(data)
                         }
                     }
+                    print("이미지 갯수를 확인합니다 : \(uiImgs)")
                     await send(.inner(.photosLoaded(uiImgs, bianryData, presignedURL)))
                 }
             case .inner(.photosLoaded(let imgs, let photoImageData, let presignedURL)):
@@ -137,8 +138,9 @@ public struct PostWriteFeature {
                                 throw URLError(.badServerResponse)
                             }
                         }
+                        // 이미지 iamgeName
                         let imageRequests = presignedList.map { presigned in
-                            UploadPostImageItemReqeuest(url: presigned.imageURL, width: 0, height: 0)
+                            UploadPostImageItemReqeuest(url: presigned.imageName, width: 0, height: 0)
                         }
                         
                         

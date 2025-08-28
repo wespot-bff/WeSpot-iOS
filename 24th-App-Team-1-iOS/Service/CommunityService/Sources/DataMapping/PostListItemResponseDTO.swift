@@ -18,6 +18,7 @@ public struct PostListResponseDTO: Decodable {
 public struct PostItemDTO: Decodable {
     let id: Int
     let type: String
+    let isMyPost: Bool
     let content: ContentDTO
 }
 
@@ -110,11 +111,12 @@ public enum ContentSectionDTO: Decodable {
     private enum SectionType: String, Decodable { case Images }
     
     public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let raw = try c.decode(SectionType.self, forKey: .type)
-        switch raw {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let rawType = try container.decode(SectionType.self, forKey: .type)
+
+        switch rawType {
         case .Images:
-            let imgs = try c.decode([ImageDTO].self, forKey: .images)
+            let imgs = try container.decode([ImageDTO].self, forKey: .images)
             self = .images(imgs)
         }
     }
@@ -138,8 +140,28 @@ public struct ScrapDTO: Decodable {
 }
 
 public struct ButtonDTO: Decodable {
-    let title: StyledTextDTO
-    let action: String
+    let type: String?
+    let action: String?
+    
+    let icon: IconDTO?
+    let text: StyledTextDTO?
+    let isSelected: Bool?
+    let title: StyledTextDTO?
+    
+    private enum CodingKeys: String, CodingKey {
+        case type, action, icon, text, isSelected, title
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.type = try container.decodeIfPresent(String.self, forKey: .type)
+        self.action = try container.decodeIfPresent(String.self, forKey: .action)
+        self.icon = try container.decodeIfPresent(IconDTO.self, forKey: .icon)
+        self.text = try container.decodeIfPresent(StyledTextDTO.self, forKey: .text)
+        self.isSelected = try container.decodeIfPresent(Bool.self, forKey: .isSelected)
+        self.title = try container.decodeIfPresent(StyledTextDTO.self, forKey: .title)
+    }
 }
 
 extension PostListResponseDTO {
@@ -194,6 +216,14 @@ extension ContentDTO {
         )
     }
 }
+
+public struct DetailButtonDTO: Decodable {
+    let type: String
+    let icon: IconDTO
+    let text: StyledTextDTO
+    let isSelected: Bool
+}
+
 
 extension CategoryDTO {
     func toDomain() -> CategoryItemEntity {
@@ -277,7 +307,22 @@ extension ScrapDTO {
 }
 
 extension ButtonDTO {
-    func toDomain() -> Button {
-        return Button(title: title.toDomain(), action: action)
+    func toDomain() -> ButtonEntity {
+        return ButtonEntity(
+            type: type,
+            title: title?.toDomain() ?? text?.toDomain(),
+            action: action,
+            icon: icon?.toDomain(),
+            isSelected: isSelected
+        )
+    }
+}
+
+extension IconDTO {
+    func toDomain() -> IconEntity {
+        return IconEntity(
+            url: url,
+            color: color.value
+        )
     }
 }
