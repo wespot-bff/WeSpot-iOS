@@ -10,6 +10,8 @@ import DesignSystem
 import ComposableArchitecture
 import CommunityDomain
 import Extensions
+import Util
+import NotificationFeature
 
 
 public struct MainNoticeBoardView: View {
@@ -20,6 +22,7 @@ public struct MainNoticeBoardView: View {
     var store: StoreOf<MainNoticeBoardFeature>
     @StateObject private var viewStore: ViewStore<MainNoticeBoardFeature.State, MainNoticeBoardFeature.Action>
     @State private var showCategoryPost = false
+    @State private var showNotification = false
     @State private var selectedDetailChip: CategoryChipsEntity? = nil
     public init(store: StoreOf<MainNoticeBoardFeature>) {
         self.store = store
@@ -118,6 +121,17 @@ public struct MainNoticeBoardView: View {
                         }
                     }
                     NavigationLink(
+                        destination: NotificationViewWrapper()
+                            .ignoresSafeArea()
+                            .navigationBarBackButtonHidden()
+                            .navigationBarHidden(true)
+                        ,
+                        isActive: $showNotification
+                    ) {
+                        EmptyView()
+                    }
+                    
+                    NavigationLink(
                         destination: Group {
                             if let chip = selectedDetailChip {
                                 CategoryPostView(store: .init(initialState: CategoryPostFeature.State(category: chip) , reducer: { CategoryPostFeature()}))
@@ -165,7 +179,7 @@ public struct MainNoticeBoardView: View {
                                     .foregroundColor(.white)
                             }
                             Button {
-                                
+                                showNotification = true
                             } label: {
                                 DesignSystemAsset.Images.notice.swiftUIImage
                                     .foregroundColor(.white)
@@ -533,35 +547,62 @@ struct PostView: View {
             if let section = content.contentSection {
                 switch section {
                 case .images(let images) where !images.isEmpty:
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(Array(images.enumerated()), id: \.offset) { _, image in
-                                AsyncImage(url: URL(string: image.url)) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        ProgressView()
-                                            .frame(width: 120, height: 120)
-                                    case .success(let img):
-                                        img
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 120, height: 120)
-                                            .clipped()
-                                            .cornerRadius(12)
-                                    case .failure:
-                                        Color.gray
-                                            .frame(width: 120, height: 120)
-                                            .overlay(
-                                                Image(systemName: "photo")
-                                            )
-                                            .cornerRadius(12)
-                                    @unknown default:
-                                        EmptyView()
-                                    }
-                                }
+                    if images.count == 1 {
+                        AsyncImage(url: URL(string: images[0].url)) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(width: 336, height: 155)
+                            case .success(let img):
+                                img
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 336, height: getImageHeight(for: images[0], maxWidth: 336))
+                                    .clipped()
+                                    .cornerRadius(12)
+                            case .failure:
+                                Color.gray
+                                    .frame(width: 336, height: 155)
+                                    .overlay(
+                                        Image(systemName: "photo")
+                                    )
+                                    .cornerRadius(12)
+                            @unknown default:
+                                EmptyView()
                             }
                         }
                         .padding(.vertical, 8)
+                    } else {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(Array(images.enumerated()), id: \.offset) { _, image in
+                                    AsyncImage(url: URL(string: image.url)) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            ProgressView()
+                                                .frame(width: 226, height: 226)
+                                        case .success(let img):
+                                            img
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 226, height: 226)
+                                                .clipped()
+                                                .cornerRadius(12)
+                                        case .failure:
+                                            Color.gray
+                                                .frame(width: 226, height: 226)
+                                                .overlay(
+                                                    Image(systemName: "photo")
+                                                )
+                                                .cornerRadius(12)
+                                        @unknown default:
+                                            EmptyView()
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        }
                     }
                 default:
                     EmptyView()
@@ -638,6 +679,36 @@ struct PostView: View {
         }
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func getImageHeight(for imageData: Any, maxWidth: CGFloat) -> CGFloat {
+        let defaultHeight: CGFloat = 155
+        let maxHeight: CGFloat = 718
+        
+        return defaultHeight
+    }
+    
+}
+
+struct NotificationViewWrapper: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> NotificationViewController {
+        let notificationViewController = DependencyContainer.shared.injector.resolve(NotificationViewController.self)
+        
+        notificationViewController.navigationController?.setNavigationBarHidden(true, animated: false)
+        notificationViewController.navigationController?.navigationBar.isHidden = true
+        
+        DispatchQueue.main.async {
+            notificationViewController.beginAppearanceTransition(true, animated: false)
+            notificationViewController.endAppearanceTransition()
+        }
+        
+        NotificationCenter.default.post(name: .hideTabBar, object: nil)
+        
+        return notificationViewController
+    }
+    
+    func updateUIViewController(_ uiViewController: NotificationViewController, context: Context) {
+        uiViewController.navigationController?.setNavigationBarHidden(true, animated: false)
     }
 }
 

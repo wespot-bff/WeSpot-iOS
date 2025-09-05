@@ -131,11 +131,15 @@ public struct PostListEntity: Equatable {
     public var items: [PostListElement]
     public var lastCursorId: Int?
     public var hasNext: Bool
+    public let thumbnail: ImageResource?
+    public let background: ImageResource?
     
-    public init(items: [PostListElement], lastCursorId: Int? = nil, hasNext: Bool) {
+    public init(items: [PostListElement], lastCursorId: Int? = nil, hasNext: Bool, thumbnail: ImageResource?, background: ImageResource?) {
         self.items = items
         self.lastCursorId = lastCursorId
         self.hasNext = hasNext
+        self.thumbnail = thumbnail
+        self.background = background
     }
 }
 
@@ -167,8 +171,10 @@ public struct CommentEntity: Equatable {
     public let content: String
     public var likeCount: Int
     public var isLiked: Bool
-    public let isReported: Bool
+    public var isReported: Bool
     public let createdAt: String
+    
+    public var isDeleted: Bool = false
     
     
     public init(id: Int, isMine: Bool, profileImageURL: URL?, nickname: String, content: String, likeCount: Int, isLiked: Bool, isReported: Bool, createdAt: String) {
@@ -351,5 +357,14 @@ public struct StyledText: Equatable {
 extension CGSize: @retroactive Equatable {
     public static func == (lhs: CGSize, rhs: CGSize) -> Bool {
         return lhs.width == rhs.width && lhs.height == rhs.height
+    }
+}
+
+extension ContentSectionEntity {
+    public var imageURLs: [String] {
+        switch self {
+        case .images(let imageResources):
+            return imageResources.map { $0.url }
+        }
     }
 }

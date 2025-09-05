@@ -13,7 +13,10 @@ public struct PostListResponseDTO: Decodable {
     let data: [PostElementDTO]
     let lastCursorId: Int?
     let hasNext: Bool
+    let background: ImageDTO?
+    let thumbnail: ImageDTO?
 }
+
 
 public struct PostItemDTO: Decodable {
     let id: Int
@@ -167,7 +170,7 @@ public struct ButtonDTO: Decodable {
 extension PostListResponseDTO {
     func toDomain() -> PostListEntity {
         let elements = data.map { $0.toDomain() }
-        return PostListEntity(items: elements, lastCursorId: lastCursorId, hasNext: hasNext)
+        return PostListEntity(items: elements, lastCursorId: lastCursorId, hasNext: hasNext, thumbnail: thumbnail?.toDomain(), background: background?.toDomain())
     }
 }
 
@@ -176,7 +179,8 @@ extension PostItemDTO {
         return PostItem(
             id: id,
             type: PostType(rawValue: type) ?? .postItem,
-            content: content.toDomain()
+            content: content.toDomain(),
+            isMyPost: isMyPost
         )
     }
 }

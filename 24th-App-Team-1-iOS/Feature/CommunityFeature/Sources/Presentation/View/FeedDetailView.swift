@@ -13,21 +13,72 @@ import ComposableArchitecture
 import CommunityDomain
 import Perception
 
+enum FeedAlertType: Equatable {
+    case deletePost(postId: Int)
+    case deleteComment(commentId: Int)
+    case blockUser(userId: String)
+
+    var title: String {
+        switch self {
+        case .deletePost:
+            return "게시글을 삭제할까요?"
+        case .deleteComment:
+            return "댓글을 삭제할까요?"
+        case .blockUser:
+            return "해당 유저를 차단할까요?"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .deletePost:
+            return "삭제된 게시글은 되돌릴 수 없어요."
+        case .deleteComment:
+            return "삭제된 댓글도 되돌릴 수 없어요."
+        case .blockUser:
+            return "해당 유저가 작성한 게시글이 보이지 않도록 숨겨드릴게요.다만, 차단 해제는 불가해요."
+        }
+    }
+}
+
+
+
 struct FeedDetailView: View {
     @Perception.Bindable
     public var store: StoreOf<FeedDetailFeature>
     @Environment(\.presentationMode) private var presentationMode
+    @State private var showNormalAlert = false
     @StateObject private var viewStore: ViewStore<FeedDetailFeature.State, FeedDetailFeature.Action>
+    @State private var currentAlertType: FeedAlertType? = nil
+    @State private var showReportView = false
     
+    @State private var showPostWriteView = false
+    @State private var showBottomSheet = false
     public init(store: StoreOf<FeedDetailFeature>) {
         self.store = store
         self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
     }
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
+        if let toast = viewStore.toast {
+            BBToastView(type: toast)
+                .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 44 + 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(1000)
+        }
+            
             DesignSystemAsset.Colors.gray900.swiftUIColor
                 .ignoresSafeArea()
+            
+            NavigationLink(
+                destination: PostWriteView(
+                    store: .init(
+                        initialState: PostWriteFeature.State(editingPost: viewStore.postEntity, isEditing: true),
+                        reducer: {PostWriteFeature()})),
+                isActive: $showPostWriteView,
+                label: { EmptyView()}
+            )
             
             GeometryReader { geometry in
                 let statusBarHeight = geometry.safeAreaInsets.top
@@ -41,7 +92,9 @@ struct FeedDetailView: View {
                                 footerView(postEntity: postEntity)
                                 
                                 Divider()
-                                    .background(Color.gray.opacity(0.3))
+                                    .frame(height: 8)
+                                    .background(DesignSystemAsset.Colors.gray500.swiftUIColor)
+                                    .padding(.horizontal, -16)
                                     .padding(.vertical, 16)
                                 
                                 commentsSection(comments: viewStore.commentItem)
@@ -49,11 +102,48 @@ struct FeedDetailView: View {
                             .padding(.horizontal, 16)
                         }
                     }
+                    
                     .safeAreaInset(edge: .top, spacing: 0) {
                         Color.clear.frame(height: 120)
                     }
                 }
             }
+            .customAlert(
+                isPresented: $showNormalAlert,
+                title: currentAlertType?.title ?? "",
+                message: currentAlertType?.subtitle ?? "",
+                primaryButtonText: "네",
+                secondaryButtonText: "아니요",
+                style: .normal,
+                primaryAction: {
+                    switch currentAlertType {
+                    case .deleteComment(let id):
+                        viewStore.send(.view(.didTappedDeleteComment(id)))
+                        
+                    case .deletePost(let id):
+                        viewStore.send(.view(.didTappedDeletePost(id)))
+                        
+                    case .blockUser(let userId):
+                        showReportView = true
+                        let _ = print("리포트 값 확인 \(showReportView)")
+                        
+                    case .none:
+                        break
+                    }
+                },
+                secondaryAction: {
+                    viewStore.send(.view(.cancelDeleteComment))
+                }
+            )
+            .background(
+                NavigationLink(
+                    destination: ReportReasonView(store: .init(initialState: ReportFeature.State(postId: viewStore.postId), reducer: { ReportFeature()})),
+                    isActive: $showReportView
+                ) {
+                    EmptyView()
+                }
+            )
+            
             ChatInputView(
                 text: viewStore.binding(
                     get: \.chatInputText,
@@ -79,8 +169,88 @@ struct FeedDetailView: View {
                 }
             )
             .keyboardAware()
+            .sheet(isPresented: $showBottomSheet) {
+                VStack(spacing: 0) {
+
+                    if viewStore.postEntity?.isMyPost == true {
+                        Button {
+                            showBottomSheet = false
+                            showPostWriteView = true
+                        } label: {
+                            Text("수정하기")
+                                .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .frame(maxWidth: .infinity, minHeight: 52)
+                                .padding(.top, 10)
+                        }
+                        
+                        Rectangle()
+                            .fill(Color.white.opacity(0.2))
+                            .frame(height: 0.5)
+                        
+                        Button {
+                            showBottomSheet = false
+                            if let postId = viewStore.postEntity?.id {
+                                currentAlertType = .deletePost(postId: postId)
+                                showNormalAlert = true
+                            }
+                        } label: {
+                            Text("삭제하기")
+                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                                .frame(maxWidth: .infinity, minHeight: 52)
+                                .padding(.top, 10)
+                        }
+                    } else {
+                        Button {
+                            showBottomSheet = false
+                            if let postEntity = viewStore.postEntity {
+                                currentAlertType = .blockUser(userId: String(postEntity.id))
+                                showNormalAlert = true
+                            }
+                        } label: {
+                            Text("신고하기")
+                                .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .frame(maxWidth: .infinity, minHeight: 52)
+                                .padding(.top, 10)
+                        }
+                        
+                        Rectangle()
+                            .fill(Color.white.opacity(0.2))
+                            .frame(height: 0.5)
+                        
+                        Button {
+                            showBottomSheet = false
+                            if let postEntity = viewStore.postEntity {
+                                currentAlertType = .blockUser(userId: String(postEntity.id))
+                                showNormalAlert = true
+                            }
+                        } label: {
+                            Text("차단하기")
+                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                                .frame(maxWidth: .infinity, minHeight: 52)
+                                .padding(.top, 10)
+                        }
+                    }
+                    
+                    Rectangle()
+                        .fill(Color(hex: "#2B2B2B"))
+                        .frame(height: 34)
+                }
+                .background(Color(hex: "#2B2B2B"))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.height(156)])
+                .presentationBackground(.clear)
+            }
         }
-        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onChange(of: viewStore.shouldDismiss) { shouldDismiss in
+            if shouldDismiss {
+                presentationMode.wrappedValue.dismiss()
+            }
+        }
         .wsNavigationBar(left: {
             Button {
                 presentationMode.wrappedValue.dismiss()
@@ -107,7 +277,7 @@ struct FeedDetailView: View {
             }
         }, right: {
             Button {
-                presentationMode.wrappedValue.dismiss()
+                showBottomSheet = true
             } label: {
                 DesignSystemAsset.Images.icCommunityDotFiled.swiftUIImage
             }
@@ -205,11 +375,13 @@ struct FeedDetailView: View {
                         .font(.typography(title.typography))
                         .lineLimit(title.maxLine)
                 }
+                let _ = print("텍스트 값 확인합니다 \(content.info.description)")
                 
                 Text(content.info.description.text)
                     .foregroundColor(.token(content.info.description.color))
                     .font(.typography(content.info.description.typography))
                     .lineLimit(content.info.description.maxLine)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
                 if let contentSection = content.contentSection {
                     switch contentSection {
@@ -227,20 +399,32 @@ struct FeedDetailView: View {
     
     @ViewBuilder
     private func imageGridView(imageUrls: [String]) -> some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())
-        ], spacing: 8) {
-            ForEach(Array(imageUrls.enumerated()), id: \.offset) { _, url in
-                AsyncImage(url: URL(string: url)) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Rectangle().fill(Color.gray.opacity(0.3))
+        if imageUrls.count == 1 {
+            AsyncImage(url: URL(string: imageUrls.first ?? "")) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle().fill(Color.gray.opacity(0.3))
+            }
+            .frame(width: 336, height: 336)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(Array(imageUrls.enumerated()), id: \.offset) { _, url in
+                        AsyncImage(url: URL(string: url)) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Rectangle().fill(Color.gray.opacity(0.3))
+                        }
+                        .frame(width: 336, height: 336)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
                 }
-                .frame(height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 20)
             }
         }
     }
+
     @ViewBuilder
     private func footerView(postEntity: PostItem) -> some View {
         if let content = postEntity.content {
@@ -316,119 +500,252 @@ struct FeedDetailView: View {
         let updatedComment = store.commentsForUI.first(where: { $0.id == comment.id }) ?? comment
         
         HStack(alignment: .top, spacing: 0) {
-            if updatedComment.isMine {
-                Spacer()
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(updatedComment.nickname)
-                        .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
-                        .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                    
-                    Text(updatedComment.content)
-                        .foregroundColor(DesignSystemAsset.Colors.white.swiftUIColor)
-                        .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(DesignSystemAsset.Colors.gray600.swiftUIColor)
-                        )
-                        .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .trailing)
-                    
-                    HStack(spacing: 8) {
-                        Text(updatedComment.createdAt)
-                            .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
-                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
-                        
-                        HStack(spacing: 4) {
-                            Button {
-                                viewStore.send(.view(.didTappedCommentLike(String(comment.id))))
-                            } label: {
-                                updatedComment.isLiked ? DesignSystemAsset.Images.icCommunityLikeFiled.swiftUIImage : DesignSystemAsset.Images.icCommunityUnlikeFiled.swiftUIImage
-                            }
-                            
-                            Text("\(updatedComment.likeCount)")
-                                .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
-                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
-                        }
-                        
-                        Button {
-                            
-                        } label: {
-                            Text("・ 삭제")
-                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
-                                .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
-                        }
+            
+            
+            if updatedComment.isDeleted {
+                HStack {
+                    if updatedComment.isMine { Spacer() }
 
-                    }
-                }
-                AsyncImage(url: updatedComment.profileImageURL) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Circle().fill(Color.gray.opacity(0.3))
-                }
-                .frame(width: 32, height: 32)
-                .clipShape(Circle())
-                .padding(.leading, 8)
-                
-            } else {
-                AsyncImage(url: updatedComment.profileImageURL) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Circle().fill(Color.gray.opacity(0.3))
-                }
-                .frame(width: 32, height: 32)
-                .clipShape(Circle())
-                .padding(.trailing, 8)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(updatedComment.nickname)
-                        .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
-                        .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                    
-                    Text(updatedComment.content)
-                        .foregroundColor(DesignSystemAsset.Colors.white.swiftUIColor)
-                        .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(DesignSystemAsset.Colors.gray600.swiftUIColor)
-                        )
-                        .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .leading)
-                    
-                    HStack(spacing: 8) {
+                    VStack(alignment: updatedComment.isMine ? .trailing : .leading, spacing: 4) {
+                        
+                        Text("익명")
+                            .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
+                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+
+                        Text("작성자가 삭제한 댓글입니다.")
+                            .foregroundColor(DesignSystemAsset.Colors.white.swiftUIColor)
+                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(DesignSystemAsset.Colors.gray600.swiftUIColor)
+                            )
+                            .frame(
+                                maxWidth: UIScreen.main.bounds.width * 0.7,
+                                alignment: updatedComment.isMine ? .trailing : .leading
+                            )
+
                         Text(updatedComment.createdAt)
                             .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
                             .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                    }
+
+                    if !updatedComment.isMine { Spacer() }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                Circle()
+                    .fill(DesignSystemAsset.Colors.gray300.swiftUIColor)
+                    .frame(width: 32, height: 32)
+                
+                
+
+            } else {
+                if updatedComment.isMine {
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text(updatedComment.nickname)
+                            .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
+                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         
-                        HStack(spacing: 4) {
-                            Button {
-                                viewStore.send(.view(.didTappedCommentLike(String(comment.id))))
-                            } label: {
-                                updatedComment.isLiked ? DesignSystemAsset.Images.icCommunityLikeFiled.swiftUIImage : DesignSystemAsset.Images.icCommunityUnlikeFiled.swiftUIImage
+                        Text(updatedComment.content)
+                            .foregroundColor(DesignSystemAsset.Colors.white.swiftUIColor)
+                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(DesignSystemAsset.Colors.gray600.swiftUIColor)
+                            )
+                            .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .trailing)
+                        
+                        HStack(spacing: 8) {
+                            Text(updatedComment.createdAt)
+                                .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                            
+                            HStack(spacing: 4) {
+                                Button {
+                                    viewStore.send(.view(.didTappedCommentLike(String(updatedComment.id))))
+                                } label: {
+                                    updatedComment.isLiked ? DesignSystemAsset.Images.icCommunityLikeFiled.swiftUIImage : DesignSystemAsset.Images.icCommunityUnlikeFiled.swiftUIImage
+                                }
+                                
+                                Text("\(updatedComment.likeCount)")
+                                    .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
+                                    .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
                             }
                             
-                                
-                            Text("\(updatedComment.likeCount)")
-                                .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
-                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                            Button {
+                                showNormalAlert = true
+                                currentAlertType = .deleteComment(commentId: updatedComment.id)
+                            } label: {
+                                Text("・ 삭제")
+                                    .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                                    .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
                             }
-                        
-                        if !updatedComment.isReported {
-                            Button("신고") {
-                                // 신고 액션
-                            }
-                            .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
-                            .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+
                         }
                     }
+                    AsyncImage(url: updatedComment.profileImageURL) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Circle().fill(Color.gray.opacity(0.3))
+                    }
+                    .frame(width: 32, height: 32)
+                    .clipShape(Circle())
+                    .padding(.leading, 8)
+                    
+                } else {
+                    if updatedComment.isReported {
+                        HStack(alignment: .top, spacing: 8) {
+                            Circle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 32, height: 32)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("익명")
+                                    .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+                                    .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+
+                                Text("신고 누적으로 숨김 처리된 채팅입니다.")
+                                    .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+                                    .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .fill(DesignSystemAsset.Colors.gray500.swiftUIColor)
+                                    )
+                                    .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .leading)
+
+                                Text(updatedComment.createdAt)
+                                    .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+                                    .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                    } else {
+                        AsyncImage(url: updatedComment.profileImageURL) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Circle().fill(Color.gray.opacity(0.3))
+                        }
+                        .frame(width: 32, height: 32)
+                        .clipShape(Circle())
+                        .padding(.trailing, 8)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(updatedComment.nickname)
+                                .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
+                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            
+                            Text(updatedComment.content)
+                                .foregroundColor(DesignSystemAsset.Colors.white.swiftUIColor)
+                                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(DesignSystemAsset.Colors.gray600.swiftUIColor)
+                                )
+                                .frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .leading)
+                            
+                            HStack(spacing: 8) {
+                                Text(updatedComment.createdAt)
+                                    .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+                                    .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                                
+                                HStack(spacing: 4) {
+                                    Button {
+                                        viewStore.send(.view(.didTappedCommentLike(String(comment.id))))
+                                    } label: {
+                                        updatedComment.isLiked ? DesignSystemAsset.Images.icCommunityLikeFiled.swiftUIImage : DesignSystemAsset.Images.icCommunityUnlikeFiled.swiftUIImage
+                                    }
+                                    
+                                        
+                                    Text("\(updatedComment.likeCount)")
+                                        .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
+                                        .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                                    }
+                                
+                                if !updatedComment.isReported {
+                                    Button("신고") {
+                                        viewStore.send(.view(.didTappedCommentReport(updatedComment.id)))
+                                    }
+                                    .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                                    .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
+                                }
+                            }
+                        }
+                    }
+
+                    
+                    Spacer()
                 }
-                
-                Spacer()
             }
+            
+
         }
     }
 }
+
+
+public enum ToastType: Equatable {
+    case success(String)
+    case error(String)
+
+    var icon: Image {
+        switch self {
+        case .success: return DesignSystemAsset.Images.checkmarkFillPositive.swiftUIImage
+        case .error: return DesignSystemAsset.Images.exclamationmarkFillDestructive.swiftUIImage
+        }
+    }
+
+    var backgroundColor: Color {
+        switch self {
+        case .success: return DesignSystemAsset.Colors.gray100.swiftUIColor
+        case .error: return DesignSystemAsset.Colors.gray100.swiftUIColor
+        }
+    }
+
+    var text: String {
+        switch self {
+        case let .success(message): return message
+        case let .error(message): return message
+        }
+    }
+}
+
+
+struct BBToastView: View {
+    let type: ToastType
+
+    var body: some View {
+        HStack(spacing: 8) {
+            type.icon
+                .resizable()
+                .frame(width: 20, height: 20)
+            
+            Text(type.text)
+                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                .foregroundColor(DesignSystemAsset.Colors.gray900.swiftUIColor)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            Capsule()
+                .fill(type.backgroundColor)
+        )
+        .padding(.top, 20)
+        .padding(.horizontal, 20)
+    }
+}
+
 
 
 
@@ -512,4 +829,213 @@ struct ChatInputView: View {
     }
 }
 
+
+
+extension View {
+    func customAlert(
+        isPresented: Binding<Bool>,
+        title: String,
+        message: String,
+        primaryButtonText: String = "네",
+        secondaryButtonText: String = "아니요",
+        style: CustomAlert.AlertStyle = .normal,
+        primaryAction: @escaping () -> Void = {},
+        secondaryAction: @escaping () -> Void = {}
+    ) -> some View {
+        self.overlay(
+            Group {
+                if isPresented.wrappedValue {
+                    CustomAlert(
+                        title: title,
+                        message: message,
+                        primaryButtonText: primaryButtonText,
+                        secondaryButtonText: secondaryButtonText,
+                        primaryAction: primaryAction,
+                        secondaryAction: secondaryAction,
+                        style: style,
+                        isPresented: isPresented
+                    )
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                        removal: .opacity.combined(with: .scale(scale: 0.8))
+                    ))
+                }
+            }
+        )
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isPresented.wrappedValue)
+    }
+}
+
+
+
+struct CustomAlert: View {
+    let title: String
+    let message: String
+    let primaryButtonText: String
+    let secondaryButtonText: String
+    let primaryAction: () -> Void
+    let secondaryAction: () -> Void
+    let style: AlertStyle
+    @Binding var isPresented: Bool
+
+    enum AlertStyle {
+        case normal
+        case destructive
+    }
+
+    var body: some View {
+        ZStack {
+            VStack(spacing: 0) {
+                VStack(spacing: 8) {
+                    Text(title)
+                        .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 20))
+                        .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+
+                    Text(message)
+                        .font(DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                        .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 20)
+
+                HStack(spacing: 12) {
+                    Button(action: {
+                        withAnimation { isPresented = false }
+                        secondaryAction()
+                    }) {
+                        Text(secondaryButtonText)
+                            .font(.system(size: 16))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.white.opacity(0.2))
+                            )
+                    }
+
+                    Button(action: {
+                        withAnimation { isPresented = false }
+                        primaryAction()
+                    }) {
+                        Text(primaryButtonText)
+                            .font(.system(size: 16))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(primaryButtonColor)
+                            )
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(alertBackgroundColor)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(borderColor, lineWidth: style == .destructive ? 2 : 0)
+                    )
+            )
+            .padding(.horizontal, 40)
+            .transition(.scale)
+            .zIndex(999)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+    }
+
+    private var alertBackgroundColor: Color {
+        switch style {
+        case .normal:
+            return Color(red: 0.25, green: 0.25, blue: 0.27)
+        case .destructive:
+            return Color(red: 0.2, green: 0.2, blue: 0.22)
+        }
+    }
+
+    private var primaryButtonColor: Color {
+        switch style {
+        case .normal, .destructive:
+            return Color(red: 0.85, green: 0.85, blue: 0.4)
+        }
+    }
+
+    private var borderColor: Color {
+        switch style {
+        case .normal:
+            return Color.clear
+        case .destructive:
+            return Color.purple.opacity(0.6)
+        }
+    }
+}
+
+
+
+
+struct FeedBottomSheetView: View {
+    let items: [String]
+    let action: (Int) -> Void
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(items.indices, id: \.self) { index in
+                Button {
+                    action(index)
+                    dismiss()
+                } label: {
+                    HStack {
+                        Text(items[index])
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .background(Color(hex: "#2B2B2B"))
+                }
+
+                if index < items.count - 1 {
+                    Divider()
+                        .frame(height: 0.5)
+                        .background(Color.white.opacity(0.2))
+                }
+            }
+        }
+        .background(Color(hex: "#2B2B2B"))
+        .ignoresSafeArea(.all, edges: .bottom)
+    }
+}
+
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape(RoundedCorner(radius: radius, corners: corners))
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = 10.0
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
+    }
+}
 

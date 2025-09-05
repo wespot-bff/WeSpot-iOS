@@ -19,6 +19,11 @@ public struct FeedDetailFeature {
     @Dependency(\.fetchCommentItemUseCase) var fetchCommentItemUseCase: FetchCommentItemUseCaseProtocol
     @Dependency(\.createPostCommentUseCase) var createPostCommentUseCase: CreatePostCommentUseCaseProtocol
     @Dependency(\.updateCommentLikeUseCase) var updateCommentLikeUseCase: UpdateCommentLikeUseCaseProtocol
+    @Dependency(\.deleteCommentUseCase) var deleteCommentUseCase: DeleteCommentUseCaseProtocol
+    @Dependency(\.updateCommentReportUseCase) var updateCommentReportUseCase: UpdateCommentReportUseCaseProtocol
+    @Dependency(\.deletePostItemUseCase) var deletePostItemUseCase: DeletePostItemUseCaseProtocol
+    @Dependency(\.updatePostBlockUseCase) var updatePostItemBlockUseCase: UpdatePostBlockUseCaseProtocol
+    
     
     public struct CommentLikeOverride: Equatable {
         var isLiked: Bool
@@ -27,8 +32,11 @@ public struct FeedDetailFeature {
     
     @ObservableState
     public struct State: Equatable {
+        var toast: ToastType? = nil
+        var commentIdForDeleteAlert: Int? = nil
         var postEntity: PostItem? = nil
         var rawPostListItems: PostItem? = nil
+        var shouldDismiss: Bool = false
         var originalPostData: PostItem?
         var commentItem: [CommentEntity] = []
         var originalComments: [CommentEntity] = []
@@ -57,7 +65,7 @@ public struct FeedDetailFeature {
                 return comment
             }
         }
-        
+        var deletedCommentBackup: CommentEntity? = nil
         var isCommentLike: Bool = false
         var isScrap: Bool = false
         var isLoke: Bool = false
@@ -78,9 +86,21 @@ public struct FeedDetailFeature {
     @CasePathable
     public enum View: BindableAction, Equatable {
         case binding(BindingAction<State>)
+        case showToast(ToastType)
+        case clearToast
+        case showDeleteAlert(Int)
+        case cancelDeleteComment
         case onAppear
+        case didTappedCommentReport(Int)
+        case didTappedDeletePost(Int)
+        case didTappedBlockPost(String)
+        case commentReportSuccess(commentId: Int)
+        case commentReportFailure(commentId: Int, errorMessage: String)
         case didTappedLike(Int)
         case didTappedScrap(Int)
+        case didTappedDeleteComment(Int)
+        case commentDeleteSuccess(commentId: Int)
+        case commentDeleteFailure(commentId: Int, errorMessage: String)
         case didTappedCommentLike(String)
         case dismissChatTextField
         case didTappedChat
@@ -88,6 +108,10 @@ public struct FeedDetailFeature {
         case chatInputTextChanged(String)
         case didTappedCommentNotification(Int)
         case likeResponseSuccess(postId: Int)
+        case postDeleteResponseSuccess(postId: Int)
+        case postDeleteResponseFailure(postId: Int, errorMessage: String)
+        case updatePostBlockResponseSuccess(postId: String)
+        case updatePostBlockResponseFailure(postId: String, errorMessage: String)
         case commentLikeResponseSuccess(commentId: String)
         case commentLikeResponseFailure(commentId: String, errorMessage: String)
         case likeResponseFailure(postId: Int, errorMessage: String)
@@ -115,6 +139,15 @@ public struct FeedDetailFeature {
                 return .none
             case .view(.binding):
                 return .none
+                
+            case .view(.showDeleteAlert(let id)):
+                state.commentIdForDeleteAlert = id
+            return .none
+                
+            case .view(.cancelDeleteComment):
+                state.commentIdForDeleteAlert = nil
+            return .none
+                
                 
             case .view(.onAppear):
                 let postId = state.postId
@@ -424,6 +457,104 @@ public struct FeedDetailFeature {
                                     return .none
             case .inner(.clearCommentOverride(commentId: let commentId)):
                 state.commentLikeOverrides.removeValue(forKey: commentId)
+                return .none
+                
+            case let .view(.didTappedDeleteComment(commentId)):
+                if let index = state.commentItem.firstIndex(where: { $0.id == commentId }) {
+                    state.deletedCommentBackup = state.commentItem[index]
+                    state.commentItem[index].isDeleted = true
+                }
+
+                return .run { send in
+                    do {
+                        try await deleteCommentUseCase.execute(commentId: commentId)
+                        await send(.view(.commentDeleteSuccess(commentId: commentId)))
+                    } catch {
+                        await send(.view(.commentDeleteFailure(commentId: commentId, errorMessage: error.localizedDescription)))
+                    }
+                }
+
+                
+            case let .view(.commentDeleteFailure(commentId, errorMessage)):
+                if let backup = state.deletedCommentBackup {
+                    state.commentItem.append(backup)
+                    state.deletedCommentBackup = nil
+                }
+                return .none
+
+                
+            case let .view(.commentDeleteSuccess(commentId)):
+                state.deletedCommentBackup = nil
+                return .none
+
+            case let .view(.didTappedCommentReport(commentId)):
+                return .run { send in
+                    do {
+                        try await updateCommentReportUseCase.execute(String(commentId))
+                        await send(.view(.commentReportSuccess(commentId: commentId)))
+                    } catch {
+                        await send(.view(.commentReportFailure(commentId: commentId, errorMessage: error.localizedDescription)))
+                    }
+                }
+                
+            case let .view(.commentReportFailure(commentId, _)):
+                return .none
+            case .view(.commentReportSuccess(commentId: let commentId)):
+                let query = FetchCommentRequestQuery(postId: state.postId)
+                
+                return .run { send in
+                    
+                    await send(.view(.showToast(.success("신고가 접수되었습니다"))))
+
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                    await send(.view(.clearToast))
+
+                    do {
+                        let comments = try await fetchCommentItemUseCase.execute(query)
+                        await send(.inner(.postCommentResponse(.success(comments))))
+                    } catch {
+                        await send(.inner(.postCommentResponse(.failure(error))))
+                    }
+                }
+            case .view(.showToast(let toast)):
+                state.toast = toast
+                return .none
+
+            case .view(.clearToast):
+                state.toast = nil
+                return .none
+            case let .view(.didTappedDeletePost(postId)):
+                return .run { send in
+                    do {
+                        try await deletePostItemUseCase.execute(postId: postId)
+                        await send(.view(.postDeleteResponseSuccess(postId: postId)))
+                    } catch {
+                        print(error.localizedDescription)
+                        await send(.view(.postDeleteResponseFailure(postId: postId, errorMessage: error.localizedDescription)))
+                    }
+                    
+                }
+            case let .view(.didTappedBlockPost(postId)):
+                return .run { send in
+                    do {
+                        try await updatePostItemBlockUseCase.execute(postId: postId)
+                        await send(.view(.updatePostBlockResponseSuccess(postId: postId)))
+                    } catch {
+                        print(error.localizedDescription)
+                        await send(.view(.updatePostBlockResponseFailure(postId: postId, errorMessage: error.localizedDescription)))
+                    }
+                }
+            case .view(.postDeleteResponseSuccess(postId: let postId)):
+                state.shouldDismiss = true
+                return .none
+            case .view(.postDeleteResponseFailure(postId: let postId, errorMessage: let errorMessage)):
+                state.shouldDismiss = false
+                return .none
+            case .view(.updatePostBlockResponseSuccess(postId: let postId)):
+                state.shouldDismiss = true
+                return .none
+            case .view(.updatePostBlockResponseFailure(postId: let postId, errorMessage: let errorMessage)):
+                state.shouldDismiss = false
                 return .none
             }
         }

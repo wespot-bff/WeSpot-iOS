@@ -38,7 +38,12 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     case createCommentReport(String)
     case createCommentLike(String)
     case updatePostBlock(String)
-    case updatePostReport(String)
+    case updatePostReport(postId: String, body: Encodable)
+    case deleteComment(Int)
+    case editPostItem(postId: Int, body: Encodable)
+    case deletePostItem(Int)
+    case fetchReportItem
+    
     
     public var spec: WSNetworkSpec {
         switch self {
@@ -78,12 +83,20 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/comment/\(commentId)/like")
         case let .updatePostBlock(postId):
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/block")
-        case let .updatePostReport(postId):
+        case let .updatePostReport(postId, _):
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/report")
         case .createComment:
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/comment")
         case .fetchComment:
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/comment")
+        case let .deleteComment(commentId):
+            return WSNetworkSpec(method: .delete, url: "\(WSNetworkConfigure.baseURL)/post/comment/\(commentId)")
+        case let .deletePostItem(postId):
+            return WSNetworkSpec(method: .delete, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)")
+        case let .editPostItem(postId, _):
+            return WSNetworkSpec(method: .put, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)")
+        case .fetchReportItem:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/reports")
         }
     }
     
@@ -99,6 +112,8 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
             return .none
         case let .createComment(body):
             return .requestBody(body)
+        case let .editPostItem(_, body):
+            return .requestBody(body)
         case let .uploadPost(body):
             return .requestBody(body)
         case let .fetchPostImagePresignedURL(query):
@@ -107,6 +122,8 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
             return .requestQuery(query)
         case let .fetchComment(query):
             return .requestQuery(query)
+        case let .updatePostReport(_ , body):
+            return .requestBody(body)
         default:
             return .none
         }

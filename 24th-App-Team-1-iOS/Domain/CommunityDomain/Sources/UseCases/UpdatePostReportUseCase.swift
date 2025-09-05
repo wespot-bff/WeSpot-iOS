@@ -8,7 +8,7 @@
 
 
 public protocol UpdatePostReportUseCaseProtocol {
-    func execute(_ postId: String) async throws -> Bool
+    func execute(_ postId: String, body: ReportReasonRequest) async throws -> Bool
 }
 
 
@@ -22,8 +22,8 @@ public final class UpdatePostReportUseCase: UpdatePostReportUseCaseProtocol {
         self.communityRepository = communityRepository
     }
     
-    public func execute(_ postId: String) async throws -> Bool {
-        try await communityRepository.updatePostReport(postId)
+    public func execute(_ postId: String, body: ReportReasonRequest) async throws -> Bool {
+        try await communityRepository.updatePostReport(postId, body: body)
     }
     
 }

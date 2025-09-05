@@ -28,10 +28,12 @@ public protocol CommunityRepositoryProtocol {
     func updatePostScrap(_ postId: Int) async throws -> Bool
     func updateCommentReport(_ commentId: String) async throws -> Bool
     func updateCommentLike(_ commentId: String) async throws -> Bool
-    func updatePostReport(_ postId: String) async throws -> Bool
+    func updatePostReport(_ postId: String, body: ReportReasonRequest) async throws -> Bool
     func updatePostBlock(_ postId: String) async throws -> Bool
     func fetchCommentItem(_ query: FetchCommentRequestQuery) async throws -> [CommentEntity]
     func createPostComment(_ body: CreatePostCommentRequest) async throws -> Bool
-    
-    
+    func deleteComment(_ commentId: Int) async throws -> Bool
+    func deletePostItem(_ postId: Int)  async throws -> Bool
+    func editPostItem(_ postId: Int, body: UploadPostItemRequest) async throws -> Bool
+    func fetchReportItem()  async throws -> [ReportReason]
 }

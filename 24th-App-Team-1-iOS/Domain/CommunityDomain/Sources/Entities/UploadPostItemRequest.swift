@@ -10,13 +10,13 @@ public struct UploadPostItemRequest: Equatable {
     public let categoryId: Int
     public let title: String
     public let description: String
-    public let imagesRequest: [UploadPostImageItemReqeuest]
+    public let imagesRequest: [String]
     
     public init(
         categoryId: Int,
         title: String,
         description: String,
-        imagesRequest: [UploadPostImageItemReqeuest]
+        imagesRequest: [String]
     ) {
         self.categoryId = categoryId
         self.title = title

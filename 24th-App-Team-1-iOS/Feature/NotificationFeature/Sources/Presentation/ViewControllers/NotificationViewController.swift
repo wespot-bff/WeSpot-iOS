@@ -16,6 +16,7 @@ import RxSwift
 import RxCocoa
 import ReactorKit
 import RxDataSources
+import AllFeature
 
 public final class NotificationViewController: BaseViewController<NotificationViewReactor> {
 
@@ -62,11 +63,12 @@ public final class NotificationViewController: BaseViewController<NotificationVi
     public override func setupAttributes() {
         super.setupAttributes()
         navigationBar.do {
-            $0.setNavigationBarUI(property: .leftWithCenterItem(
+            $0.setNavigationBarUI(property: .leftWithRightItem(
                 DesignSystemAsset.Images.arrow.image,
-                "알림"
+                "알림",
+                DesignSystemAsset.Images.icNavigationBarSettingFiled.image
             ))
-            $0.setNavigationBarAutoLayout(property: .leftWithCenterItem)
+            $0.setNavigationBarAutoLayout(property: .leftWithRightItem)
         }
         
         
@@ -94,6 +96,13 @@ public final class NotificationViewController: BaseViewController<NotificationVi
             .drive(notificationTableView.rx.items(dataSource: notificationDataSources))
             .disposed(by: disposeBag)
         
+        navigationBar.rightBarButton
+            .rx.tap
+            .bind(with: self) { owner, _ in
+                let alarmViewController = DependencyContainer.shared.injector.resolve(ProfileAlarmSettingViewController.self)
+                owner.navigationController?.pushViewController(alarmViewController, animated: true)
+            }
+            .disposed(by: disposeBag)
         
         notificationTableView
             .rx.itemSelected

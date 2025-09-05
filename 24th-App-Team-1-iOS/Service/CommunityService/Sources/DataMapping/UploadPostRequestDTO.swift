@@ -10,11 +10,5 @@ public struct UploadPostRequestDTO: Encodable {
     public let categoryId: Int
     public let title: String
     public let description: String
-    public let imagesRequest: [UploadPostImageRequestDTO]
-}
-
-public struct UploadPostImageRequestDTO: Encodable {
-    public let url: String
-//    public let width: Int
-//    public let height: Int
+    public let imagesRequest: [String]
 }

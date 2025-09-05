@@ -14,6 +14,7 @@ let communityFeature = Project.makeProject(
                 .domain(module: .CommunityDomain),
                 .service(module: .CommunityService),
                 .shared(module: .DesignSystem),
+                .feature(module: .NotificationFeature),
                 .core(module: .Util)
             ]
         )

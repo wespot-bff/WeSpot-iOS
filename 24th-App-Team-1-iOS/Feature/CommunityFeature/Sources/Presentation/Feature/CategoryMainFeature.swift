@@ -1,17 +1,17 @@
 //
-//  CategoryPostFeature.swift
+//  CategoryMainFeature.swift
 //  CommunityFeature
 //
-//  Created by 김도현 on 8/3/25.
+//  Created by 김도현 on 9/5/25.
 //
+
 
 import ComposableArchitecture
 import CommunityDomain
 
 
 @Reducer
-public struct CategoryPostFeature {
-    
+public struct CategoryMainFeature {
     @Dependency(\.fetchPostItemListUseCase) var fetchPostDetailListUseCase: FetchPostItemListUseCaseProtocol
     @Dependency(\.fetchCategoryDetailItemUseCase) var fetchCategoryDetailUseCase: FetchCategoryDetailItemUseCaseProtocol
     @Dependency(\.updatePostScrapUseCase) var updatePostScrapUseCase: UpdatePostScrapUseCaseProtocol
@@ -247,7 +247,7 @@ public struct CategoryPostFeature {
 }
 
 
-extension CategoryPostFeature {
+extension CategoryMainFeature {
     func applyOverrides(to state: inout State) {
         guard let raw = state.rawPostListItems else {
             state.postListEntity = nil
