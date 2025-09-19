@@ -255,10 +255,10 @@ extension MessageReplyInfoViewController {
             .bind(with: self) {  this, info in
                 this.posterName.text = info?.senderProfile.name
                 this.posterImageView.kf.setImage(with: URL(string: info?.senderProfile.iconUrl ?? ""),
-                                                 placeholder: DesignSystemAsset.Images.icBasicProfile.image)
+                                                 placeholder: DesignSystemAsset.Images.basicProfile.image)
                 this.reciverName.text = (info?.receiverProfile.name ?? "") + "|" + (info?.receiverProfile.schoolName ?? "")
                 this.reciverImageView.kf.setImage(with: URL(string: info?.receiverProfile.iconUrl ?? ""),
-                                                  placeholder: DesignSystemAsset.Images.icBasicProfile.image)
+                                                  placeholder: DesignSystemAsset.Images.basicProfile.image)
 
             }
             .disposed(by: disposeBag)

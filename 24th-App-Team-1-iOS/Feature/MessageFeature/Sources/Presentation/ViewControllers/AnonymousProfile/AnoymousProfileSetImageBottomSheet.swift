@@ -80,7 +80,7 @@ public final class AnoymousProfileSetImageBottomSheet: BaseViewController<Anonym
                 case .setGalleryImage:
                     this.presentImagePicker()
                 case .setBasicProfileImage:
-                    let basicImage = DesignSystemAsset.Images.icBasicProfile.image
+                    let basicImage = DesignSystemAsset.Images.basicProfile.image
                     reactor.action.onNext(.setProfileImage(basicImage))
                     this.navigationController?.popViewController(animated: true)
                 }

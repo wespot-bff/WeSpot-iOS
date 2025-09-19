@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol UpdateCommentReportUseCaseProtocol {
-    func execute(_ commentId: String) async throws -> Bool
+    func execute(_ commentId: String, body: ReportReasonRequest) async throws -> Bool
 }
 
 
@@ -23,8 +23,8 @@ public final class UpdateCommentReportUseCase: UpdateCommentReportUseCaseProtoco
     }
     
     
-    public func execute(_ commentId: String) async throws -> Bool {
-        try await communityRepository.updateCommentReport(commentId)
+    public func execute(_ commentId: String, body: ReportReasonRequest) async throws -> Bool {
+        try await communityRepository.updateCommentReport(commentId, body: body)
     }
     
 }

@@ -71,7 +71,6 @@ public struct WSNavigationBarModifier<LeftView: View,
                             .frame(height: 44)
                             .frame(maxWidth: .infinity)
                             .multilineTextAlignment(.center)
-                            .allowsHitTesting(false)
                     }
                     HStack(spacing: 0) {
                         if let left = left {

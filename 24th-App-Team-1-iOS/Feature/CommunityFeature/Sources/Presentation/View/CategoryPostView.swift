@@ -56,7 +56,9 @@ struct CategoryPostView: View {
                 
                 floatingWriteButton()
             }
-            .onAppear { viewStore.send(.view(.onAppear)) }
+            .onAppear {
+                viewStore.send(.view(.onAppear))
+            }
         }
         .sheet(
             isPresented: viewStore.binding(

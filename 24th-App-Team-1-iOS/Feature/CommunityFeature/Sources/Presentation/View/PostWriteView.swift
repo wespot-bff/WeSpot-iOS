@@ -11,6 +11,7 @@ import ComposableArchitecture
 import _PhotosUI_SwiftUI
 import CommunityDomain
 import Perception
+import Storage
 
 @ViewAction(for: PostWriteFeature.self)
 struct PostWriteView: View {
@@ -20,6 +21,8 @@ struct PostWriteView: View {
     @State private var images: [UIImage] = []
     @State private var localPhotoItems: [PhotosPickerItem] = []
     @State private var showAlertView = false
+    @State private var showCategoryMain = false
+    @State private var isShowingWriteSheet = false
     @Environment(\.presentationMode) private var presentationMode
     
     public init(store: StoreOf<PostWriteFeature>) {
@@ -29,6 +32,21 @@ struct PostWriteView: View {
     
     var body: some View {
         WithPerceptionTracking {
+            
+            NavigationLink(
+                 destination: CategoryMainView(
+                     store: .init(
+                         initialState: CategoryMainFeature.State(
+                             category: viewStore.selectedCategory,
+                             isEditable: true
+                         ),
+                         reducer: {CategoryMainFeature()}
+                     )
+                 ),
+                 isActive: $showCategoryMain,
+                 label: { EmptyView()}
+             )
+            
             GeometryReader { geo in
                 let topInset = geo.safeAreaInsets.top
                 let navBarHeight = topInset + 8 + 44 + 12
@@ -77,11 +95,14 @@ struct PostWriteView: View {
                         }
                     )
                 }
-                .onChange(of: viewStore.didUploadSuccess) {
-                    if $0 {
-                        presentationMode.wrappedValue.dismiss() }
+                .onChange(of: viewStore.didUploadSuccess) { success in
+                    if success {
+                        presentationMode.wrappedValue.dismiss()
+                        
+                        NotificationCenter.default.post(name: .didFinishWritePost, object: nil)
+                    }
                 }
-                .onAppear {
+                .onAppear {                    
                     NotificationCenter.default.post(name: .hideTabBar, object: nil)
                     if let urls = viewStore.editingPost?.content?.contentSection?.imageURLs, viewStore.uiImages.isEmpty {
                         Task {
@@ -91,8 +112,7 @@ struct PostWriteView: View {
                                     loadedImages.append(image)
                                 }
                             }
-                            print("🔍 View onAppear - imageURLs 개수: \(viewStore.imageURLs.count)")
-                            print("🔍 View onAppear - imageURLs: \(viewStore.imageURLs)")
+                            checkFirstTimeWrite()
                             viewStore.send(.view(.setLoadedImages(loadedImages)))
                         }
                     }
@@ -124,6 +144,13 @@ struct PostWriteView: View {
             )
         }
         .padding(.horizontal, 20)
+        .sheet(isPresented: $isShowingWriteSheet, content: {
+            HealthyCommunicationView()
+            .presentationCornerRadius(25)
+            .presentationDetents([.height(423)])
+            .interactiveDismissDisabled(true)
+        })
+        
         .sheet(isPresented: viewStore.binding(get: \.isShowingCategorySheet, send: { $0 ? .view(.didTappedCategoryButton) : .view(.dismissCategorySheet) })) {
             CategoryBottomSheetView(
                 sections: viewStore.chipDetails,
@@ -244,7 +271,10 @@ struct PostWriteView: View {
     
     
     private var submitSection: some View {
-        Button(action: { viewStore.send(.view(.submitButtonTapped)) }) {
+        Button(action: {
+            viewStore.send(.view(.submitButtonTapped))
+            onWriteComplete()
+        }) {
             Text("게시하기")
                 .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
                 .foregroundColor(viewStore.canSubmit ? DesignSystemAsset.Colors.gray900.swiftUIColor : DesignSystemAsset.Colors.gray300.swiftUIColor)
@@ -332,5 +362,101 @@ struct LimitedTextEditor: View {
             .frame(height: 160)
             .padding(.bottom, 8)
         }
+    }
+}
+
+
+struct HealthyCommunicationView: View {
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        ZStack {
+            DesignSystemAsset.Colors.gray600.swiftUIColor
+                .ignoresSafeArea(.all)
+            
+            VStack {
+                VStack(spacing: 0) {
+                    VStack(spacing: 8) {
+                        Text("위스팟은 건강한 소통을 지향해요")
+                            .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 20))
+                            .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 40)
+                            .padding(.bottom, 34)
+                        
+                        VStack(spacing: 32) {
+                            GuidelineRow(
+                                emoji: DesignSystemAsset.Images.icCommunitySadFaceFiled.swiftUIImage,
+                                text: "욕설, 모욕, 저격 등 타인의 명예를 훼손하거나\n과도하게 비방하는 행위는 허용하지 않아요."
+                            )
+                            
+                            GuidelineRow(
+                                emoji: DesignSystemAsset.Images.icCommunityMoneyFiled.swiftUIImage,
+                                text: "개인의 아이, 수익을 목적으로 한 도배/광고성\n게시글은 허용하지 않아요."
+                            )
+                            
+                            GuidelineRow(
+                                emoji: DesignSystemAsset.Images.icCommunityLaughFiled.swiftUIImage,
+                                text: "신고 차단 기능을 활용하여 건강하고 즐거운\n소통 문화 형성에 동참해주세요."
+                            )
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 34)
+                        .padding(.bottom, 40)
+                        
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Text("이해했어요")
+                                .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(DesignSystemAsset.Colors.primary300.swiftUIColor)
+                                .cornerRadius(12)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                        
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct GuidelineRow: View {
+    let emoji: Image
+    let text: String
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 16) {
+            emoji
+                .frame(width: 24, height: 24)
+            
+            Text(text)
+                .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                .lineLimit(nil)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+
+extension PostWriteView {
+    func checkFirstTimeWrite() {
+        let hasWrittenBefore = KeychainManager.shared.getBool(type: .isFeedWrite)
+        
+        if !hasWrittenBefore {
+            isShowingWriteSheet = true
+        }
+    }
+
+    func onWriteComplete() {
+        KeychainManager.shared.set(value: true, type: .isFeedWrite)
+        isShowingWriteSheet = false
     }
 }

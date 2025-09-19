@@ -33,7 +33,7 @@ final class ReservedMessageCountView: UIView {
         $0.lottieView.loopMode = .playOnce
     }
     private let messageImageView = UIImageView().then {
-        $0.image = DesignSystemAsset.Images.threeMessageCount.image
+        $0.image = DesignSystemAsset.Images.message3.image
     }
     private let pencilIconImage = UIImageView().then {
         $0.image = DesignSystemAsset.Images.icPencil.image
@@ -198,11 +198,11 @@ extension ReservedMessageCountView {
         
         switch count {
         case 1:
-            self.messageImageView.image = DesignSystemAsset.Images.oneMessageCount.image
+            self.messageImageView.image = DesignSystemAsset.Images.message1.image
         case 2:
-            self.messageImageView.image = DesignSystemAsset.Images.twoMessageCount.image
+            self.messageImageView.image = DesignSystemAsset.Images.message2.image
         case 3:
-            self.messageImageView.image = DesignSystemAsset.Images.threeMessageCount.image
+            self.messageImageView.image = DesignSystemAsset.Images.message3.image
             default:
             break
         }

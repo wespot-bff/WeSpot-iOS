@@ -91,11 +91,8 @@ public struct FeedDetailFeature {
         case showDeleteAlert(Int)
         case cancelDeleteComment
         case onAppear
-        case didTappedCommentReport(Int)
         case didTappedDeletePost(Int)
         case didTappedBlockPost(String)
-        case commentReportSuccess(commentId: Int)
-        case commentReportFailure(commentId: Int, errorMessage: String)
         case didTappedLike(Int)
         case didTappedScrap(Int)
         case didTappedDeleteComment(Int)
@@ -487,35 +484,6 @@ public struct FeedDetailFeature {
                 state.deletedCommentBackup = nil
                 return .none
 
-            case let .view(.didTappedCommentReport(commentId)):
-                return .run { send in
-                    do {
-                        try await updateCommentReportUseCase.execute(String(commentId))
-                        await send(.view(.commentReportSuccess(commentId: commentId)))
-                    } catch {
-                        await send(.view(.commentReportFailure(commentId: commentId, errorMessage: error.localizedDescription)))
-                    }
-                }
-                
-            case let .view(.commentReportFailure(commentId, _)):
-                return .none
-            case .view(.commentReportSuccess(commentId: let commentId)):
-                let query = FetchCommentRequestQuery(postId: state.postId)
-                
-                return .run { send in
-                    
-                    await send(.view(.showToast(.success("신고가 접수되었습니다"))))
-
-                    try? await Task.sleep(nanoseconds: 2_000_000_000)
-                    await send(.view(.clearToast))
-
-                    do {
-                        let comments = try await fetchCommentItemUseCase.execute(query)
-                        await send(.inner(.postCommentResponse(.success(comments))))
-                    } catch {
-                        await send(.inner(.postCommentResponse(.failure(error))))
-                    }
-                }
             case .view(.showToast(let toast)):
                 state.toast = toast
                 return .none

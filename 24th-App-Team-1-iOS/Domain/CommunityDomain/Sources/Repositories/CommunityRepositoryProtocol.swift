@@ -26,7 +26,7 @@ public protocol CommunityRepositoryProtocol {
     func uploadPostImages(_ image: Data, presingedURL: String) async throws -> Bool
     func updatePostLike(_ postId: Int) async throws -> Bool
     func updatePostScrap(_ postId: Int) async throws -> Bool
-    func updateCommentReport(_ commentId: String) async throws -> Bool
+    func updateCommentReport(_ commentId: String, body: ReportReasonRequest) async throws -> Bool
     func updateCommentLike(_ commentId: String) async throws -> Bool
     func updatePostReport(_ postId: String, body: ReportReasonRequest) async throws -> Bool
     func updatePostBlock(_ postId: String) async throws -> Bool

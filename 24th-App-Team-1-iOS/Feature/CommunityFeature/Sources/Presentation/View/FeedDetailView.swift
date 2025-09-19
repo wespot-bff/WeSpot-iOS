@@ -13,6 +13,18 @@ import ComposableArchitecture
 import CommunityDomain
 import Perception
 
+class ImageViewerStore: ObservableObject {
+    @Published var showImageViewer = false
+    @Published var selectedImageIndex = 0
+    @Published var currentImageUrls: [String] = []
+    
+    func showViewer(with urls: [String], at index: Int) {
+        currentImageUrls = urls
+        selectedImageIndex = index
+        showImageViewer = true
+    }
+}
+
 enum FeedAlertType: Equatable {
     case deletePost(postId: Int)
     case deleteComment(commentId: Int)
@@ -50,10 +62,13 @@ struct FeedDetailView: View {
     @State private var showNormalAlert = false
     @StateObject private var viewStore: ViewStore<FeedDetailFeature.State, FeedDetailFeature.Action>
     @State private var currentAlertType: FeedAlertType? = nil
-    @State private var showReportView = false
-    
+    @State private var showPostReportView = false
+    @State private var showCommentReportView = false
+    @State private var currentCommentId: String? = nil
+    @State private var showCategoryMain = false
     @State private var showPostWriteView = false
     @State private var showBottomSheet = false
+    @StateObject private var imageViewerStore = ImageViewerStore()
     public init(store: StoreOf<FeedDetailFeature>) {
         self.store = store
         self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
@@ -79,7 +94,15 @@ struct FeedDetailView: View {
                 isActive: $showPostWriteView,
                 label: { EmptyView()}
             )
-            
+            if let categoryId = Int(viewStore.postEntity?.content?.category?.target ?? "1"),
+               let categoryText = viewStore.postEntity?.content?.category?.text {
+                NavigationLink(
+                    destination: CategoryMainView(store: .init(initialState: CategoryMainFeature.State(category: .init(id: categoryId, text: categoryText)), reducer: {CategoryMainFeature()})),
+                    isActive: $showCategoryMain,
+                    label: { EmptyView()}
+                )
+            }
+        
             GeometryReader { geometry in
                 let statusBarHeight = geometry.safeAreaInsets.top
                 let navBarTotalHeight = statusBarHeight + 8 + 44 + 12
@@ -124,8 +147,7 @@ struct FeedDetailView: View {
                         viewStore.send(.view(.didTappedDeletePost(id)))
                         
                     case .blockUser(let userId):
-                        showReportView = true
-                        let _ = print("리포트 값 확인 \(showReportView)")
+                        showPostReportView = true
                         
                     case .none:
                         break
@@ -136,11 +158,31 @@ struct FeedDetailView: View {
                 }
             )
             .background(
-                NavigationLink(
-                    destination: ReportReasonView(store: .init(initialState: ReportFeature.State(postId: viewStore.postId), reducer: { ReportFeature()})),
-                    isActive: $showReportView
-                ) {
-                    EmptyView()
+                Group {
+                    NavigationLink(
+                        destination: ReportReasonView(
+                            store: .init(
+                                initialState: ReportFeature.State(postId: viewStore.postId),
+                                reducer: { ReportFeature() }
+                            )
+                        ),
+                        isActive: $showPostReportView
+                    ) {
+                        EmptyView()
+                    }
+                    
+                    // 댓글 신고용 NavigationLink
+                    NavigationLink(
+                        destination: ReportReasonView(
+                            store: .init(
+                                initialState: ReportFeature.State(commentId: currentCommentId),
+                                reducer: { ReportFeature() }
+                            )
+                        ),
+                        isActive: $showCommentReportView
+                    ) {
+                        EmptyView()
+                    }
                 }
             )
             
@@ -246,6 +288,13 @@ struct FeedDetailView: View {
                 .presentationBackground(.clear)
             }
         }
+        .fullScreenCover(isPresented: $imageViewerStore.showImageViewer) {
+            ImageViewerView(
+                imageUrls: imageViewerStore.currentImageUrls,
+                initialIndex: imageViewerStore.selectedImageIndex,
+                isPresented: $imageViewerStore.showImageViewer
+            )
+        }
         .onChange(of: viewStore.shouldDismiss) { shouldDismiss in
             if shouldDismiss {
                 presentationMode.wrappedValue.dismiss()
@@ -258,20 +307,18 @@ struct FeedDetailView: View {
                 DesignSystemAsset.Images.icCommunityLeftArrowFiled.swiftUIImage
             }
         }, title: {
-            Group {
+            HStack(spacing: 5) {
                 if let category = viewStore.postEntity?.content?.category {
-                    HStack(spacing: 5) {
-                        Button {
-                            
-                        } label: {
+                    Button {
+                        showCategoryMain = true
+                    } label: {
+                        HStack(spacing: 4) {
                             Text(category.text)
-                                .foregroundColor(.init(hex: category.textColor))
-                                .font(.typography(category.typography))
-                            
+                                .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                                .font(DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+
                             DesignSystemAsset.Images.icCommuntyCategoryChipFiled.swiftUIImage
                         }
-                        
-                        
                     }
                 }
             }
@@ -407,10 +454,13 @@ struct FeedDetailView: View {
             }
             .frame(width: 336, height: 336)
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .onTapGesture {
+                imageViewerStore.showViewer(with: imageUrls, at: 0)
+            }
         } else {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(Array(imageUrls.enumerated()), id: \.offset) { _, url in
+                    ForEach(Array(imageUrls.enumerated()), id: \.offset) { index, url in
                         AsyncImage(url: URL(string: url)) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {
@@ -418,9 +468,12 @@ struct FeedDetailView: View {
                         }
                         .frame(width: 336, height: 336)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .onTapGesture {
+                            imageViewerStore.showViewer(with: imageUrls, at: index)
+                        }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 10)
             }
         }
     }
@@ -675,7 +728,8 @@ struct FeedDetailView: View {
                                 
                                 if !updatedComment.isReported {
                                     Button("신고") {
-                                        viewStore.send(.view(.didTappedCommentReport(updatedComment.id)))
+                                        currentCommentId = String(updatedComment.id)
+                                        showCommentReportView = true
                                     }
                                     .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
                                     .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
@@ -1039,3 +1093,73 @@ struct RoundedCorner: Shape {
     }
 }
 
+
+
+
+struct ImageViewerView: View {
+    let imageUrls: [String]
+    let initialIndex: Int
+    @Binding var isPresented: Bool
+    
+    init(imageUrls: [String], initialIndex: Int, isPresented: Binding<Bool>) {
+        self.imageUrls = imageUrls
+        self.initialIndex = initialIndex
+        self._isPresented = isPresented
+    }
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea(.all)
+            
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button {
+                        isPresented = false
+                    } label: {
+                        DesignSystemAsset.Images.icCommunityXmarkFiled.swiftUIImage
+                            .foregroundColor(.white)
+                    }
+                    .padding(.trailing, 16)
+                    .padding(.top, 16)
+                }
+                
+                Spacer()
+                
+                if imageUrls.indices.contains(initialIndex) {
+                    AsyncImage(url: URL(string: imageUrls[initialIndex])) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                                .clipped()
+                        case .failure(_):
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.width - 40)
+                                .overlay(
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "photo")
+                                            .font(.system(size: 50))
+                                            .foregroundColor(.white)
+                                        Text("이미지를 불러올 수 없습니다")
+                                            .foregroundColor(.white)
+                                            .font(.caption)
+                                    }
+                                )
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                }
+                
+                Spacer()
+            }
+        }
+        .onAppear {
+            print("ImageViewerView appeared with URL: \(imageUrls.indices.contains(initialIndex) ? imageUrls[initialIndex] : "Invalid index")")
+        }
+    }
+}

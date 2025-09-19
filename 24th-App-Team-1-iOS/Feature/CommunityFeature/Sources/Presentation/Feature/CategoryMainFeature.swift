@@ -22,13 +22,19 @@ public struct CategoryMainFeature {
     @ObservableState
     public struct State: Equatable {
         var chipDetails: [CategoryDetailEntity] = []
-        var category: CategoryChipsEntity
+        var category: CategoryChipsEntity? = nil
         var rawPostListItems: PostListEntity? = nil
         var postListEntity: PostListEntity? = nil
         var overrides: [Int: PostLocalOverride] = [:]
         var isShowingCategorySheet: Bool = false
         var isScrap: Bool = false
         var isLike: Bool = false
+        var isEditable: Bool
+        
+        public init(category: CategoryChipsEntity? = nil, isEditable: Bool = false) {
+            self.category = category
+            self.isEditable = isEditable
+        }
     }
 
     public enum Action: ViewAction {
@@ -68,9 +74,9 @@ public struct CategoryMainFeature {
         Reduce { state, action in
             switch action {
             case .view(.onAppear):
-                let categoryId = state.category.id
+                let categoryId = state.category?.id
                 return .run { send in
-                    let query = FetchPostDetailItemRequestQuery(categoryId: categoryId, inquirySize: 10, cursorId: 10)
+                    let query = FetchPostDetailItemRequestQuery(categoryId: categoryId ?? 0, inquirySize: 10, cursorId: 10)
                     do {
                         let posts = try await fetchPostDetailListUseCase.execute(query: query)
                         await send(.inner(.postListResponse(.success(posts))))

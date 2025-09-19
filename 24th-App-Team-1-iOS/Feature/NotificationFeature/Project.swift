@@ -17,7 +17,8 @@ let notificationFeature = Project.makeProject(
             .domain(module: .NotificationDomain),
             .service(module: .NotificationService),
             .shared(module: .ThirdPartyLib),
-            .shared(module: .DesignSystem)
+            .shared(module: .DesignSystem),
+            .feature(module: .AllFeature)
         
         ])
     ]

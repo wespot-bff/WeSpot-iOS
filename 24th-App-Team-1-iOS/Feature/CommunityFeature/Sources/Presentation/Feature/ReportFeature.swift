@@ -14,16 +14,17 @@ import CommunityDomain
 public struct ReportFeature {
     @Dependency(\.fetchReportReasonItemUseCase) var fetchReportReasonItemUseCase: FetchReportReasonItemUseCaseProtocol
     @Dependency(\.updatePostReportUseCase) var updatePostReportUseCase: UpdatePostReportUseCaseProtocol
-    
+    @Dependency(\.updateCommentReportUseCase) var updateCommentReportUseCase: UpdateCommentReportUseCaseProtocol
     
     
     @ObservableState
     public struct State: Equatable {
         var shouldDismiss: Bool = false
         var reportEntity: [ReportReason] = []
-        var postId: String
+        var postId: String?
         var selectedReasonIds: Set<Int> = []
         var etcText: String = ""
+        var commentId: String?
         
         var isEtcSelected: Bool {
             let etcReasonId = reportEntity.first { $0.isEditable }?.id
@@ -38,8 +39,9 @@ public struct ReportFeature {
         }
         
         
-        public init(postId: String) {
+        public init(postId: String? = nil, commentId: String? = nil) {
             self.postId = postId
+            self.commentId = commentId
         }
     }
     
@@ -52,6 +54,7 @@ public struct ReportFeature {
     @CasePathable
     public enum View: BindableAction, Equatable {
         case binding(BindingAction<State>)
+        case didTappedCommentReport(Int)
         case onAppear
         case didTapReason(Int)
         case didTapSubmit
@@ -103,22 +106,40 @@ public struct ReportFeature {
                 
                 
             case .view(.didTapSubmit):
-                let selectedReasons = state.reportEntity.filter { state.selectedReasonIds.contains($0.id) }
-                
-                let requestItems: [ReportReasonRequestItem] = selectedReasons.map {
-                    ReportReasonRequestItem(
-                        reportReasonId: $0.id,
-                        customReason: state.etcText.isEmpty ? nil : state.etcText
-                    )
-                }
-                
-                let request = ReportReasonRequest(reportReasonRequests: requestItems)
-                
+                if state.postId != nil {
+                    let selectedReasons = state.reportEntity.filter { state.selectedReasonIds.contains($0.id) }
+                    
+                    let requestItems: [ReportReasonRequestItem] = selectedReasons.map {
+                        ReportReasonRequestItem(
+                            reportReasonId: $0.id,
+                            customReason: state.etcText.isEmpty ? nil : state.etcText
+                        )
+                    }
+                    
+                    let request = ReportReasonRequest(reportReasonRequests: requestItems)
+                    
 
-                return .run { [postId = state.postId] send in
-                    _ = try await updatePostReportUseCase.execute(postId, body: request)
+                    return .run { [postId = state.postId] send in
+                        _ = try await updatePostReportUseCase.execute(postId ?? "", body: request)
+                    }
+                } else {
+                    let selectedReasons = state.reportEntity.filter {
+                        state.selectedReasonIds.contains($0.id) }
+                    
+                    let requestItems: [ReportReasonRequestItem] = selectedReasons.map {
+                        ReportReasonRequestItem(
+                            reportReasonId: $0.id,
+                            customReason: state.etcText.isEmpty ? nil : state.etcText
+                        )
+                    }
+                    
+                    let request = ReportReasonRequest(reportReasonRequests: requestItems)
+                    
+                    print("신고 값을 확인합니다 : \(request)")
+                    return .run { [commentId = state.commentId] send in
+                        _ = try await updateCommentReportUseCase.execute(commentId ?? "", body: request)
+                    }
                 }
-                
                 
                 
                 

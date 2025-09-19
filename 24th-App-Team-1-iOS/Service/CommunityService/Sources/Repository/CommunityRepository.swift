@@ -323,8 +323,13 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
     }
     
     
-    public func updateCommentReport(_ commentId: String) async throws -> Bool {
-        let endPoint = CommunityEndPoint.createCommentReport(commentId)
+    public func updateCommentReport(_ commentId: String, body: ReportReasonRequest) async throws -> Bool {
+        var requestItemDTO: [CreateReportReasonRequesItemtDTO] = []
+        body.reportReasonRequests.forEach { body in
+            requestItemDTO.append(CreateReportReasonRequesItemtDTO(reportReasonId: body.reportReasonId, customReason: body.customReason))
+        }
+        print("네 값을. 확인합니다 : \(requestItemDTO)")
+        let endPoint = CommunityEndPoint.createCommentReport(commentId: commentId, body: requestItemDTO)
         let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
         return response
     }

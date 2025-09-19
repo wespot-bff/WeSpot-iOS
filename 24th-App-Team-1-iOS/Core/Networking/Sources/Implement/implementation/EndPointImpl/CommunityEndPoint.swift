@@ -35,7 +35,7 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     case updateCommentNotification(String)
     case createComment(Encodable)
     case fetchComment(Encodable)
-    case createCommentReport(String)
+    case createCommentReport(commentId: String, body: Encodable)
     case createCommentLike(String)
     case updatePostBlock(String)
     case updatePostReport(postId: String, body: Encodable)
@@ -77,7 +77,7 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)")
         case let .updateCommentNotification(postId):
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)/notification/comment")
-        case let .createCommentReport(commentId):
+        case let .createCommentReport(commentId, _):
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/comment/\(commentId)/report")
         case let .createCommentLike(commentId):
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/post/comment/\(commentId)/like")
@@ -123,6 +123,8 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
         case let .fetchComment(query):
             return .requestQuery(query)
         case let .updatePostReport(_ , body):
+            return .requestBody(body)
+        case let .createCommentReport(_, body):
             return .requestBody(body)
         default:
             return .none

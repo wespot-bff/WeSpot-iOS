@@ -56,7 +56,6 @@ public struct MainNoticeBoardView: View {
                                         switch element {
                                         case .post(let post):
                                             if let content = post.content {
-                                                
                                                 NavigationLink(
                                                     destination: FeedDetailView(
                                                         store: .init(
@@ -65,8 +64,7 @@ public struct MainNoticeBoardView: View {
                                                         )
                                                     )
                                                 ) {
-                                                    PostView(content: content) {
-                                                        
+                                                    PostView(content: content, postId: post.id) {
                                                         
                                                     } onTapLike: {
                                                         viewStore.send(.view(.didTappedLike(post.id)))
@@ -313,7 +311,6 @@ private struct HotPostBannerView: View {
                 Text(hotPostEntity.titleText.text)
                     .font(.typography(hotPostEntity.titleText.typography))
                     .foregroundColor(.token(hotPostEntity.titleText.color))
-                    .lineLimit(hotPostEntity.titleText.maxLine)
             }
             .padding(.horizontal, 20)
             
@@ -456,12 +453,41 @@ private struct VoteBannerView: View {
 
 struct PostView: View {
     let content: PostContent
+    let postId: Int
     let onTapComment: () -> Void
     let onTapLike:    () -> Void
     let onTapScrap:   () -> Void
     @State private var isExpanded = false
+    @State private var showFeedDetail = false
+    
+    init(
+        content: PostContent,
+        postId: Int = 0,
+        onTapComment: @escaping () -> Void = {},
+        onTapLike: @escaping () -> Void,
+        onTapScrap: @escaping () -> Void
+    ) {
+        self.content = content
+        self.postId = postId
+        self.onTapComment = onTapComment
+        self.onTapLike = onTapLike
+        self.onTapScrap = onTapScrap
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            NavigationLink(
+                destination: FeedDetailView(
+                    store: .init(
+                        initialState: FeedDetailFeature.State(postId: String(postId)),
+                        reducer: { FeedDetailFeature() }
+                    )
+                ),
+                isActive: $showFeedDetail
+            ) {
+                EmptyView()
+            }
+            
             HStack(alignment: .top, spacing: 12) {
                 AsyncImage(url: URL(string: content.header.profileImageURL)) { state in
                     switch state {
@@ -517,12 +543,11 @@ struct PostView: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                
+                                
                 if let contentTitle = content.info.title {
                     Text(contentTitle.text)
                         .font(.typography(contentTitle.typography))
                         .foregroundColor(.token(contentTitle.color))
-                        .lineLimit(contentTitle.maxLine)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, maxHeight: 21, alignment: .leading)
                 }
@@ -531,18 +556,19 @@ struct PostView: View {
                 Text(content.info.description.text)
                     .font(.typography(content.info.description.typography))
                     .foregroundColor(.token(content.info.description.color))
-                    .lineLimit(content.info.description.maxLine)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, maxHeight: 120, alignment: .leading)
             }
             .padding(.top, 12)
             
-            Button(content.info.seeMore.text) {
-                
+            if content.info.description.maxLine >= 5 {
+                Button(content.info.seeMore.text) {
+                    showFeedDetail = true
+                }
+                .font(.typography(content.info.seeMore.typography))
+                .frame(maxWidth: .infinity, maxHeight: 18, alignment: .leading)
+                .foregroundColor(.token(content.info.seeMore.color))
             }
-            .font(.typography(content.info.seeMore.typography))
-            .frame(maxWidth: .infinity, maxHeight: 18, alignment: .leading)
-            .foregroundColor(.token(content.info.seeMore.color))
             
             if let section = content.contentSection {
                 switch section {
