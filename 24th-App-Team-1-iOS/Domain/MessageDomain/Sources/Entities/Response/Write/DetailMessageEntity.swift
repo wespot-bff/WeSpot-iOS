@@ -35,7 +35,12 @@ public struct MessageDetailEntity {
     public let isRead: Bool
     public let isAbleToAnswer: Bool
     
-    public init(id: Int, createdAt: String, content: String, direction: MessageDirection, isRead: Bool, isAbleToAnswer: Bool) {
+    public init(id: Int,
+                createdAt: String,
+                content: String,
+                direction: MessageDirection,
+                isRead: Bool, isAbleToAnswer: Bool) {
+
         self.id = id
         self.createdAt = createdAt
         self.content = content

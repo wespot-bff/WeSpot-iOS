@@ -12,7 +12,8 @@ let messageDomain = Project.makeProject(
     module: .domain(.MessageDomain),
     targets: [
         .domain(module: .MessageDomain, dependencies: [
-            .shared(module: .ThirdPartyLib)
+            .shared(module: .ThirdPartyLib),
+            .domain(module: .CommonDomain)
         ])
     ]
 )

@@ -35,6 +35,7 @@ final public class WSTabBar: UIView {
     }
     
     // MARK: - Functions
+    
     private func setupUI() {
         
         addSubviews(stackView, topBorder)
