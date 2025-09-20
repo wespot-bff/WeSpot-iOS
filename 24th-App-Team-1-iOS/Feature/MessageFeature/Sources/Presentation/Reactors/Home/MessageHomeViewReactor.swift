@@ -167,8 +167,6 @@ extension MessageHomeViewReactor {
                 )
             }
     }
-    
-
 }
 
 // MARK: - Helper Methods
