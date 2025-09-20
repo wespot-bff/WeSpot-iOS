@@ -9,6 +9,7 @@ let project = Project
                 .feature(module: .SplashFeature),
                 .feature(module: .LoginFeature),
                 .feature(module: .AllFeature),
+                .feature(module: .CommunityFeature),
                 .feature(module: .VoteFeature),
                 .feature(module: .MessageFeature),
                 .feature(module: .NotificationFeature),

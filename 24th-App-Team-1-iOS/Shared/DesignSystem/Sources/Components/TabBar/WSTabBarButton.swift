@@ -13,12 +13,15 @@ import Then
 public final class WSTabBarButton: UIButton {
 
     public enum tabBarType {
+        case community
         case vote
         case message
         case all
         
         var text: String {
             switch self {
+            case .community:
+                "커뮤니티"
             case .vote:
                 "비밀 투표"
             case .message:
@@ -30,6 +33,8 @@ public final class WSTabBarButton: UIButton {
         
         var selectedImage: UIImage {
             switch self {
+            case .community:
+                DesignSystemAsset.Images.icTabbarCommunitySelected.image
             case .vote:
                 DesignSystemAsset.Images.icTabbarVoteSelected.image
             case .message:
@@ -41,6 +46,8 @@ public final class WSTabBarButton: UIButton {
         
         var unSelectedImage: UIImage {
             switch self {
+            case .community:
+                DesignSystemAsset.Images.icTabbarCommunityUnselected.image
             case .vote:
                 DesignSystemAsset.Images.icTabbarVoteUnseleceted.image
             case .message:

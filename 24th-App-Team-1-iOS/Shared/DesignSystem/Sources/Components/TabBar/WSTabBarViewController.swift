@@ -66,16 +66,15 @@ public final class WSTabBarViewController: UITabBarController {
     }
     
     private func bind() {
-        
-        tabBarView.voteButton.rx.tap
+        tabBarView.communityButton.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
                 owner.selectedIndex = 0
                 owner.updateTabBarButtonState()
             }
             .disposed(by: disposeBag)
-        
-        tabBarView.messageButton.rx.tap
+                
+        tabBarView.voteButton.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
                 owner.selectedIndex = 1
@@ -83,7 +82,7 @@ public final class WSTabBarViewController: UITabBarController {
             }
             .disposed(by: disposeBag)
         
-        tabBarView.allButton.rx.tap
+        tabBarView.messageButton.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
                 owner.selectedIndex = 2
@@ -91,13 +90,21 @@ public final class WSTabBarViewController: UITabBarController {
             }
             .disposed(by: disposeBag)
         
+        tabBarView.allButton.rx.tap
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .bind(with: self) { owner, _ in
+                owner.selectedIndex = 3
+                owner.updateTabBarButtonState()
+            }
+            .disposed(by: disposeBag)
+        
     }
     
     private func updateTabBarButtonState() {
-        
-        tabBarView.voteButton.updateState(isSelected: selectedIndex == 0)
-        tabBarView.messageButton.updateState(isSelected: selectedIndex == 1)
-        tabBarView.allButton.updateState(isSelected: selectedIndex == 2)
+        tabBarView.communityButton.updateState(isSelected: selectedIndex == 0)
+        tabBarView.voteButton.updateState(isSelected: selectedIndex == 1)
+        tabBarView.messageButton.updateState(isSelected: selectedIndex == 2)
+        tabBarView.allButton.updateState(isSelected: selectedIndex == 3)
     }
     
     public func setTabBar(hidden: Bool) {

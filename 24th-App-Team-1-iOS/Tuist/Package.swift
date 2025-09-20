@@ -17,7 +17,8 @@
             "RxKakaoSDKCommon": .framework,
             "RxKakaoSDKAuth": .framework,
             "RxKakaoSDKUser": .framework,
-            "Then": .framework
+            "Then": .framework,
+            "ComposableArchitecture": .staticFramework,
         ],
         baseSettings: .settings(configurations: [
             .debug(name: .configuration("DEV")),
@@ -29,6 +30,7 @@
 let package = Package(
     name: "App",
     dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", "1.10.4" ..< "1.11.1"),
         .package(url: "https://github.com/Swinject/Swinject", from: "2.9.1"),
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.7.1"),
         .package(url: "https://github.com/RxSwiftCommunity/RxDataSources", from: "5.0.2"),

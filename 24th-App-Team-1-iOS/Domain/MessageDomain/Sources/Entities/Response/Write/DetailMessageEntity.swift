@@ -40,6 +40,7 @@ public struct MessageDetailEntity {
                 content: String,
                 direction: MessageDirection,
                 isRead: Bool, isAbleToAnswer: Bool) {
+
         self.id = id
         self.createdAt = createdAt
         self.content = content
