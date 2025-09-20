@@ -556,12 +556,12 @@ struct PostView: View {
                 Text(content.info.description.text)
                     .font(.typography(content.info.description.typography))
                     .foregroundColor(.token(content.info.description.color))
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(5)
                     .frame(maxWidth: .infinity, maxHeight: 120, alignment: .leading)
             }
             .padding(.top, 12)
             
-            if content.info.description.maxLine >= 5 {
+            if content.info.seeMore.maxLine >= 5 {
                 Button(content.info.seeMore.text) {
                     showFeedDetail = true
                 }
