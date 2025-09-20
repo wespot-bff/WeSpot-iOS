@@ -22,7 +22,6 @@ public final class FetchMessagesStatusUseCase: FetchMessagesStatusUseCaseProtoco
     }
     
     public func execute() -> Single<MessageStatusResponseEntity> {
-        print("FetchMessagesStatusUseCase")
         return repository.fetchMessagesStatus()
     }
 }

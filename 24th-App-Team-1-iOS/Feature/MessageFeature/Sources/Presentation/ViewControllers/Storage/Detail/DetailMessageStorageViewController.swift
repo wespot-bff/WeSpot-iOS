@@ -114,8 +114,9 @@ public final class DetailMessageStorageViewController: BaseViewController<Messag
                 }
             })
             .bind(to: messageHistoryCollectionView.rx.items(cellIdentifier: String.MessageTexts.Identifier.MessageHistoryCollectionViewCell, cellType: MessageHistoryCollectionViewCell.self)) { index, item, cell in
-                let dateStr = item.createdAt // .description은 필요 없습니다. createdAt이 이미 String 타입일 것입니다.
-                cell.configureCell(date: dateStr, messageState: item.direction)
+                let dateStr = item.createdAt 
+                cell.configureCell(date: dateStr,
+                                   messageState: item.direction)
             }
             .disposed(by: disposeBag)
         
