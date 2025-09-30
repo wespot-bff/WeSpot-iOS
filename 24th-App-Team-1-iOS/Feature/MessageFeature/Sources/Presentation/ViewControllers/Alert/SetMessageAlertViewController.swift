@@ -58,8 +58,8 @@ final class SetMessageAlertViewController: BaseViewController<MessageSettingReac
 
         case .incomingOutgoing:
             titleLabel.text = String.MessageTexts.messageAlertTitle
-            alertTitleLabel.text = String.MessageTexts.getMessageAlertText
-            alertDescriptionLabel.text = String.MessageTexts.messageAlertDes
+            alertTitleLabel.text = String.MessageTexts.messageAlertTitle
+            alertDescriptionLabel.text = String.MessageTexts.messageNotitDes
         case .alert:
             titleLabel.text = String.MessageTexts.messageAlertTitle
             alertTitleLabel.text = String.MessageTexts.getMessageAlertText
