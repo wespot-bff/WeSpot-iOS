@@ -239,7 +239,7 @@ extension MessageReplyInfoViewController {
                     .setTitle(title: "답장을 전달할게요",
                               titleAlignment: .left)
                     .setMessage(message: "쪽지 전송 후에는 수정이나 전송 취소가 불가하며\n남은 쪽지 개수에서 1개가 차감돼요")
-                    .setConfirm(text: "네 좋아요!")
+                    .setConfirm(text: "네 좋아요")
                     .setCancel(text: "닫기")
                     .action(.confirm)
                     {
