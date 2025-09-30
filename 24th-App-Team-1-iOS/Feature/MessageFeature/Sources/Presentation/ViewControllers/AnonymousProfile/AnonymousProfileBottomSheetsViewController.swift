@@ -137,6 +137,7 @@ final class AnonymousProfileBottomSheetsViewController: BaseViewController<Anony
                                        item.image,
                                        item.isAnonymous,
                                        image)
+                print("---------\(item)")
                 this.dismiss(animated: true, completion: nil)
             }
             .disposed(by: disposeBag)
