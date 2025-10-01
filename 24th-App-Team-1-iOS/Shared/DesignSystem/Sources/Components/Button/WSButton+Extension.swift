@@ -12,11 +12,11 @@ extension UIButton {
         if isActive {
             self.backgroundColor = DesignSystemAsset.Colors.gray200.color
             self.setTitleColor(DesignSystemAsset.Colors.gray900.color, for: .normal)
-            self.tintColor = DesignSystemAsset.Colors.gray900.color
+            self.tintColor = DesignSystemAsset.Colors.gray700.color
             self.layer.borderWidth = 0
         } else {
-            self.backgroundColor = WSButtonType.tab.buttonProperties.backgroundColor.color
-            self.setTitleColor(WSButtonType.tab.buttonProperties.textColor, for: .normal)
+            self.backgroundColor = DesignSystemAsset.Colors.gray700.color
+            self.setTitleColor(DesignSystemAsset.Colors.gray900.color, for: .normal)
             self.tintColor = DesignSystemAsset.Colors.gray200.color
             self.layer.borderWidth = 0
         }
