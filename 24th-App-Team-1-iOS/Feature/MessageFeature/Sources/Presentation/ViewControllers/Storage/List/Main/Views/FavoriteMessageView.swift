@@ -32,13 +32,14 @@ final class FavoriteMessageView: UIView {
     private let emptyTitle = WSLabel(wsFont: .Body03, text: "아직 즐겨찾기에 추가된 쪽지가 없어요").then {
         $0.textAlignment = .center
     }
-    private let emptyDes = WSLabel(wsFont: .Body03, text: "소중한 쪽지를 놓치지 않도록\n즐겨찾기에 추가해 보세요").then {
+    private let emptyDes = WSLabel(wsFont: .Body06, text: "소중한 쪽지를 놓치지 않도록\n즐겨찾기에 추가해 보세요").then {
+        $0.textColor = DesignSystemAsset.Colors.gray400.color
         $0.numberOfLines = 2
         $0.textAlignment = .center
     }
     private let emptyStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 16 // 컴포넌트 사이의 간격 설정
+        $0.spacing = 8 // 컴포넌트 사이의 간격 설정
         $0.alignment = .center // 가운데 정렬
     }
 
@@ -57,7 +58,7 @@ final class FavoriteMessageView: UIView {
         }
         
         emptyStackView.snp.makeConstraints {
-            $0.center.equalToSuperview()
+            $0.top.equalToSuperview().offset(160)
             $0.horizontalEdges.equalToSuperview().inset(20)
         }
     }

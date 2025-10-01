@@ -38,7 +38,7 @@ public final class MessageStorageViewController: BaseViewController<MessageStora
 
     private let favoriteMessageButton = UIButton().then {
         $0.setTitle(String.MessageTexts.messageInventoryFavoriteButton, for: .normal)
-        $0.setImage(DesignSystemAsset.Images.icStarFill.image, for: .normal)
+        $0.setImage(UIImage(systemName: "star.fill"), for: .normal)
         $0.imageView?.contentMode = .scaleAspectFit
         $0.titleLabel?.font = WSFont.Body05.font()
         $0.layer.cornerRadius = 12
