@@ -92,7 +92,7 @@ final class DetailMessageCustomNaviBar: UIView {
                       imageUrl: URL,
                       isBookmarked: Bool) {
         nameLabel.text = name
-        userImageView.kf.setImage(with: imageUrl, placeholder: DesignSystemAsset.Images.icBasicProfile.image)
+        userImageView.kf.setImage(with: imageUrl, placeholder: DesignSystemAsset.Images.basicProfile.image)
         bookMarkImg.isHidden = !isBookmarked
         nameStateLabel.text = isAnonymous ? "익명" : "실명"
     }

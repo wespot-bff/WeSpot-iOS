@@ -33,47 +33,51 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
     
     public func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
-        DependencyContainer.shared.injector.assemble([
-            SplashPresentationAssembly(),
-            SignInPresentationAssembly(),
-            SignUpNamePresentationAssembly(),
-            SignUpClassPresentationAssembly(),
-            SignUpGenderPresentationAssembly(),
-            SignUpResultPresentationAssembly(),
-            SignUpGradePresentationAssembly(),
-            SignUpCompletePresentationAssembly(),
-            SignUpSchoolPresentationAssembly(),
-            VotePresentationAssembly(),
-            VoteEffectPresentationAssembly(),
-            VoteMainPresentationAssembly(),
-            VoteHomePresentationAssembly(),
-            VotePagePresentationAssembly(),
-            VoteResultPresentationAssembly(),
-            VoteCompletePresentationAssembly(),
-            VoteInventoryPresentationAssembly(),
-            VoteInventoryDetailPresentationAssembly(),
-            MessageMainPresentationAssembly(),
-            MessagePagePresentationAssembly(),
-            MessageSettingAssembly(),
-            MessageHomePresentationAssembly(),
-            MessageWritePresentationAssembly(),
-            MessageStroagePresentationAssembly(),
-            MessageReportPresentationAssembly(),
-            MessageBottomSheetPresentationAssembly(),
-            AnonymousProfileBottomSheetAssembly(),
-            AllMainPresentationAssembly(),
-            AllMainProfilePresentationAssembly(),
-            AllMainProfileWebPresentationAssembly(),
-            AllMainProfileSettingPresentationAssembly(),
-            AllMainProfileAlarmSettingPresentationAssembly(),
-            AllMainProfileUserBlockPresentationAssembly(),
-            AllMainProfileAccountSettingPresentationAssembly(),
-            AllMainProfileResignNotePresentationAssembly(),
-            AllMainProfileResignPresentationAssembly(),
-            NotificationPresentationAssembly(),
-            DataAssembly(),
-            DomainAssembly()
-        ])
+        if #available(iOS 16.0, *) {
+            DependencyContainer.shared.injector.assemble([
+                SplashPresentationAssembly(),
+                SignInPresentationAssembly(),
+                SignUpNamePresentationAssembly(),
+                SignUpClassPresentationAssembly(),
+                SignUpGenderPresentationAssembly(),
+                SignUpResultPresentationAssembly(),
+                SignUpGradePresentationAssembly(),
+                SignUpCompletePresentationAssembly(),
+                SignUpSchoolPresentationAssembly(),
+                VotePresentationAssembly(),
+                VoteEffectPresentationAssembly(),
+                VoteMainPresentationAssembly(),
+                VoteHomePresentationAssembly(),
+                VotePagePresentationAssembly(),
+                VoteResultPresentationAssembly(),
+                VoteCompletePresentationAssembly(),
+                VoteInventoryPresentationAssembly(),
+                VoteInventoryDetailPresentationAssembly(),
+                MessageMainPresentationAssembly(),
+                MessagePagePresentationAssembly(),
+                MessageSettingAssembly(),
+                MessageHomePresentationAssembly(),
+                MessageWritePresentationAssembly(),
+                MessageStroagePresentationAssembly(),
+                MessageReportPresentationAssembly(),
+                MessageBottomSheetPresentationAssembly(),
+                AnonymousProfileBottomSheetAssembly(),
+                AllMainPresentationAssembly(),
+                AllMainProfilePresentationAssembly(),
+                AllMainProfileWebPresentationAssembly(),
+                AllMainProfileSettingPresentationAssembly(),
+                AllMainProfileAlarmSettingPresentationAssembly(),
+                AllMainProfileUserBlockPresentationAssembly(),
+                AllMainProfileAccountSettingPresentationAssembly(),
+                AllMainProfileResignNotePresentationAssembly(),
+                AllMainProfileResignPresentationAssembly(),
+                NotificationPresentationAssembly(),
+                DataAssembly(),
+                DomainAssembly()
+            ])
+        } else {
+            // Fallback on earlier versions
+        }
         
         window = UIWindow(windowScene: scene)
         UNUserNotificationCenter.current().delegate = notificationHandler
@@ -83,7 +87,11 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
     
         let splashViewController = DependencyContainer.shared.injector.resolve(SplashViewController.self, argument: accessToken)
         window?.rootViewController = UINavigationController(rootViewController: splashViewController)
-        setupViewControllers()
+        if #available(iOS 16.0, *) {
+            setupViewControllers()
+        } else {
+            // Fallback on earlier versions
+        }
         window?.makeKeyAndVisible()
     }
     

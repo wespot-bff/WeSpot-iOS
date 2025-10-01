@@ -12,17 +12,17 @@ import DesignSystem
 import MessageDomain
 
 final class MessageHistoryCollectionViewCell: UICollectionViewCell {
-    private let messageIcon = UIImageView(image: DesignSystemAsset.Images.icMessageWhite.image)
+    private let messageIcon = UIImageView(image: DesignSystemAsset.Images.messageWhiteIcon.image)
     private let dateLabel = WSLabel(wsFont: .Body09)
     private let darkOverlayView = UIView().then {
         $0.backgroundColor = DesignSystemAsset.Colors.gray700.color
         $0.layer.opacity = 0.5
     }
     private let receivedImg = UIImageView().then {
-        $0.image = DesignSystemAsset.Images.icDownRedArrow.image
+        $0.image = DesignSystemAsset.Images.downRed.image
     }
     private let sentImg = UIImageView().then {
-        $0.image = DesignSystemAsset.Images.icUpBlueArrow.image
+        $0.image = DesignSystemAsset.Images.upBlue.image
     }
     
     override init(frame: CGRect) {
@@ -58,7 +58,7 @@ final class MessageHistoryCollectionViewCell: UICollectionViewCell {
     }
         
     func configureCell(date: String,
-                       messageState: MessageDirection) {
+                       messageState: MessageDirectionEnum) {
 
         dateLabel.text = self.formatDate(from: date) ?? date
         dateLabel.sizeToFit()

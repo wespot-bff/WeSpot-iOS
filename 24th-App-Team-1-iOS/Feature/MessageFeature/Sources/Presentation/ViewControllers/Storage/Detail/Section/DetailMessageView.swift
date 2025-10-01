@@ -34,10 +34,10 @@ final class DetailMessageView: UIView {
             messageStatusLabel.text = "보낸쪽지"
             messageStatusView.backgroundColor = UIColor(hex: "#B5D1FF")
             messageStatusLabel.textColor = UIColor(hex: "#3782FF")
-            backGroundView.image = DesignSystemAsset.Images.recivedMessageBackground.image
+            backGroundView.image = DesignSystemAsset.Images.recivedBackground.image
             replyButton.isHidden = true
         } else {
-            backGroundView.image = DesignSystemAsset.Images.sentMessageBackground.image
+            backGroundView.image = DesignSystemAsset.Images.sendBackground.image
             messageStatusLabel.text = "받은쪽지"
             messageStatusLabel.textColor = UIColor(hex: "#FF5946")
             messageStatusView.backgroundColor = UIColor(hex: "#FFCBC6")

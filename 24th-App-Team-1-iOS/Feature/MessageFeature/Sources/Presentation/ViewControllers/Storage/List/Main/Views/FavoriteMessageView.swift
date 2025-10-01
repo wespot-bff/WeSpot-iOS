@@ -7,6 +7,7 @@
 
 import UIKit
 import MessageDomain
+import DesignSystem
 
 import RxDataSources
 import SnapKit
@@ -24,15 +25,40 @@ final class FavoriteMessageView: UIView {
         $0.backgroundColor = .clear
         $0.showsVerticalScrollIndicator = false
     }
-    
+    private let emptyImageView = UIImageView().then {
+        $0.image = DesignSystemAsset.Images.emptyMessage.image
+        $0.contentMode = .scaleAspectFit
+    }
+    private let emptyTitle = WSLabel(wsFont: .Body03, text: "아직 즐겨찾기에 추가된 쪽지가 없어요").then {
+        $0.textAlignment = .center
+    }
+    private let emptyDes = WSLabel(wsFont: .Body03, text: "소중한 쪽지를 놓치지 않도록\n즐겨찾기에 추가해 보세요").then {
+        $0.numberOfLines = 2
+        $0.textAlignment = .center
+    }
+    private let emptyStackView = UIStackView().then {
+        $0.axis = .vertical
+        $0.spacing = 16 // 컴포넌트 사이의 간격 설정
+        $0.alignment = .center // 가운데 정렬
+    }
+
     private let disposeBag = DisposeBag()
     
     private func layout() {
-        self.addSubview(messageCollectionView)
+        self.addSubviews(messageCollectionView, emptyStackView)
+        [emptyImageView, emptyTitle, emptyDes].forEach {
+             self.emptyStackView.addArrangedSubview($0)
+         }
+        
         messageCollectionView.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview()
+        }
+        
+        emptyStackView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(20)
         }
     }
     
@@ -68,6 +94,16 @@ final class FavoriteMessageView: UIView {
         sectionsRelay
             .bind(to: messageCollectionView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
+        
+        sectionsRelay
+             .map { $0.first?.items.isEmpty ?? true }
+             .distinctUntilChanged()
+             .asDriver(onErrorJustReturn: true)
+             .drive(onNext: { [weak self] isEmpty in
+                 self?.messageCollectionView.isHidden = isEmpty
+                 self?.emptyStackView.isHidden = !isEmpty 
+             })
+             .disposed(by: disposeBag)
         
         messageCollectionView.rx.modelSelected(MessageRoomEntity.self)
             .bind(with: self) { this, message in
