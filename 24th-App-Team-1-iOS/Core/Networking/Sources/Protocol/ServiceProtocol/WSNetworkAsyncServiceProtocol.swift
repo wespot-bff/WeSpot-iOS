@@ -11,4 +11,6 @@ import Alamofire
 
 public protocol WSNetworkAsyncServiceProtocol {
     func request<T: Decodable>(endPoint: URLRequestConvertible) async throws -> T
+    func requestEmptyResponse(endPoint: URLRequestConvertible) async throws -> Bool
+    func upload(endPoint: URLRequestConvertible, binaryData: Data) async throws -> Bool
 }

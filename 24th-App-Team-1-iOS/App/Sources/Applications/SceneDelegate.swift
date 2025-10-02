@@ -25,6 +25,8 @@ import RxKakaoSDKAuth
 import KakaoSDKAuth
 import MessageFeature
 import KeychainSwift
+import CommunityFeature
+import SwiftUI
 
 public class SceneDelegate: UIResponder, UISceneDelegate {
     
@@ -86,6 +88,7 @@ public class SceneDelegate: UIResponder, UISceneDelegate {
         let refreshToken = KeychainManager.shared.get(type: .refreshToken)
     
         let splashViewController = DependencyContainer.shared.injector.resolve(SplashViewController.self, argument: accessToken)
+        
         window?.rootViewController = UINavigationController(rootViewController: splashViewController)
         if #available(iOS 16.0, *) {
             setupViewControllers()
@@ -240,8 +243,13 @@ extension SceneDelegate {
         let allMainViewController = DependencyContainer.shared.injector.resolve(AllMainViewController.self)
         let allNavigationContoller = UINavigationController(rootViewController: allMainViewController)
     
+        let communityView = MainNoticeBoardView(store: .init(initialState: MainNoticeBoardFeature.State(), reducer: { MainNoticeBoardFeature()}))
+        let communityHostingController = UIHostingController(rootView: communityView)
+        let cmmunityNavigationController = UINavigationController(rootViewController: communityHostingController)
+        cmmunityNavigationController.setNavigationBarHidden(true, animated: false)
+        
         let tabbarcontroller = WSTabBarViewController()
-        tabbarcontroller.viewControllers = [voteNavigationContoller,messageNavigationContoller, allNavigationContoller]
+        tabbarcontroller.viewControllers = [cmmunityNavigationController, voteNavigationContoller,messageNavigationContoller, allNavigationContoller]
         window?.rootViewController = tabbarcontroller
     }
 }

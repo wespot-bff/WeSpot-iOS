@@ -43,7 +43,7 @@ public extension WSNetworkEndPoint {
     
     private func setupRequestQuery(_ url: URL, paramters: Encodable?) throws -> URL {
         let params = paramters?.toDictionary() ?? [:]
-        let queryParams = params.map { URLQueryItem(name: $0.key, value: "\($0.value)") }
+        let queryParams = params.map { URLQueryItem(name: $0.key, value: "\($0.value)" ) }
         var components = URLComponents(string: url.absoluteString)
         
         components?.queryItems = queryParams

@@ -19,8 +19,10 @@ import RxDataSources
 public final class ProfileAlarmSettingViewController: BaseViewController<ProfileAlarmSettingViewReactor> {
 
     //MARK: - Properties
-    private let sentAlarmSettingView: ProfileAlarmSettingView = ProfileAlarmSettingView(contentText: "투표", descriptionText: "우리 반 투표 및 결과 관련 알림", isOn: false)
-    private let eventAlarmSettingView: ProfileAlarmSettingView = ProfileAlarmSettingView(contentText: "이벤트 혜택", descriptionText: "광고성 정보 수신 동의에 의한 이벤트 혜택 알림", isOn: false)
+    private let communityAlarmSettingView: ProfileAlarmSettingView = ProfileAlarmSettingView(contentText: "커뮤니티 알림", descriptionText: "인기 게시글, 댓글 등 게시판 알림", isOn: false)
+    private let messageAlarmSettingView: ProfileAlarmSettingView = ProfileAlarmSettingView(contentText: "쪽지 알림", descriptionText: "쪽지, 쪽지 답장 등 쪽지 관련 알림", isOn: false)
+    private let sentAlarmSettingView: ProfileAlarmSettingView = ProfileAlarmSettingView(contentText: "비밀 투표", descriptionText: "투표 결과 등 우리 반 비밀 투표 관련 알림", isOn: false)
+    private let eventAlarmSettingView: ProfileAlarmSettingView = ProfileAlarmSettingView(contentText: "이벤트 알림", descriptionText: "광고성 정보 수신 동의에 의한 이벤트 혜택 알림", isOn: false)
     private let loadingIndicatorView: WSLottieIndicatorView = WSLottieIndicatorView()
     
     //MARK: - LifeCycle
@@ -32,19 +34,31 @@ public final class ProfileAlarmSettingViewController: BaseViewController<Profile
     //MARK: - Configure
     public override func setupUI() {
         super.setupUI()
-        view.addSubviews(sentAlarmSettingView, eventAlarmSettingView)
+        view.addSubviews(communityAlarmSettingView, sentAlarmSettingView, messageAlarmSettingView ,eventAlarmSettingView)
     }
     
     public override func setupAutoLayout() {
         super.setupAutoLayout()
-        sentAlarmSettingView.snp.makeConstraints {
+        communityAlarmSettingView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(50)
         }
         
-        eventAlarmSettingView.snp.makeConstraints {
+        sentAlarmSettingView.snp.makeConstraints {
+            $0.top.equalTo(communityAlarmSettingView.snp.bottom).offset(32)
+            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.height.equalTo(50)
+        }
+        
+        messageAlarmSettingView.snp.makeConstraints {
             $0.top.equalTo(sentAlarmSettingView.snp.bottom).offset(32)
+            $0.horizontalEdges.equalToSuperview().inset(24)
+            $0.height.equalTo(50)
+        }
+        
+        eventAlarmSettingView.snp.makeConstraints {
+            $0.top.equalTo(messageAlarmSettingView.snp.bottom).offset(32)
             $0.horizontalEdges.equalToSuperview().inset(24)
             $0.height.equalTo(50)
         }
