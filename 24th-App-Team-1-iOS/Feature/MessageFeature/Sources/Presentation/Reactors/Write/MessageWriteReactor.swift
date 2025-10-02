@@ -62,7 +62,7 @@ public final class MessageWriteReactor: Reactor {
         case loadMoreUsers
         case sendMessageTapped
         case presentAnonymousBottomSheet(Int, UIViewController)
-        case setAnonymousProfile(name: String, imageUrl: String, image: UIImage)
+        case setAnonymousProfile(name: String, imageUrl: String, image: UIImage, isAnonymous: Bool)
         case anonymousProfileCreationCompleted
         case setMessageRoom(MessageRoomEntity)
         
@@ -84,7 +84,7 @@ public final class MessageWriteReactor: Reactor {
         case postMessage(Bool)
         case setAnonymous(Bool)
         case setBottomSheet(AnonymousProfileStatusEnum)
-        case setAnonymousProfile(name: String, imageUrl: String, image: UIImage)
+        case setAnonymousProfile(name: String, imageUrl: String, image: UIImage,  isAnonymous: Bool)
         case completeSenderProfileSetup(Bool)
         case setRoom(MessageRoomEntity)
         case setDetailMessage(MessageDetailEntity)
@@ -110,8 +110,8 @@ public final class MessageWriteReactor: Reactor {
             .asObservable()
             .flatMap { globalEvent -> Observable<Action> in // globalEvent로 이름 변경
                 switch globalEvent { // globalAction 대신 globalEvent 사용
-                case .setAnonymousProfileData(let name, let imageUrl, let image):
-                    return .just(.setAnonymousProfile(name: name, imageUrl: imageUrl, image: image))
+                case .setAnonymousProfileData(let name, let imageUrl, let image, let isAnonymous):
+                    return .just(.setAnonymousProfile(name: name, imageUrl: imageUrl, image: image, isAnonymous: isAnonymous))
                 case .anonymousProfileSetupComplete:
                     return .just(.anonymousProfileCreationCompleted)
                 default:
@@ -161,15 +161,16 @@ extension MessageWriteReactor {
                     
                     self.bottomSheetRouter?.presentAnonymousProfileBottomSheet(status, id: id, vc: vc, onProfileCreated: { name, imageUrl, isAnonymous, profileImg in
                         print("Anonymous Profile Created: \(name), \(imageUrl)")
-                        self.globalState.event.onNext(.setAnonymousProfileData(name: name, imageUrl: imageUrl, image: profileImg))
+                        
+                        self.globalState.event.onNext(.setAnonymousProfileData(name: name, imageUrl: imageUrl, image: profileImg, isAnonymous: isAnonymous))
                         self.globalState.event.onNext(.anonymousProfileSetupComplete)
                         NotificationCenter.default.post(name: .showInputMessageWirteViewController, object: nil)
                     })
                     return .empty()
                 }
             
-        case .setAnonymousProfile(let name, let imageUrl, let image):
-            return Observable.just(.setAnonymousProfile(name: name, imageUrl: imageUrl, image: image))
+        case .setAnonymousProfile(let name, let imageUrl, let image, let isAnonymouse):
+            return Observable.just(.setAnonymousProfile(name: name, imageUrl: imageUrl, image: image, isAnonymous: isAnonymouse))
     
             
         case .anonymousProfileCreationCompleted:
@@ -241,10 +242,10 @@ extension MessageWriteReactor {
         case .setBottomSheet(let status):
             newState.anonymousProfileStatus = status
             
-        case .setAnonymousProfile(let name, let imageUrl, let image):
+        case .setAnonymousProfile(let name, let imageUrl, let image, let isAnonymous):
             newState.userName = name
             newState.profileImageURL = imageUrl
-            newState.isAnonymous = true
+            newState.isAnonymous = isAnonymous
             newState.profileImage = image
         case .completeSenderProfileSetup(let completed):
             newState.completSetSenderProfile = completed

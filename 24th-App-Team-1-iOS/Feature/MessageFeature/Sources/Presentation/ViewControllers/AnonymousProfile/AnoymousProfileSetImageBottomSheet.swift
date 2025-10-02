@@ -46,7 +46,7 @@ public final class AnoymousProfileSetImageBottomSheet: BaseViewController<Anonym
         buttonTableView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(28)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(15)
+            $0.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(8)
         }
     }
     
@@ -80,7 +80,7 @@ public final class AnoymousProfileSetImageBottomSheet: BaseViewController<Anonym
                 case .setGalleryImage:
                     this.presentImagePicker()
                 case .setBasicProfileImage:
-                    let basicImage = DesignSystemAsset.Images.icBasicProfile.image
+                    let basicImage = DesignSystemAsset.Images.basicProfile.image
                     reactor.action.onNext(.setProfileImage(basicImage))
                     this.navigationController?.popViewController(animated: true)
                 }

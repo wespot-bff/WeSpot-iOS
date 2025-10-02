@@ -32,7 +32,7 @@ public final class AnonymousProfileReactor: Reactor {
         @Pulse var error: String = ""
         var userName: String = ""
         var profileImageURL: String = ""
-        var profileImage: UIImage = DesignSystemAsset.Images.icBasicProfile.image
+        var profileImage: UIImage = DesignSystemAsset.Images.basicProfile.image
         var setProfileImageBottomSheet: [SetAnonymousProfileImageEnum] = [.setGalleryImage, .setBasicProfileImage]
         @Pulse var creationComplete: (name: String, imageUrl: String)?
     }
@@ -53,7 +53,8 @@ public final class AnonymousProfileReactor: Reactor {
         case setUserName(String)
         case setProfileImageURL(String)
         case setProfileImage(UIImage)
-        case setCreationComplete(name: String, imageUrl: String)
+        case setCreationComplete(name: String,
+                                 imageUrl: String)
         
 
     }

@@ -60,6 +60,7 @@ final class MakeAnonymousProfilePopupViewController: BaseViewController<Anonymou
         super.viewDidLoad()
         self.view.backgroundColor = .black.withAlphaComponent(0.6)
         self.navigationBar.isHidden = true
+        setupKeyboardDismissal()
     }
     
     //MARK: - Functions
@@ -75,7 +76,8 @@ final class MakeAnonymousProfilePopupViewController: BaseViewController<Anonymou
                               makeProfileButton)
         nickNameTextField.addSubviews(nameCountLabel)
         nickNameTextField.addSubview(underline)
-
+        nickNameTextField.rightView = nameCountLabel
+        nickNameTextField.rightViewMode = .always
     }
     
     public override func setupAutoLayout() {
@@ -109,14 +111,9 @@ final class MakeAnonymousProfilePopupViewController: BaseViewController<Anonymou
         nickNameTextField.snp.makeConstraints {
             $0.top.equalTo(imageView.snp.bottom).offset(36)
             $0.horizontalEdges.equalToSuperview().inset(32)
-            $0.height.equalTo(28)
+            $0.height.equalTo(54)
         }
-        nameCountLabel.snp.makeConstraints {
-            $0.top.equalToSuperview()
-            $0.trailing.equalToSuperview()
-            $0.width.equalTo(40)
-            $0.height.equalTo(20)
-        }
+
         makeProfileButton.snp.makeConstraints {
             $0.bottom.equalToSuperview().offset(-20)
             $0.horizontalEdges.equalToSuperview().inset(20)
@@ -192,4 +189,19 @@ final class MakeAnonymousProfilePopupViewController: BaseViewController<Anonymou
             }
             .disposed(by: disposeBag)
     }
+    
+    private func setupKeyboardDismissal() {
+        // 뷰에 탭 제스처를 추가합니다.
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(downKeyboard))
+        // 중요: 탭 제스처가 다른 UI 요소(버튼 등)의 터치 이벤트를 막지 않도록 설정합니다.
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    // 탭 제스처가 감지되면 이 함수가 호출됩니다.
+    @objc private func downKeyboard() {
+        // 뷰의 편집 상태를 강제로 종료하여 키보드를 내립니다.
+        view.endEditing(true)
+    }
+    
 }

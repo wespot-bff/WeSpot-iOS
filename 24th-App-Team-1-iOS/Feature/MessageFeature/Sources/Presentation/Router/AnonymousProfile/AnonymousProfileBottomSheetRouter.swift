@@ -59,7 +59,7 @@ public class AnonymousProfileBottomSheetRouter: AnonymousProfileBottomSheetRouti
             if let sheet = bottomSheet.sheetPresentationController {
                 sheet.detents = [
                     .custom(identifier: .init("AnoymousProfileSetImageBottomSheet"), resolver: { context in
-                        return 140
+                        return 150
                     }),
                     .large()
                 ]
