@@ -91,6 +91,7 @@ public final class MessageSettingViewController: BaseViewController<MessageSetti
     }
     
     private func bindAction(reactor: Reactor) {
+        
         listTableView.rx
             .modelSelected(MessageSettingListEnum.self)
             .bind {  list in

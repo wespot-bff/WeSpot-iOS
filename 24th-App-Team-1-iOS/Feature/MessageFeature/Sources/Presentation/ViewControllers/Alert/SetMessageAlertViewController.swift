@@ -131,13 +131,25 @@ final class SetMessageAlertViewController: BaseViewController<MessageSettingReac
     }
     
     private func bindAction(reactor: Reactor) {
-        reactor.action.onNext(.fetchMessageStatus)
-        reactor.action.onNext(.fetchNotificationStatus)
+        
+        self.rx.viewWillAppear
+            .map { _ in Reactor.Action.fetchMessageStatus }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        self.rx.viewWillAppear
+            .map { _ in Reactor.Action.fetchNotificationStatus }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+
+
         switch viewType {
         case .blockList:
             break
         case .incomingOutgoing:
             alertStateSwitch.rx.isOn
+                .skip(1)
+                .distinctUntilChanged()
                 .observe(on: MainScheduler.instance)
                 .bind(with: self) { owner, isOn in
                     reactor.action.onNext(.toggleMessageStatus(isOn))
@@ -145,6 +157,8 @@ final class SetMessageAlertViewController: BaseViewController<MessageSettingReac
                 .disposed(by: self.disposeBag)
         case .alert:
             alertStateSwitch.rx.isOn
+                .skip(1)
+                .distinctUntilChanged()
                 .observe(on: MainScheduler.instance)
                 .bind(with: self) { owner, isOn in
                     reactor.action.onNext(.toggleNotificationStatus(isOn))
