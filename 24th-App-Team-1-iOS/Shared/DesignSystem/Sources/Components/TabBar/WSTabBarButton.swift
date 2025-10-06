@@ -34,7 +34,7 @@ public final class WSTabBarButton: UIButton {
         var selectedImage: UIImage {
             switch self {
             case .community:
-                DesignSystemAsset.Images.icTabbarCommunitySelected.image
+                DesignSystemAsset.Images.icTabbarMessageSelected.image
             case .vote:
                 DesignSystemAsset.Images.icTabbarVoteSelected.image
             case .message:
@@ -47,7 +47,7 @@ public final class WSTabBarButton: UIButton {
         var unSelectedImage: UIImage {
             switch self {
             case .community:
-                DesignSystemAsset.Images.icTabbarCommunityUnselected.image
+                DesignSystemAsset.Images.icTabbarMessageUnselected.image
             case .vote:
                 DesignSystemAsset.Images.icTabbarVoteUnseleceted.image
             case .message:

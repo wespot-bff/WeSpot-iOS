@@ -28,7 +28,7 @@ final class MessageCollectionViewCell: UICollectionViewCell {
         $0.contentMode = .scaleAspectFit
     }
     private let profileImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
         $0.layer.cornerRadius = 17
         $0.clipsToBounds = true
@@ -56,7 +56,7 @@ final class MessageCollectionViewCell: UICollectionViewCell {
     private let opponentNameLabel = WSLabel(wsFont: .Body06)
     
     private let opponentImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
         $0.layer.cornerRadius = 17
         $0.clipsToBounds = true

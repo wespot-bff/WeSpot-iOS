@@ -28,7 +28,7 @@ final class MakeAnonymousProfilePopupViewController: BaseViewController<Anonymou
     private let imageView = UIImageView().then {
         $0.backgroundColor = DesignSystemAsset.Colors.gray700.color
         $0.layer.cornerRadius = 43.3
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.clipsToBounds = true
     }
     private let galleryButton = UIButton().then {
