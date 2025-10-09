@@ -46,7 +46,7 @@ public final class AnoymousProfileSetImageBottomSheet: BaseViewController<Anonym
         buttonTableView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(28)
             $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(15)
+            $0.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(8)
         }
     }
     

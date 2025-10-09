@@ -53,7 +53,8 @@ public final class AnonymousProfileReactor: Reactor {
         case setUserName(String)
         case setProfileImageURL(String)
         case setProfileImage(UIImage)
-        case setCreationComplete(name: String, imageUrl: String)
+        case setCreationComplete(name: String,
+                                 imageUrl: String)
         
 
     }

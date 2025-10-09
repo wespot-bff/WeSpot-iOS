@@ -40,7 +40,7 @@ extension DetailMessageResponseDTO {
             isBookmarked: self.isBookmarked,
             messages: self.messageDetails.map { detailDTO in
                 // isReceived, isSend Bool 값에 따라 메시지 방향 결정
-                let direction: MessageDirection = detailDTO.isReceived ? .received : .sent
+                let direction: MessageDirectionEnum = detailDTO.isReceived ? .received : .sent
                 
                 return MessageDetailEntity(
                     id: detailDTO.id,

@@ -124,13 +124,13 @@ extension MessageSettingReactor {
                 .asObservable()
                 .flatMap {  entity -> Observable<Mutation> in
                     let isOn = entity.isReceivedAllowed
+                    print("======\(entity)")
                     return .just(.setMessageStatus(isOn))
                 }
         case .fetchNotificationStatus:
             return notiUsecase!.execute()
                 .asObservable()
                 .flatMap { entity -> Observable<Mutation> in
-                    let status = entity?.isEnableMessageNotification
                     return .just(.setNotificationStatus(entity ?? UserAlarmEntity(isEnableVoteNotification: false, isEnableMessageNotification: false, isEnableMarketingNotification: false)))
                 }
                 
@@ -159,6 +159,7 @@ extension MessageSettingReactor {
             newState.blockList = state.blockList.filter { $0.id != id }
             newState.compelteUnBlock = true
         case .setMessageStatus(let status):
+            print("111111 \(status)")
             newState.messageAlertState = status
         case .setError(let errorMsg):
             newState.error = errorMsg

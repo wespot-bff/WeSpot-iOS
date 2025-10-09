@@ -46,6 +46,6 @@ public enum WSGlobalStateType {
     case didTappedResignButton(_ isStatus: Bool)
     case didShowSignInViewController(_ isSuccess: Bool)
     case showToast(_ message: String, type: ToastImagesType)
-    case setAnonymousProfileData(name: String, imageUrl: String, image: UIImage)
+    case setAnonymousProfileData(name: String, imageUrl: String, image: UIImage, isAnonymous: Bool)
     case anonymousProfileSetupComplete
 }
