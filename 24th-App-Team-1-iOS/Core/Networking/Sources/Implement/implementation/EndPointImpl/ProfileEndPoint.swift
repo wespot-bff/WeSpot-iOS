@@ -33,6 +33,8 @@ public enum ProfileEndPoint: WSNetworkEndPoint {
     case updateUserResign
     /// 사용자 프로필 이미지 수정 API
     case editProfileImage(Encodable)
+    /// 사용자 포스트 알림 API
+    case updatePostNotification(Encodable)
     
     public var spec: WSNetworkSpec {
         switch self {
@@ -50,6 +52,8 @@ public enum ProfileEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/users/revoke")
         case .editProfileImage:
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/image/update-profile")
+        case .updatePostNotification:
+            return WSNetworkSpec(method: .patch, url: "\(WSNetworkConfigure.baseURLV2)/post/notification-setting")
         }
     }
     
@@ -61,6 +65,8 @@ public enum ProfileEndPoint: WSNetworkEndPoint {
             return .requestQuery(query)
         case let .editProfileImage(query):
             return .requestQuery(query)
+        case let .updatePostNotification(body):
+            return .requestBody(body)
         default:
             return .none
         }

@@ -198,6 +198,11 @@ struct DomainAssembly: Assembly {
             let repository = resolver.resolve(NotificationRepositoryProtocol.self)!
             return UpdateUserNotificationItemUseCase(notificationRepository: repository)
         }
+        
+        container.register(UpdatePostAlarmUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(ProfileRepositoryProtocol.self)!
+            return UpdatePostAlarmUseCase(profileRepository: repository)
+        }
                                                                             
         container.register(CreateUserResignUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(ProfileRepositoryProtocol.self)!

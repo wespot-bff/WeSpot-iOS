@@ -33,7 +33,6 @@ public final class WSNetworkAsyncService: WSNetworkAsyncServiceProtocol {
             WSNetworkAsyncService.session.request(endPoint)
                 .validate(statusCode: 200..<300)
                 .response { response in
-                    print("데이터를 확인합니다잉 : \(response)")
                     switch response.result {
                     case let .success(response):
                         continuation.resume(returning: true)

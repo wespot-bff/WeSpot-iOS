@@ -11,6 +11,10 @@ import Networking
 import CommunityDomain
 import ComposableArchitecture
 
+enum PostDetailError: Error {
+    case unexpectedPostType
+}
+
 private enum CommunityRepositoryKey: DependencyKey {
   static let liveValue: CommunityRepositoryProtocol = CommunityRepository()
 }
@@ -45,6 +49,13 @@ private enum UploadPostItemUseCaseKey: DependencyKey {
         communityRepository: CommunityRepositoryKey.liveValue
       )
 }
+
+private enum FetchPostDetailItemUseCaseKey: DependencyKey {
+    static let liveValue: FetchPostDetailItemUseCaseProtocol = FetchPostDetailItemUseCase(
+        communityRepository: CommunityRepositoryKey.liveValue
+    )
+}
+
 
 private enum FetchPostAllItemListUseCaseKey: DependencyKey {
     static let liveValue: FetchPostAllItemUseCaseProtocol = FetchPostAllItemUseCase(
@@ -81,6 +92,12 @@ private enum FetchMyPostWrittenItemUseCaseKey: DependencyKey {
     }
 }
 
+private enum FetchReportReasonItemUseCaseKey: DependencyKey {
+    static var liveValue: FetchReportReasonItemUseCaseProtocol {
+        FetchReportReasonItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+    }
+}
+
 
 private enum FetchCategoryItemUseCaseKey: DependencyKey {
   static let liveValue: FetchCategoryItemUseCaseProtocol =
@@ -96,8 +113,110 @@ private enum FetchCategoryDetailItemUseCaseKey: DependencyKey {
     )
 }
 
+private enum UpdateCommentNotificationUseCaseKey: DependencyKey {
+    static let liveValue: UpdateCommentNotificationUseCaseProtocol = UpdateCommentNotificationUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum CreatePostCommentUseCaseKey: DependencyKey {
+    static let liveValue: CreatePostCommentUseCaseProtocol = CreatePostCommentUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum FetchCommentItemUseCaseKey: DependencyKey {
+    static let liveValue: FetchCommentItemUseCaseProtocol = FetchCommentItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum UpdatePostReportUseCaseKey: DependencyKey {
+    static let liveValue: UpdatePostReportUseCaseProtocol = UpdatePostReportUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum UpdatePostBlockUseCaseKey: DependencyKey {
+    static let liveValue: UpdatePostBlockUseCaseProtocol = UpdatePostBlockUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum UpdateCommentLikeUseCaseKey: DependencyKey {
+    static let liveValue: UpdateCommentLikeUseCaseProtocol = UpdateCommentLikeUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum UpdateCommentReportUseCaseKey: DependencyKey {
+    static let liveValue: UpdateCommentReportUseCaseProtocol = UpdateCommentReportUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum DeletePostItemUseCaseKey: DependencyKey {
+    static let liveValue: DeletePostItemUseCaseProtocol = DeletePostItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum DeleteCommentUseCaseKey: DependencyKey {
+    static let liveValue: DeleteCommentUseCaseProtocol = DeleteCommentUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
+private enum EditPostItemUseCaseKey: DependencyKey {
+    static let liveValue: EditPostItemUseCaseProtocol = EditPostItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
 
 public extension DependencyValues {
+    
+    var fetchReportReasonItemUseCase: FetchReportReasonItemUseCaseProtocol {
+        get { self[FetchReportReasonItemUseCaseKey.self] }
+        set { self[FetchReportReasonItemUseCaseKey.self] = newValue }
+    }
+    
+    var deletePostItemUseCase: DeletePostItemUseCaseProtocol {
+        get { self[DeletePostItemUseCaseKey.self]}
+        set { self[DeletePostItemUseCaseKey.self] = newValue}
+    }
+    
+    var deleteCommentUseCase: DeleteCommentUseCaseProtocol {
+        get { self[DeleteCommentUseCaseKey.self]}
+        set { self[DeleteCommentUseCaseKey.self] = newValue}
+    }
+    
+    var editPostItemUseCase: EditPostItemUseCaseProtocol {
+        get { self[EditPostItemUseCaseKey.self]}
+        set { self[EditPostItemUseCaseKey.self] = newValue}
+    }
+    
+    var updateCommentReportUseCase: UpdateCommentReportUseCaseProtocol {
+        get { self[UpdateCommentReportUseCaseKey.self]}
+        set { self[UpdateCommentReportUseCaseKey.self] = newValue}
+    }
+    
+    var updateCommentLikeUseCase: UpdateCommentLikeUseCaseProtocol {
+        get { self[UpdateCommentLikeUseCaseKey.self]}
+        set { self[UpdateCommentLikeUseCaseKey.self] = newValue}
+    }
+    
+    var updatePostBlockUseCase: UpdatePostBlockUseCaseProtocol {
+        get { self[UpdatePostBlockUseCaseKey.self]}
+        set { self[UpdatePostBlockUseCaseKey.self] = newValue}
+    }
+    
+    var updatePostReportUseCase: UpdatePostReportUseCaseProtocol {
+        get { self[UpdatePostReportUseCaseKey.self]}
+        set { self[UpdatePostReportUseCaseKey.self] = newValue}
+    }
+    
+    var fetchCommentItemUseCase: FetchCommentItemUseCaseProtocol {
+        get { self[FetchCommentItemUseCaseKey.self]}
+        set { self[FetchCommentItemUseCaseKey.self] = newValue}
+    }
+    
+    var createPostCommentUseCase: CreatePostCommentUseCaseProtocol {
+        get { self[CreatePostCommentUseCaseKey.self]}
+        set { self[CreatePostCommentUseCaseKey.self] = newValue}
+    }
+    
+    var updateCommentNotificationUseCase: UpdateCommentNotificationUseCaseProtocol {
+        get { self[UpdateCommentNotificationUseCaseKey.self]}
+        set { self[UpdateCommentNotificationUseCaseKey.self] = newValue}
+    }
+    
+    
+    var fetchPostDetailItemUseCase: FetchPostDetailItemUseCaseProtocol {
+        get { self[FetchPostDetailItemUseCaseKey.self]}
+        set { self[FetchPostDetailItemUseCaseKey.self] = newValue}
+    }
+    
     var fetchMyPostWrittenItemUseCase: FetchMyPostWrittenItemUseCaseProtocol {
         get { self[FetchMyPostWrittenItemUseCaseKey.self] }
         set { self[FetchMyPostWrittenItemUseCaseKey.self] = newValue }
@@ -173,9 +292,21 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
     
     public init() {}
     
+    public func updateCommentNotification(_ postId: String) async throws -> Bool {
+        let endPoint = CommunityEndPoint.updateCommentNotification(postId)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        return response
+    }
+    
     public func fetchMyPostCommentItem() async throws -> PostListEntity {
         let endPoint = CommunityEndPoint.fetchMyCommnetPost
         let response: PostListResponseDTO = try await networkService.request(endPoint: endPoint)
+        return response.toDomain()
+    }
+    
+    public func fetchFeedDetailItem(postId: String) async throws -> PostItem {
+        let endPoint = CommunityEndPoint.fetchPostDetail(postId)
+        let response: PostItemDTO = try await networkService.request(endPoint: endPoint)
         return response.toDomain()
     }
     
@@ -192,6 +323,85 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
     }
     
     
+    public func updateCommentReport(_ commentId: String, body: ReportReasonRequest) async throws -> Bool {
+        var requestItemDTO: [CreateReportReasonRequesItemtDTO] = []
+        body.reportReasonRequests.forEach { body in
+            requestItemDTO.append(CreateReportReasonRequesItemtDTO(reportReasonId: body.reportReasonId, customReason: body.customReason))
+        }
+        print("네 값을. 확인합니다 : \(requestItemDTO)")
+        let endPoint = CommunityEndPoint.createCommentReport(commentId: commentId, body: requestItemDTO)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        return response
+    }
+    
+    public func deleteComment(_ commentId: Int) async throws -> Bool {
+        let endPoint = CommunityEndPoint.deleteComment(commentId)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        return response
+    }
+    
+    public func fetchReportItem() async throws -> [ReportReason] {
+        let endPoint = CommunityEndPoint.fetchReportItem
+        let response: [FetchReportResponseDTO] = try await networkService.request(endPoint: endPoint)
+        return response.map { $0.toDomain() }
+    }
+    
+    public func editPostItem(_ postId: Int, body: UploadPostItemRequest) async throws -> Bool {
+        
+        let body = UploadPostRequestDTO(categoryId: body.categoryId, title: body.title, description: body.description, imagesRequest: body.imagesRequest)
+        print("수정된 게시글 리스트 입니다 : \(body)")
+        let endPoint = CommunityEndPoint.editPostItem(postId: postId, body: body)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        print("게시글 수정 했음? : \(response)")
+        return response
+    }
+    
+    public func deletePostItem(_ postId: Int) async throws -> Bool {
+        let endPoint = CommunityEndPoint.deletePostItem(postId)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        return response
+    }
+    
+    public func updateCommentLike(_ commentId: String) async throws -> Bool {
+        let endPoint = CommunityEndPoint.createCommentLike(commentId)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        return response
+    }
+    
+    public func updatePostReport(_ postId: String, body: ReportReasonRequest) async throws -> Bool {
+        var requestItemDTO: [CreateReportReasonRequesItemtDTO] = []
+        body.reportReasonRequests.forEach { body in
+            requestItemDTO.append(CreateReportReasonRequesItemtDTO(reportReasonId: body.reportReasonId, customReason: body.customReason))
+        }
+        let body = CreateReportReasonRequestDTO(reportReasonRequests: requestItemDTO)
+        
+        let endPoint = CommunityEndPoint.updatePostReport(postId: postId, body: body)
+        print("이건 뭐지 : \(endPoint)")
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        return response
+    }
+    
+    public func updatePostBlock(_ postId: String) async throws -> Bool {
+        let endPoint = CommunityEndPoint.updatePostBlock(postId)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        return response
+    }
+    
+    public func fetchCommentItem(_ query: FetchCommentRequestQuery) async throws -> [CommentEntity] {
+        let query = FetchCommentRequestDTO(postId: query.postId)
+        let endPoint = CommunityEndPoint.fetchComment(query)
+        let response: [CommentDTO] = try await networkService.request(endPoint: endPoint)
+        return response.map { $0.toDomain() }
+    }
+    
+    public func createPostComment(_ body: CommunityDomain.CreatePostCommentRequest) async throws -> Bool {
+        let body = CreatePostCommentRequestDTO(postId: body.postId, content: body.content)
+        let endPoint = CommunityEndPoint.createComment(body)
+        let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
+        
+        return response
+    }
+    
     public func fetchSearchPostItems(query: FetchPostSearchKeywordQuery) async throws -> PostListEntity {
         let query = FetchPostSearchKeywordRequestDTO(keyword: query.keyword)
         let endPoint = CommunityEndPoint.fetchSearchPost(query)
@@ -202,14 +412,12 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
     public func updatePostLike(_ postId: Int) async throws -> Bool {
         let endPoint = CommunityEndPoint.updatePostLike("\(postId)")
         let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
-        print("성공 확인합니다2 : \(response)")
         return response
     }
     
     public func updatePostScrap(_ postId: Int) async throws -> Bool {
         let endPoint = CommunityEndPoint.updatePostScrap("\(postId)")
         let response = try await networkService.requestEmptyResponse(endPoint: endPoint)
-        print("성공 확인합니다 : \(response)")
         return response
     }
     
@@ -254,6 +462,7 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
         let endPoint = CommunityEndPoint.uploadPostImage(presingedURL)
         do {
             _ = try await networkService.upload(endPoint: endPoint, binaryData: image)
+            print("수정하는 이미지 들입니다 : \(presingedURL)")
             return true
         } catch {
             print("🛑 uploadPostImage failed:", error)
@@ -263,12 +472,7 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
     
     public func uploadPostItem(body: UploadPostItemRequest) async throws -> Bool {
         
-        let imagesRequestDTO: [UploadPostImageRequestDTO] = body.imagesRequest.map { image in
-            UploadPostImageRequestDTO(
-                url: image.url
-            )
-        }
-        let requestDTO = UploadPostRequestDTO(categoryId: body.categoryId, title: body.title, description: body.description, imagesRequest: imagesRequestDTO)
+        let requestDTO = UploadPostRequestDTO(categoryId: body.categoryId, title: body.title, description: body.description, imagesRequest: body.imagesRequest)
         
         let endPoint = CommunityEndPoint.uploadPost(requestDTO)
         print("서버 요청 보내는 값 확인 합니다 \(endPoint)")

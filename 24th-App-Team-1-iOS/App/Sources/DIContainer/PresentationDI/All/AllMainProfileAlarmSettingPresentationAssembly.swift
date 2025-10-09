@@ -17,10 +17,14 @@ struct AllMainProfileAlarmSettingPresentationAssembly: Assembly {
         container.register(ProfileAlarmSettingViewReactor.self) { resolver in
             let fetchUserAlarmUseCase = resolver.resolve(FetchUserAlarmSettingUseCaseProtocol.self)!
             let updateUserAlarmUseCase = resolver.resolve(UpdateUserAlarmSettingUseCaseProtocol.self)!
+            let updatePostAlarmUseCase = resolver.resolve(UpdatePostAlarmUseCaseProtocol.self)!
+            
+            
             
             return ProfileAlarmSettingViewReactor(
                 fetchUserAlarmUseCase: fetchUserAlarmUseCase,
-                updateUserAlarmUseCase: updateUserAlarmUseCase
+                updateUserAlarmUseCase: updateUserAlarmUseCase,
+                updatePostAlarmUseCase: updatePostAlarmUseCase
             )
         }
         

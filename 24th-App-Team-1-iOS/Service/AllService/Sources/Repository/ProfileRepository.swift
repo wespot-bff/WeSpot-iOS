@@ -30,6 +30,18 @@ public final class ProfileRepository: ProfileRepositoryProtocol {
             .asSingle()
     }
     
+    public func updatePostAlarmItems(body: UpdatePostAlarmRequest) -> Single<Bool> {
+        let body = UpdatePostAlarmRequestDTO(isEnablePostNotification: body.isEnablePostNotification)
+        let endPoint = ProfileEndPoint.updatePostNotification(body)
+        
+        return networkService.request(endPoint: endPoint)
+            .asObservable()
+            .map { _ in true }
+            .catchAndReturn(false)
+            .logErrorIfDetected(category: Network.error)
+            .asSingle()
+    }
+    
     public func updateUserAlarmItem(body: UpdateUserProfileAlarmRequest) -> RxSwift.Single<Bool> {
         let body = UpdateUserProfileAlarmRequestDTO(
             isEnableVoteNotification: body.isEnableVoteNotification,

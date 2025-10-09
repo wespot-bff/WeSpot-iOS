@@ -18,9 +18,16 @@ public class KeychainManager {
     public enum keychainType: String {
         case accessToken
         case refreshToken
+        case isFeedWrite
     }
     
     private init() {}
+    
+    @discardableResult
+    public func set(value: Bool, type: keychainType) -> Bool {
+        return keychain.set(value, forKey: type.rawValue)
+    }
+    
     
     // 데이터 저장하기
     @discardableResult
@@ -31,6 +38,10 @@ public class KeychainManager {
     // 데이터 불러오기
     public func get(type: keychainType) -> String? {
         return keychain.get(type.rawValue)
+    }
+    
+    public func getBool(type: keychainType) -> Bool {
+        return keychain.getBool(type.rawValue) ?? false
     }
     
     // 데이터 삭제

@@ -16,6 +16,14 @@ private struct SizePreferenceKey: PreferenceKey {
 }
 
 public extension View {
+    func eraseToAnyView() -> AnyView {
+        AnyView(self)
+    }
+    
+    func keyboardAware() -> some View {
+        self.modifier(KeyboardAwareModifier())
+    }
+    
     func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
         background(
             GeometryReader { proxy in
@@ -32,3 +40,5 @@ public extension View {
         )
     }
 }
+
+

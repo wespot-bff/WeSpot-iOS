@@ -13,7 +13,8 @@ let commonDomain = Project.makeProject(
     targets: [
         .domain(module: .CommonDomain, dependencies: [
             .shared(module: .ThirdPartyLib),
-            .core(module: .Storage)
+            .core(module: .Storage),
+            .core(module: .Extensions)
         ], product: .staticFramework)
     ]
 )

@@ -14,6 +14,7 @@ import ReactorKit
 public final class ProfileAlarmSettingViewReactor: Reactor {
     
     private let fetchUserAlarmUseCase: FetchUserAlarmSettingUseCaseProtocol
+    private let updatePostAlarmUseCase: UpdatePostAlarmUseCaseProtocol
     private let updateUserAlarmUseCase: UpdateUserAlarmSettingUseCaseProtocol
     private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     
@@ -43,10 +44,12 @@ public final class ProfileAlarmSettingViewReactor: Reactor {
     
     public init(
         fetchUserAlarmUseCase: FetchUserAlarmSettingUseCaseProtocol,
-        updateUserAlarmUseCase: UpdateUserAlarmSettingUseCaseProtocol
+        updateUserAlarmUseCase: UpdateUserAlarmSettingUseCaseProtocol,
+        updatePostAlarmUseCase: UpdatePostAlarmUseCaseProtocol
     ) {
         self.fetchUserAlarmUseCase = fetchUserAlarmUseCase
         self.updateUserAlarmUseCase = updateUserAlarmUseCase
+        self.updatePostAlarmUseCase = updatePostAlarmUseCase
         self.initialState = State(
             isLoading: false,
             isUpdate: false
@@ -124,7 +127,18 @@ public final class ProfileAlarmSettingViewReactor: Reactor {
         case let .didChangeMessageStatus(isOn):
             return .empty()
         case let .didChangeCommunityStatus(isOn):
-            return .empty()
+            let body = UpdatePostAlarmRequest(isEnablePostNotification: isOn)
+            
+            return updatePostAlarmUseCase
+                .execute(body: body)
+                .asObservable()
+                .flatMap { isUpdate -> Observable<Mutation> in
+                    return .concat(
+                        .just(.setLoading(false)),
+                        .just(.setUpdateAlarm(isUpdate)),
+                        .just(.setLoading(true))
+                    )
+                }
         }
     }
     

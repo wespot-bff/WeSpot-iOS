@@ -20,7 +20,20 @@ public protocol CommunityRepositoryProtocol {
     func fetchPostImagePresignedURL(query: CreatePostImagePresignedURLQuery) async throws -> CreatePostImagePresignedURLEntity
     func fetchPostDetailItems(query: FetchPostDetailItemRequestQuery) async throws -> PostListEntity
     func fetchPostAllItems(query: FetchPostAllItemRequestQuery) async throws -> PostListEntity
+    func fetchFeedDetailItem(postId: String) async throws -> PostItem
+    
+    func updateCommentNotification(_ postId: String) async throws -> Bool
     func uploadPostImages(_ image: Data, presingedURL: String) async throws -> Bool
     func updatePostLike(_ postId: Int) async throws -> Bool
     func updatePostScrap(_ postId: Int) async throws -> Bool
+    func updateCommentReport(_ commentId: String, body: ReportReasonRequest) async throws -> Bool
+    func updateCommentLike(_ commentId: String) async throws -> Bool
+    func updatePostReport(_ postId: String, body: ReportReasonRequest) async throws -> Bool
+    func updatePostBlock(_ postId: String) async throws -> Bool
+    func fetchCommentItem(_ query: FetchCommentRequestQuery) async throws -> [CommentEntity]
+    func createPostComment(_ body: CreatePostCommentRequest) async throws -> Bool
+    func deleteComment(_ commentId: Int) async throws -> Bool
+    func deletePostItem(_ postId: Int)  async throws -> Bool
+    func editPostItem(_ postId: Int, body: UploadPostItemRequest) async throws -> Bool
+    func fetchReportItem()  async throws -> [ReportReason]
 }

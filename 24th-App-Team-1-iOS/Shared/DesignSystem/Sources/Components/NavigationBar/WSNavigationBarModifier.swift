@@ -37,17 +37,17 @@ public extension View {
 
 public struct WSNavigationBarModifier<LeftView: View,
                                TitleView: View,
-                               RightView: View>: ViewModifier {
-
+                                      RightView: View>: ViewModifier {
+    
     private let left: (() -> LeftView)?
     private let title: (() -> TitleView)?
     private let backgound: Color
     private let right: (() -> RightView)?
     
     public init(left: (() -> LeftView)? = nil,
-         title: (() -> TitleView)? = nil,
-         right: (() -> RightView)? = nil,
-         background: Color? = nil
+                title: (() -> TitleView)? = nil,
+                right: (() -> RightView)? = nil,
+                background: Color? = nil
     ) {
         self.left  = left
         self.title = title
@@ -56,44 +56,58 @@ public struct WSNavigationBarModifier<LeftView: View,
     }
     
     public func body(content: Content) -> some View {
+        let statusBar = UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0
+        
         ZStack(alignment: .top) {
             content
-                .edgesIgnoringSafeArea(.top)
             
-            let statusBar = UIApplication
-                            .shared
-                            .windows
-                            .first?
-                            .safeAreaInsets.top ?? 0
-        
-                HStack(spacing: 0) {
-                    if let left = left {
-                        left()
-                            .frame(width: 44, height: 44)
-                    } else {
-                        Spacer().frame(width: 44)
-                    }
-                    
-                    Spacer()
-                    
+            VStack(spacing: 0) {
+                Spacer().frame(height: statusBar)
+                
+                ZStack {
                     if let title = title {
                         title()
+                            .lineLimit(1)
+                            .frame(height: 44)
+                            .frame(maxWidth: .infinity)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 64)
                     }
                     
-                    Spacer()
-                    
-                    if let right = right {
-                        right()
-                            .frame(height: 44)
-                    } else {
-                        Spacer().frame(width: 44)
+                    HStack(spacing: 0) {
+                        if let left = left {
+                            HStack(spacing: 0) {
+                                left()
+                                    .frame(height: 44)
+                                Spacer()
+                            }
+                            .frame(minWidth: 44)
+                            .padding(.leading, 20)
+                        } else {
+                            Spacer()
+                                .frame(width: 20)
+                        }
+                        
+                        Spacer()
+                        
+                        if let right = right {
+                            HStack(spacing: 0) {
+                                Spacer()
+                                right()
+                                    .frame(height: 44)
+                            }
+                            .frame(minWidth: 44)
+                            .padding(.trailing, 20)
+                        } else {
+                            Spacer()
+                                .frame(width: 20)
+                        }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, statusBar + 8 + 44 + 12)
-                .frame(height: 60)
-                .edgesIgnoringSafeArea(.top)
-                .background(backgound)
+                .frame(height: 44)
+            }
+            .background(backgound)
         }
+        .ignoresSafeArea(edges: .top)
     }
 }

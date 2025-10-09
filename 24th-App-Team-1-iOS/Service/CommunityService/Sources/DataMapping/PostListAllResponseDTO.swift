@@ -153,6 +153,17 @@ struct ColorValueDTO: Decodable {
 }
 
 
+public struct PostDetailResponseDTO: Decodable {
+    let data: PostElementDTO
+}
+
+
+extension PostDetailResponseDTO {
+    func toDomain() -> PostListElement {
+        return data.toDomain()
+    }
+}
+
 
 extension PostElementDTO {
     func toDomain() -> PostListElement {

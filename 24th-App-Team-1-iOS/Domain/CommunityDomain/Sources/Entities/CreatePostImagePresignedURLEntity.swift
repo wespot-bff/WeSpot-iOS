@@ -9,10 +9,10 @@ import Foundation
 
 public struct CreatePostImagePresignedURLEntity: Equatable {
     public let presignedURL: String
-    public let imageURL: String
+    public let imageName: String
     
-    public init(presignedURL: String, imageURL: String) {
+    public init(presignedURL: String, imageName: String) {
         self.presignedURL = presignedURL
-        self.imageURL = imageURL
+        self.imageName = imageName
     }
 }

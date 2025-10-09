@@ -109,6 +109,12 @@ public final class ProfileAlarmSettingViewController: BaseViewController<Profile
             .bind(to: loadingIndicatorView.rx.isHidden)
             .disposed(by: disposeBag)
         
+        communityAlarmSettingView.toggleSwitch
+            .rx.isOn.changed
+            .map { Reactor.Action.didChangeCommunityStatus($0)}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         sentAlarmSettingView.toggleSwitch
             .rx.isOn.changed
             .map { Reactor.Action.didChangeVoteStatus($0) }

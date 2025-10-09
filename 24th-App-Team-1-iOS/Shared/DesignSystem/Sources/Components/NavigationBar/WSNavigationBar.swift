@@ -85,7 +85,7 @@ public final class WSNavigationBar: UIView {
         }
         
         // 네비게이션 타이틀 설정
-        navigationTitleLabel.text = property.items.centerItem
+        navigationTitleLabel.text = property.items.centerItem == nil ? property.items.rightTextItem : property.items.centerItem
         navigationTitleLabel.textColor = DesignSystemAsset.Colors.gray100.color
         
         return self
@@ -108,6 +108,7 @@ public final class WSNavigationBar: UIView {
         
         navigationTitleLabel.snp.makeConstraints {
             $0.center.equalToSuperview()
+            $0.height.equalTo(27)
         }
         
         // 오른쪽 버튼들의 제약조건을 초기화 (동적 변경을 위함)
