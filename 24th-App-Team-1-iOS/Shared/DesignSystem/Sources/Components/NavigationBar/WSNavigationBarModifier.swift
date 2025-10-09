@@ -71,25 +71,38 @@ public struct WSNavigationBarModifier<LeftView: View,
                             .frame(height: 44)
                             .frame(maxWidth: .infinity)
                             .multilineTextAlignment(.center)
+                            .padding(.horizontal, 64)
                     }
+                    
                     HStack(spacing: 0) {
                         if let left = left {
-                            left()
-                                .frame(width: 44, height: 44)
+                            HStack(spacing: 0) {
+                                left()
+                                    .frame(height: 44)
+                                Spacer()
+                            }
+                            .frame(minWidth: 44)
+                            .padding(.leading, 20)
                         } else {
-                            Spacer().frame(width: 44)
+                            Spacer()
+                                .frame(width: 20)
                         }
                         
                         Spacer()
                         
                         if let right = right {
-                            right()
-                                .frame(height: 44)
+                            HStack(spacing: 0) {
+                                Spacer()
+                                right()
+                                    .frame(height: 44)
+                            }
+                            .frame(minWidth: 44)
+                            .padding(.trailing, 20)
                         } else {
-                            Spacer().frame(width: 44)
+                            Spacer()
+                                .frame(width: 20)
                         }
                     }
-                    .padding(.horizontal, 20)
                 }
                 .frame(height: 44)
             }

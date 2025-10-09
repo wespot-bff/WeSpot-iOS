@@ -12,7 +12,7 @@ typealias WSTabbarConstraint = Const
 
 
 enum Const {
-    static let tabarHeight: CGFloat = Device.isTouchIDCapableDevice ? 80 : 98
+    static let tabarHeight: CGFloat = Device.isTouchIDCapableDevice ? 80 : 80
     static let tabbarButtonSize: CGFloat = Device.isTouchIDCapableDevice ? 32 : 30
     static let tabbarButtonSpacing: CGFloat = Device.isTouchIDCapableDevice ? 60 : 30
 }

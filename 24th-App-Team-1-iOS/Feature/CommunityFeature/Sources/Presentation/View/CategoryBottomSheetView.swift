@@ -50,7 +50,7 @@ struct CategoryBottomSheetView: View {
             ForEach(sections, id: \.title) { section in
                 VStack(alignment: .leading, spacing: 12) {
                     Text(section.title)
-                        .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                        .font(DesignSystemFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
                     
                     

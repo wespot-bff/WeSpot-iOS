@@ -1,15 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "icn.svg",
+      "filename" : "ic_post_right_arrow.svg",
       "idiom" : "universal"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "preserves-vector-representation" : true
   }
 }

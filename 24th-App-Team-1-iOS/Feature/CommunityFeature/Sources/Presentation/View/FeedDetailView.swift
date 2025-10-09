@@ -116,7 +116,7 @@ struct FeedDetailView: View {
                                 
                                 Divider()
                                     .frame(height: 8)
-                                    .background(DesignSystemAsset.Colors.gray500.swiftUIColor)
+                                    .background(DesignSystemAsset.Colors.gray700.swiftUIColor)
                                     .padding(.horizontal, -16)
                                     .padding(.vertical, 16)
                                 
@@ -304,7 +304,7 @@ struct FeedDetailView: View {
             Button {
                 presentationMode.wrappedValue.dismiss()
             } label: {
-                DesignSystemAsset.Images.icCommunityLeftArrowFiled.swiftUIImage
+                DesignSystemAsset.Images.arrow.swiftUIImage
             }
         }, title: {
             HStack(spacing: 5) {
@@ -354,7 +354,7 @@ struct FeedDetailView: View {
                            height: CGFloat(content.header.profileImageHeight))
                     .clipShape(Circle())
                     
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(content.header.nickname.text)
                             .foregroundColor(.token(content.header.nickname.color))
                             .font(.typography(content.header.nickname.typography))
@@ -403,7 +403,7 @@ struct FeedDetailView: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(
-            RoundedRectangle(cornerRadius: 6)
+            RoundedRectangle(cornerRadius: 8)
                 .fill(Color.gray.opacity(0.2))
                 .frame(width: 82, height: 30)
                 .onTapGesture {
@@ -416,13 +416,13 @@ struct FeedDetailView: View {
     private func contentView(postEntity: PostItem) -> some View {
         if let content = postEntity.content {
             VStack(alignment: .leading, spacing: 12) {
+                let _ = print("본문 텍스트 폰트 확인합니다 \(content.info.title?.typography)")
                 if let title = content.info.title {
                     Text(title.text)
                         .foregroundColor(.token(title.color))
                         .font(.typography(title.typography))
                         .lineLimit(title.maxLine)
                 }
-                let _ = print("텍스트 값 확인합니다 \(content.info.description)")
                 
                 Text(content.info.description.text)
                     .foregroundColor(.token(content.info.description.color))
@@ -481,7 +481,7 @@ struct FeedDetailView: View {
     @ViewBuilder
     private func footerView(postEntity: PostItem) -> some View {
         if let content = postEntity.content {
-            HStack {
+            HStack(spacing: 10) {
                 ForEach(Array(content.footer.reactions.enumerated()), id: \.offset) { index, reaction in
                     let reaction = content.footer.reactions[index]
                     Button {

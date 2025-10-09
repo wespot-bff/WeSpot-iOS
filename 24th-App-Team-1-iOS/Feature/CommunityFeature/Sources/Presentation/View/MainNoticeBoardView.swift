@@ -39,8 +39,7 @@ public struct MainNoticeBoardView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 0) {
                             Color.clear
-                                .frame(height: navBarHeight)
-                            
+                                .frame(height: navBarHeight - 10)
                             CategorySelectorWithDropdown(
                                 chips: viewStore.filterChips, selected: viewStore.selectedChip) { chip in
                                     viewStore.send(.view(.didSelectChip(chip)))
@@ -48,9 +47,8 @@ public struct MainNoticeBoardView: View {
                                     viewStore.send(.view(.didTappedCategoryButton))
                                 }
                                 .padding(.horizontal, 20)
-                                .padding(.bottom, 16)
                             
-                            LazyVStack(alignment: .leading, spacing: 16) {
+                            LazyVStack(alignment: .leading, spacing: 0) {
                                 if let list = viewStore.postListItems {
                                     ForEach(list.items, id: \.id) { element in
                                         switch element {
@@ -81,8 +79,10 @@ public struct MainNoticeBoardView: View {
                                         case .vote(let vote):
                                             VoteBannerView(voteEntity: vote)
                                                 .padding(.horizontal, 20)
+                                                .padding(.top, 24)
                                         case .hotPost(let hotpost):
                                             HotPostBannerView(hotPostEntity: hotpost)
+                                                .padding(.top, 24)
                                         }
                                     }
                                 }
@@ -105,8 +105,8 @@ public struct MainNoticeBoardView: View {
                                 DesignSystemAsset.Images.icCommunityPencilFiled.swiftUIImage
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 30, height: 30)
-                                    .padding(18)
+                                    .padding(.horizontal, 15)
+                                    .padding(.vertical, 13)
                                     .background(
                                         Circle()
                                             .fill(DesignSystemAsset.Colors.primary300.swiftUIColor)
@@ -114,7 +114,8 @@ public struct MainNoticeBoardView: View {
                                     .shadow(color: Color.black.opacity(0.2),
                                             radius: 4, x: 0, y: 5)
                             }
-                            .padding(.bottom, 40)
+                            .frame(width: 50, height: 50)
+                            .padding(.bottom, 24)
                             .padding(.trailing, 24)
                         }
                     }
@@ -231,7 +232,7 @@ struct CategorySelectorWithDropdown: View {
         ZStack {
             CategorySelectorView(chips: chips, selected: selected, onSelect: onSelect)
                 .padding(.trailing, 60)
-            
+                .frame(height: 43)
             HStack {
                 Spacer()
                 ZStack {
@@ -239,7 +240,8 @@ struct CategorySelectorWithDropdown: View {
                         .fill(
                             LinearGradient(
                                 gradient: Gradient(stops: [
-                                    .init(color: Color(hex: "1B1C1E").opacity(1.0), location: 0.0),
+                                    .init(color: Color(hex: "1B1C1E"), location: 0.0),
+                                    .init(color: Color(hex: "1B1C1E"), location: 0.24),
                                     .init(color: Color(hex: "1B1C1E").opacity(0.73), location: 0.73),
                                     .init(color: Color(hex: "1B1C1E").opacity(0.0), location: 1.0)
                                 ]),
@@ -247,7 +249,7 @@ struct CategorySelectorWithDropdown: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: 78, height: 43)
+                        .frame(width: 80, height: 43)
                     
                     Button {
                         onDropdownTap()
@@ -262,7 +264,7 @@ struct CategorySelectorWithDropdown: View {
                 }
             }
         }
-        .frame(height: 52)
+        .frame(height: 43)
     }
 }
 
@@ -284,8 +286,8 @@ private struct CategorySelectorView: View {
                         Text(chip.text)
                             .font(.typography(chip.typography))
                             .foregroundColor(foregroundColor)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 5)
                             .background(
                                 Capsule()
                                     .fill(backgroundColor)
@@ -499,32 +501,19 @@ struct PostView: View {
                 .frame(width: CGFloat(content.header.profileImageWidth),
                        height: CGFloat(content.header.profileImageHeight))
                 .clipShape(Circle())
+                let _ = print("프로필 이미지 값 \(content.header.profileImageWidth)")
                 
                 VStack(alignment: .leading, spacing: 4) {
                     if let category = content.header.category {
                         
-                        
-                        HStack(spacing: 4) {
+                        let _ = print("카테고리 아이콘 이미지 : \(category.iconURL)")
+                        HStack(spacing: 0) {
                             Text(category.text)
                                 .font(.typography(category.typography))
                                 .foregroundColor(.token(category.textColor))
-                            AsyncImage(url: URL(string: category.iconURL)) { state in
-                                switch state {
-                                case .empty:
-                                    ProgressView()
-                                        .frame(width: 16, height: 16)
-                                case .success(let image):
-                                    image
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .scaledToFit()
-                                case .failure(_):
-                                    EmptyView()
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
-                            .frame(width: 16, height: 16)
+                            
+                            DesignSystemAsset.Images.icPostRightArrow.swiftUIImage
+                                .frame(width: 16, height: 16)
                             .foregroundColor(.token(category.iconColor))
                         }
                     }
@@ -538,13 +527,11 @@ struct PostView: View {
                             .foregroundColor(.token(content.header.createdAt.color))
                     }
                 }
-                
-                Spacer()
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                                
                 if let contentTitle = content.info.title {
+                    let _ = print("데이터 확인합니다 : \(contentTitle.typography)")
                     Text(contentTitle.text)
                         .font(.typography(contentTitle.typography))
                         .foregroundColor(.token(contentTitle.color))
@@ -552,14 +539,13 @@ struct PostView: View {
                         .frame(maxWidth: .infinity, maxHeight: 21, alignment: .leading)
                 }
                 
-                
+                let _ = print("데이터 확인합니다 : \(content.info.description.typography)")
                 Text(content.info.description.text)
                     .font(.typography(content.info.description.typography))
                     .foregroundColor(.token(content.info.description.color))
                     .lineLimit(5)
                     .frame(maxWidth: .infinity, maxHeight: 120, alignment: .leading)
             }
-            .padding(.top, 12)
             
             if content.info.seeMore.maxLine >= 5 {
                 Button(content.info.seeMore.text) {
@@ -636,7 +622,7 @@ struct PostView: View {
             }
             
             
-            HStack(spacing: 24) {
+            HStack(spacing: 12) {
                 ForEach(content.footer.reactions, id: \.type) { reaction in
                     Button {
                         switch reaction.type {
@@ -656,16 +642,18 @@ struct PostView: View {
                                         .renderingMode(.template)
                                         .resizable()
                                         .scaledToFit()
-                                        .foregroundColor(reaction.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor : Color(hex: reaction.iconColor))
+                                        .foregroundColor(reaction.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor : .token(reaction.iconColor))
                                 @unknown default:
                                     EmptyView()
                                 }
                             }
                             .frame(width: 14, height: 14)
                             
-                            Text(reaction.count.text)
-                                .font(.typography(reaction.count.typography))
-                                .foregroundColor(.token(reaction.count.color))
+                            if reaction.count.text != "0" {
+                                Text(reaction.count.text)
+                                    .font(.typography(reaction.count.typography))
+                                    .foregroundColor(.token(reaction.count.color))
+                            }
                         }
                     }
                 }
@@ -684,7 +672,7 @@ struct PostView: View {
                                     .renderingMode(.template)
                                     .resizable()
                                     .scaledToFit()
-                                    .foregroundColor(content.footer.scrap.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  Color(hex: content.footer.scrap.iconColor))
+                                    .foregroundColor(content.footer.scrap.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  .token(content.footer.scrap.iconColor))
                             @unknown default: EmptyView()
                             }
                         }
@@ -700,10 +688,9 @@ struct PostView: View {
             
             Divider()
                 .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
-                .padding(.vertical, 4)
+                .padding(.vertical, 16)
             
         }
-        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     

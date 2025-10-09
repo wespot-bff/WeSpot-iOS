@@ -158,6 +158,7 @@ struct PostWriteView: View {
             )
             .presentationCornerRadius(25)
             .presentationDetents([.height(423)])
+            .ignoresSafeArea(.all)
         }
     }
     
@@ -200,13 +201,14 @@ struct PostWriteView: View {
     }
     
     private var imageSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("(선택) 사진 올리기")
                 .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
                 .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
             Text("사진은 3장까지 올릴 수 있어요")
                 .foregroundStyle(DesignSystemAsset.Colors.gray400.swiftUIColor)
                 .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                .padding(.bottom, 10)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
@@ -254,7 +256,7 @@ struct PostWriteView: View {
                                 DesignSystemAsset.Images.icCommunityXmarkWhiteFiled.swiftUIImage
                                     .frame(width: 28, height: 28)
                                     .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
-                                    .background(Circle().fill(Color.gray.opacity(0.6)))
+                                    .background(Circle().fill(Color.gray.opacity(0.8)))
                             }
                             .offset(x: 8, y: -8)
                         }
@@ -359,7 +361,7 @@ struct LimitedTextEditor: View {
                         .padding(.vertical, 12)
                 }
             }
-            .frame(height: 160)
+            .frame(height: 240)
             .padding(.bottom, 8)
         }
     }
