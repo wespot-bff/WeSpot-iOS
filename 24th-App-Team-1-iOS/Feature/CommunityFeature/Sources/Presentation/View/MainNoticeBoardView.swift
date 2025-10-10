@@ -211,6 +211,7 @@ public struct MainNoticeBoardView: View {
                 )
                 .presentationCornerRadius(25)
                 .presentationDetents([.height(423)])
+                .ignoresSafeArea(.all)
             }
             .navigationViewStyle(StackNavigationViewStyle())
         }
