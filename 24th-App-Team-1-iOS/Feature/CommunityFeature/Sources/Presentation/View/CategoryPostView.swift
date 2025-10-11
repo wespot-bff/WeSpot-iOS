@@ -75,6 +75,7 @@ struct CategoryPostView: View {
             )
             .presentationCornerRadius(25)
             .presentationDetents([.height(423)])
+            .ignoresSafeArea(.all)
         }
         
         .navigationBarHidden(true)
