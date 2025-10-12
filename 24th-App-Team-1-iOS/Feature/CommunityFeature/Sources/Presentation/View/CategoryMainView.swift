@@ -87,6 +87,7 @@ struct CategoryMainView: View {
                 )
                 .presentationCornerRadius(25)
                 .presentationDetents([.height(423)])
+                .ignoresSafeArea(.all)
             }
             .wsNavigationBar(left: {
                 Button {

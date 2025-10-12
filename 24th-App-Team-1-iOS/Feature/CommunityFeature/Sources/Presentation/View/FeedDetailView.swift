@@ -213,7 +213,6 @@ struct FeedDetailView: View {
             .keyboardAware()
             .sheet(isPresented: $showBottomSheet) {
                 VStack(spacing: 0) {
-
                     if viewStore.postEntity?.isMyPost == true {
                         Button {
                             showBottomSheet = false
@@ -223,8 +222,8 @@ struct FeedDetailView: View {
                                 .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
                                 .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .frame(maxWidth: .infinity, minHeight: 52)
-                                .padding(.top, 10)
                         }
+                        .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                         
                         Rectangle()
                             .fill(Color.white.opacity(0.2))
@@ -241,8 +240,8 @@ struct FeedDetailView: View {
                                 .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
                                 .frame(maxWidth: .infinity, minHeight: 52)
-                                .padding(.top, 10)
                         }
+                        .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                     } else {
                         Button {
                             showBottomSheet = false
@@ -255,8 +254,8 @@ struct FeedDetailView: View {
                                 .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
                                 .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .frame(maxWidth: .infinity, minHeight: 52)
-                                .padding(.top, 10)
                         }
+                        .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                         
                         Rectangle()
                             .fill(Color.white.opacity(0.2))
@@ -273,19 +272,17 @@ struct FeedDetailView: View {
                                 .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
                                 .frame(maxWidth: .infinity, minHeight: 52)
-                                .padding(.top, 10)
                         }
+                        .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                     }
-                    
-                    Rectangle()
-                        .fill(Color(hex: "#2B2B2B"))
-                        .frame(height: 34)
                 }
-                .background(Color(hex: "#2B2B2B"))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .frame(maxWidth: .infinity)
+                .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
                 .presentationDragIndicator(.visible)
                 .presentationDetents([.height(156)])
-                .presentationBackground(.clear)
+                .presentationBackground(DesignSystemAsset.Colors.gray600.swiftUIColor)
+                .presentationCornerRadius(25)
+                .interactiveDismissDisabled(false)
             }
         }
         .fullScreenCover(isPresented: $imageViewerStore.showImageViewer) {
@@ -939,6 +936,10 @@ struct CustomAlert: View {
 
     var body: some View {
         ZStack {
+            Color.black.opacity(0.6)
+                .ignoresSafeArea()
+            
+            
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
                     Text(title)
