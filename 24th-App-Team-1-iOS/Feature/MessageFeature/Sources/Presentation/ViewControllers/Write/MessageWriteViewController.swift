@@ -114,6 +114,7 @@ public final class MessageWriteViewController: BaseViewController<MessageWriteRe
                                                                "닫기",
                                                         UIImage()))
             $0.setNavigationBarAutoLayout(property: .leftWithRightItem)
+            $0.navigationTitleLabel.isHidden = true
         }
         postButton.do {
             $0.setupButton(text: "작성완료")

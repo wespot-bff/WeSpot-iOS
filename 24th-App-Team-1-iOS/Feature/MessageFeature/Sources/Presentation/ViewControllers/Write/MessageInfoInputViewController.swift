@@ -22,7 +22,7 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
     
     //MARK: - Properties
     
-    private let reciverLabel = WSLabel(wsFont: .Body01, text: "받는사람").then {
+    private let reciverLabel = WSLabel(wsFont: .Body03, text: "받는사람").then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
         $0.textAlignment = .left
     }
@@ -43,14 +43,14 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
         $0.spacing = 12
         $0.alignment = .fill
     }
-    private let contentLabel = WSLabel(wsFont: .Body01, text: "전달할 마음").then {
+    private let contentLabel = WSLabel(wsFont: .Body03, text: "전달할 내용").then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
         $0.textAlignment = .left
     }
     private let contentTextField = WSTextField(state: .default).then {
         $0.contentVerticalAlignment = .top
         $0.textAlignment = .left
-        $0.textColor = .white
+        $0.placeholderColor = DesignSystemAsset.Colors.gray100.color
         $0.isUserInteractionEnabled = false
         $0.snp.makeConstraints {
             $0.height.equalTo(170)
@@ -69,7 +69,7 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
         $0.axis = .vertical
         $0.alignment = .fill
     }
-    private let posterLabel = WSLabel(wsFont: .Body01, text: "보내는 사람").then {
+    private let posterLabel = WSLabel(wsFont: .Body03, text: "보내는 사람").then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
         $0.textAlignment = .left
     }
@@ -192,6 +192,7 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
                                                                "닫기",
                                                         UIImage()))
             $0.setNavigationBarAutoLayout(property: .leftWithRightItem)
+            $0.navigationTitleLabel.isHidden = true
         }
         postButton.do {
             $0.isEnabled = true
@@ -262,7 +263,6 @@ extension MessageInfoInputViewController {
         reactor.state
             .map {$0.profileImage}
             .bind(with: self) {  this, img in
-                print("보내는 사람 이미지 URL: \(img)")
                 this.posterImageView.image = img ?? DesignSystemAsset.Images.icDefaultProfile.image
             }
             .disposed(by: disposeBag)
@@ -272,7 +272,12 @@ extension MessageInfoInputViewController {
             .map {$0.selectedUser}
             .compactMap {$0}
             .bind(with: self) {  this, reciver in
-                this.reciverName.text = reciver.name + "|" + reciver.schoolName 
+                
+                if reciver.schoolName.isEmpty {
+                    this.reciverName.text = reciver.name
+                } else {
+                    this.reciverName.text = reciver.name + " | " + reciver.schoolName
+                }
                 this.reciverImageView.kf.setImage(with: URL(string: reciver.profile.iconUrl))
             }
             .disposed(by: disposeBag)

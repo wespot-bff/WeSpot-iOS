@@ -254,10 +254,8 @@ extension MessageReplyInfoViewController {
         reactor.state.map { $0.replyMessage }
             .bind(with: self) { this, info in
                 
-                // ✅ info가 nil이 아닌지 확인하고, nil이면 클로저를 빠져나갑니다.
                 guard let item = info else { return }
                 
-                // ✅ 이제부터 옵셔널이 아닌 'item'을 사용합니다.
                 this.posterName.text = item.senderProfile.name
                 this.posterImageView.kf.setImage(with: URL(string: item.senderProfile.iconUrl),
                                                    placeholder: DesignSystemAsset.Images.basicProfile.image)
@@ -268,7 +266,7 @@ extension MessageReplyInfoViewController {
                     this.reciverName.text = (item.receiverProfile.name) + " | " + (item.receiverProfile.schoolName)
                 }
                 
-                this.reciverImageView.kf.setImage(with: URL(string: item.receiverProfile.iconUrl ?? ""),
+                this.reciverImageView.kf.setImage(with: URL(string: item.receiverProfile.iconUrl),
                                                    placeholder: DesignSystemAsset.Images.basicProfile.image)
             }
             .disposed(by: disposeBag)
