@@ -139,7 +139,6 @@ extension MessageHomeViewController {
         checkUnReadMessageButton.rx
             .tap
             .bind(with: self) { this, _ in
-                
             }
             .disposed(by: disposeBag)
         

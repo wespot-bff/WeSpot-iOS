@@ -53,6 +53,7 @@ public final class MessageWriteReactor: Reactor {
         var replyMessage: MessageRoomEntity?
         @Pulse var meesageRoom: MessageRoomEntity?
         var detailMessage: MessageDetailEntity?
+        @Pulse var sendError: MessagePostError?
     }
     
     public enum Action {
@@ -81,7 +82,8 @@ public final class MessageWriteReactor: Reactor {
         case setLoading(Bool)
         case DetectProfanity(Bool)
         case setMessage(String)
-        case postMessage(Bool)
+        case postMessageSuccess
+        case postMessageFailure(MessagePostError)
         case setAnonymous(Bool)
         case setBottomSheet(AnonymousProfileStatusEnum)
         case setAnonymousProfile(name: String, imageUrl: String, image: UIImage,  isAnonymous: Bool)
@@ -235,8 +237,6 @@ extension MessageWriteReactor {
             newState.message = text
         case .DetectProfanity(let result):
             newState.profanityDetection = result
-        case .postMessage(let result):
-            newState.completeSendMessage = result
         case .setAnonymous(let value):
             newState.isAnonymous = value
         case .setBottomSheet(let status):
@@ -251,6 +251,13 @@ extension MessageWriteReactor {
             newState.completSetSenderProfile = completed
             newState.isReply = false
 
+        case .postMessageSuccess:
+            newState.completeSendMessage = true
+            newState.sendError = nil // 성공 시 에러 상태 초기화
+
+        case .postMessageFailure(let error):
+            newState.completeSendMessage = false
+            newState.sendError = error // 실패 시 에러 상태 저장
             
         case .setRoom(let room):
             newState.meesageRoom = room
@@ -277,12 +284,33 @@ extension MessageWriteReactor {
 extension MessageWriteReactor {
     
     private func sendMessage(content: String, receiverId: Int, senderName: String, senderImageURL: String, isAnonymous: Bool) -> Observable<Mutation> {
-        return writeMessageUseCase.sendMessage(content: content, receiverId: receiverId, senderName: senderName, senderImageURL: senderImageURL, isAnonymous: isAnonymous)
-            .asObservable()
-            .flatMap { result in
-                return Observable.just(Mutation.postMessage(result))
-            }
-    }
+           return writeMessageUseCase.sendMessage(
+               content: content,
+               receiverId: receiverId,
+               senderName: senderName,
+               senderImageURL: senderImageURL,
+               isAnonymous: isAnonymous
+           )
+           .asObservable()
+           .map { _ -> Mutation in
+               // 성공 시 .postMessageSuccess Mutation 방출
+               return .postMessageSuccess
+           }
+           .catch { error -> Observable<Mutation> in
+               // 실패 시 에러를 MessagePostError로 캐스팅하고
+               // .postMessageFailure Mutation 방출
+               if let domainError = error as? MessagePostError {
+                   return .just(.postMessageFailure(domainError))
+               } else {
+                   // 예상치 못한 에러 타입일 경우, 기본 에러 생성
+                   let unknownError = MessagePostError(
+                       errorDescription: "알 수 없는 오류가 발생했습니다.",
+                       errorView: .toast
+                   )
+                   return .just(.postMessageFailure(unknownError))
+               }
+           }
+       }
     
     private func writeMessage(message: String) -> Observable<Mutation> {
         let detectProfanity = writeMessageUseCase.checkProfanity(message: message)

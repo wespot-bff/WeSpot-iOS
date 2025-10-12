@@ -18,7 +18,8 @@ public final class MessageHomeViewReactor: Reactor {
     
     private let fetchMessagesStatusUseCase: FetchMessagesStatusUseCaseProtocol
     private let fetchReservedMessageUseCase: FetchReservedMessageUseCaseProtocol
-    
+    private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
+
     // MARK: - Timer Task (Swift Concurrency)
     
     private var timerTask: Task<Void, Never>?

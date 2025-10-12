@@ -23,6 +23,7 @@ public final class MessagePageViewController: UIPageViewController,
     private lazy var messageHomeViewController = DependencyContainer.shared.injector.resolve(MessageHomeViewController.self)
     private lazy var messageStorageViewController = DependencyContainer.shared.injector.resolve(MessageStorageViewController.self)
     public var disposeBag: DisposeBag = DisposeBag()
+    private let globalService: WSGlobalServiceProtocol = WSGlobalStateService.shared
     
     //MARK: - Initialize
     public init(reactor: Reactor) {
@@ -77,11 +78,11 @@ public final class MessagePageViewController: UIPageViewController,
         
         messageHomeViewController.checkUnreadButtonTap
             .bind(with: self) { owner, _ in
-                // 탭 이벤트가 발생하면, 두 번째 페이지(index: 1)로 이동하라는 액션을 reactor에 전달합니다.
-                // .updateViewController 액션은 이미 pageViewController(_:viewControllerAfter:)에서 사용하고 있으므로 재사용합니다.
+                owner.globalService.event.onNext(.toogleMessageType(.storage))
                 owner.reactor?.action.onNext(.updateViewController(1))
             }
             .disposed(by: disposeBag)
+        
     }
 }
 

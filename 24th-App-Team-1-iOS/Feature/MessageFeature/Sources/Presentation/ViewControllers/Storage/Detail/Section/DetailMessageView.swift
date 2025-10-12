@@ -7,6 +7,7 @@
 
 import UIKit
 import DesignSystem
+import MessageDomain
 
 final class DetailMessageView: UIView {
     private let messageStatusView = UIView().then {
@@ -28,8 +29,10 @@ final class DetailMessageView: UIView {
     private let backGroundView = UIImageView().then {
         $0.isUserInteractionEnabled = true
     }
-    func configureView(isSent: Bool, message: String) {
-        if !isSent {
+    func configureView(isSent: MessageDirection,
+                       message: String,
+                       canReply: Bool) {
+        if isSent == .sent {
             replyButton.setupButton(text: "답장 보내기")
             messageStatusLabel.text = "보낸쪽지"
             messageStatusView.backgroundColor = UIColor(hex: "#B5D1FF")
@@ -41,10 +44,11 @@ final class DetailMessageView: UIView {
             messageStatusLabel.text = "받은쪽지"
             messageStatusLabel.textColor = UIColor(hex: "#FF5946")
             messageStatusView.backgroundColor = UIColor(hex: "#FFCBC6")
-            replyButton.isHidden = false
-            replyButton.isEnabled = true
             replyButton.setupButton(text: "답장 보내기")
         }
+        
+        replyButton.isHidden = canReply ? false : true
+        replyButton.isEnabled = canReply ? true : false
         messageContentLabel.text = message
         messageContentLabel.font = WSFont.font(.Body04)()
     }

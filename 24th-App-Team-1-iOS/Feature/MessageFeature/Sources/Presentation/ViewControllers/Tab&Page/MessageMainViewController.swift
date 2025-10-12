@@ -21,7 +21,8 @@ public final class MessageMainViewController: BaseViewController<MessageMainView
     
     private let messageToggleView: MessageToggleView = MessageToggleView()
     private let messagePageViewController = MessagePageViewController(reactor: MessagePageViewReactor())
-    
+    private let globalState: WSGlobalServiceProtocol = WSGlobalStateService.shared
+
     //MARK: - LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,6 +70,19 @@ public final class MessageMainViewController: BaseViewController<MessageMainView
     public override func bind(reactor: Reactor) {
         super.bind(reactor: reactor)
         
+        globalState.event
+            .compactMap { event -> MessageTypes? in
+                // 들어온 이벤트가 .toogleMessageType일 경우에만 type을 추출합니다.
+                if case let .toogleMessageType(type) = event {
+                    return type
+                }
+                return nil
+            }
+            .bind(with: self) { owner, type in
+                owner.messageToggleView.isSelected = type == .home ? true : false
+            }
+            .disposed(by: disposeBag)
+        
         self.rx.viewWillAppear
             .bind(with: self) { owner, _ in
                 
@@ -94,7 +108,6 @@ public final class MessageMainViewController: BaseViewController<MessageMainView
         reactor.state
             .map { $0.messageTypes == .home ? true : false }
             .distinctUntilChanged()
-            .skip(1)
             .bind(to: messageToggleView.rx.isSelected)
             .disposed(by: disposeBag)
         

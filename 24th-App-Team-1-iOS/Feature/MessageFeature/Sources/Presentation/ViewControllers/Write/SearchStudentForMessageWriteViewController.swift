@@ -124,6 +124,7 @@ public final class SearchStudentForMessageWriteViewController: BaseViewControlle
         navigationBar.do {
             $0.setNavigationBarUI(property: .rightItem("닫기"))
             $0.setNavigationBarAutoLayout(property: .leftWithRightItem)
+            $0.navigationTitleLabel.isHidden = true
         }
         nextButton.do {
             $0.setupButton(text: "다음")

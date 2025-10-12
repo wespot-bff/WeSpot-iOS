@@ -58,7 +58,7 @@ final class MessageHistoryCollectionViewCell: UICollectionViewCell {
     }
         
     func configureCell(date: String,
-                       messageState: MessageDirectionEnum) {
+                       messageState: MessageDirection) {
 
         dateLabel.text = self.formatDate(from: date) ?? date
         dateLabel.sizeToFit()

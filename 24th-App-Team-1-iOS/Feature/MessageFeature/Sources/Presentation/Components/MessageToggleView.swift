@@ -95,7 +95,7 @@ final class MessageToggleView: UIView {
         }
     }
     
-    private func updateToggleLayout(_ isSelected: Bool) {
+    func updateToggleLayout(_ isSelected: Bool) {
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) { [weak self] in
             guard let self else { return }
             self.selectedLine.frame.origin.x = isSelected ? 20 : (self.frame.size.width - self.selectedLine.frame.size.width) - 20
