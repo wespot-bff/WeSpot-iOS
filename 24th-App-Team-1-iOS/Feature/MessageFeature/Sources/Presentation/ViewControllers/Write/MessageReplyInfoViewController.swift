@@ -261,8 +261,13 @@ extension MessageReplyInfoViewController {
                 this.posterName.text = item.senderProfile.name
                 this.posterImageView.kf.setImage(with: URL(string: item.senderProfile.iconUrl),
                                                    placeholder: DesignSystemAsset.Images.basicProfile.image)
-                // ✅ item은 옵셔널이 아니므로 ?를 붙일 필요가 없습니다.
-                this.reciverName.text = (item.receiverProfile.name) + "|" + (item.receiverProfile.schoolName)
+                
+                if item.receiverProfile.isAnonymous {
+                    this.reciverName.text = (item.receiverProfile.name)
+                } else {
+                    this.reciverName.text = (item.receiverProfile.name) + " | " + (item.receiverProfile.schoolName)
+                }
+                
                 this.reciverImageView.kf.setImage(with: URL(string: item.receiverProfile.iconUrl ?? ""),
                                                    placeholder: DesignSystemAsset.Images.basicProfile.image)
             }
