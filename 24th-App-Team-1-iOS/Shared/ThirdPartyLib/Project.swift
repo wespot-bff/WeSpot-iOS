@@ -27,8 +27,7 @@ let project = Project
                 .SPM.kakaoSDKUser,
                 .SPM.rxKakaoSDKUser,
                 .SPM.lottie,
-                .SPM.keychain,
-                .SPM.firebaseAnalytics
+                .SPM.keychain
             ])
         ]
     )
