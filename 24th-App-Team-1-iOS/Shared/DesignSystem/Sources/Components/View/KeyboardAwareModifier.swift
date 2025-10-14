@@ -12,7 +12,8 @@ public struct KeyboardAwareModifier: ViewModifier {
 
     public func body(content: Content) -> some View {
         content
-            .padding(.bottom, keyboardHeight)
+            .offset(y: -keyboardHeight)  // padding 대신 offset 사용
+            .animation(.easeOut(duration: 0.25), value: keyboardHeight)
             .onAppear {
                 NotificationCenter.default.addObserver(
                     forName: UIResponder.keyboardWillShowNotification,
@@ -20,7 +21,7 @@ public struct KeyboardAwareModifier: ViewModifier {
                     queue: .main
                 ) { notification in
                     if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                        keyboardHeight = keyboardFrame.height - 32
+                        keyboardHeight = keyboardFrame.height
                     }
                 }
 
@@ -31,6 +32,9 @@ public struct KeyboardAwareModifier: ViewModifier {
                 ) { _ in
                     keyboardHeight = 0
                 }
+            }
+            .onDisappear {
+                NotificationCenter.default.removeObserver(self)
             }
     }
 }

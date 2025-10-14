@@ -44,7 +44,7 @@ public struct PostWriteFeature {
             postTitle.count > 40
         }
         var descriptionTooLong: Bool {
-            postDescription.count > 1200
+            postDescription.count >= 1200
         }
         var canSubmit: Bool {
             selectedCategory != nil
@@ -250,17 +250,27 @@ public struct PostWriteFeature {
                             let newImageNames = newPresignedList.map { $0.imageName }
 
                             let allImageNames = existingImageNames + newImageNames
-
-                            let body = UploadPostItemRequest(
-                                categoryId: categoryId,
-                                title: title,
-                                description: description,
-                                imagesRequest: allImageNames
-                            )
-
-
-                            let success = try await editPostItemUseCase.execute(postId: postId, body: body)
-                            await send(.internal(.postUploadResponse(success)))
+                            let body: UploadPostItemRequest
+                            if title.isEmpty {
+                                let body = UploadPostItemRequest(
+                                    categoryId: categoryId,
+                                    title: nil,
+                                    description: description,
+                                    imagesRequest: allImageNames
+                                )
+                                let success = try await editPostItemUseCase.execute(postId: postId, body: body)
+                                await send(.internal(.postUploadResponse(success)))
+                            } else {
+                                let body = UploadPostItemRequest(
+                                    categoryId: categoryId,
+                                    title: title,
+                                    description: description,
+                                    imagesRequest: allImageNames
+                                )
+                                let success = try await editPostItemUseCase.execute(postId: postId, body: body)
+                                await send(.internal(.postUploadResponse(success)))
+                            }
+                        
                         } catch {
                             await send(.internal(.postUploadResponse(false)))
                         }

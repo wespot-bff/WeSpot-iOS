@@ -76,12 +76,6 @@ struct FeedDetailView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-        if let toast = viewStore.toast {
-            BBToastView(type: toast)
-                .padding(.top, UIApplication.shared.windows.first?.safeAreaInsets.top ?? 44 + 8)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .zIndex(1000)
-        }
             
             DesignSystemAsset.Colors.gray900.swiftUIColor
                 .ignoresSafeArea()
@@ -125,9 +119,11 @@ struct FeedDetailView: View {
                             .padding(.horizontal, 16)
                         }
                     }
-                    
                     .safeAreaInset(edge: .top, spacing: 0) {
                         Color.clear.frame(height: 120)
+                    }
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        Color.clear.frame(height: 60)
                     }
                 }
             }
@@ -185,32 +181,35 @@ struct FeedDetailView: View {
                     }
                 }
             )
-            
-            ChatInputView(
-                text: viewStore.binding(
-                    get: \.chatInputText,
-                    send: { text in
-                        FeedDetailFeature.Action.view(.chatInputTextChanged(text))
-                    }
-                ),
-                isActive: viewStore.binding(
-                    get: \.isShowingChatTextField,
-                    send: { isActive in
-                        if isActive {
-                            return FeedDetailFeature.Action.view(.didTappedChat)
-                        } else {
-                            return FeedDetailFeature.Action.view(.dismissChatTextField)
+            VStack {
+                ChatInputView(
+                    text: viewStore.binding(
+                        get: \.chatInputText,
+                        send: { text in
+                            FeedDetailFeature.Action.view(.chatInputTextChanged(text))
                         }
+                    ),
+                    isActive: viewStore.binding(
+                        get: \.isShowingChatTextField,
+                        send: { isActive in
+                            if isActive {
+                                return FeedDetailFeature.Action.view(.didTappedChat)
+                            } else {
+                                return FeedDetailFeature.Action.view(.dismissChatTextField)
+                            }
+                        }
+                    ),
+                    onSend: { message in
+                        viewStore.send(.view(.didTappedSendChat(viewStore.postId, message)))
+                    },
+                    onDismiss: {
+                        viewStore.send(.view(.dismissChatTextField))
                     }
-                ),
-                onSend: { message in
-                    viewStore.send(.view(.didTappedSendChat(viewStore.postId, message)))
-                },
-                onDismiss: {
-                    viewStore.send(.view(.dismissChatTextField))
-                }
-            )
-            .keyboardAware()
+                )
+                .keyboardAware()
+            }
+            .ignoresSafeArea(.keyboard)
+            
             .sheet(isPresented: $showBottomSheet) {
                 VStack(spacing: 0) {
                     if viewStore.postEntity?.isMyPost == true {
@@ -284,6 +283,17 @@ struct FeedDetailView: View {
                 .presentationCornerRadius(25)
                 .interactiveDismissDisabled(false)
             }
+            if let toast = viewStore.toast {
+                BBToastView(type: toast)
+                    .padding(.top, (UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0) + 40)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.easeInOut(duration: 0.3), value: viewStore.toast)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            viewStore.send(.view(.hideToast))
+                        }
+                    }
+            }
         }
         .fullScreenCover(isPresented: $imageViewerStore.showImageViewer) {
             ImageViewerView(
@@ -329,6 +339,7 @@ struct FeedDetailView: View {
         .onAppear {
             NotificationCenter.default.post(name: .hideTabBar, object: nil)
             viewStore.send(.view(.onAppear))
+            viewStore.send(.view(.didTappedChat))
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(true)
@@ -404,6 +415,12 @@ struct FeedDetailView: View {
                 .fill(Color.gray.opacity(0.2))
                 .frame(width: 82, height: 30)
                 .onTapGesture {
+                    if viewStore.isNotification {
+                        viewStore.send(.view(.showToast(.success("이 글의 댓글 업데이트 알림을 받습니다."))))
+                    } else {
+                        viewStore.send(.view(.showToast(.error("이 글의 댓글 업데이트 알림을 받습니다."))))
+                    }
+                    
                     viewStore.send(.view(.didTappedCommentNotification(Int(viewStore.postId) ?? 0)))
                 }
         )
@@ -484,8 +501,6 @@ struct FeedDetailView: View {
                     Button {
                         if reaction.type == "Like" {
                             viewStore.send(.view(.didTappedLike(postEntity.id)))
-                        } else if reaction.type == "Chat" {
-                            viewStore.send(.view(.didTappedChat))
                         }
                     } label: {
                         HStack(spacing: 4) {
@@ -596,7 +611,7 @@ struct FeedDetailView: View {
                     Spacer()
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(updatedComment.nickname)
-                            .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
+                            .foregroundColor(updatedComment.nickname == "익명의 글쓴이" ? DesignSystemAsset.Colors.primary300.swiftUIColor : DesignSystemAsset.Colors.gray200.swiftUIColor)
                             .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         
                         Text(updatedComment.content)
@@ -691,7 +706,7 @@ struct FeedDetailView: View {
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(updatedComment.nickname)
-                                .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)
+                                .foregroundColor(updatedComment.nickname == "익명의 글쓴이" ? DesignSystemAsset.Colors.primary300.swiftUIColor : DesignSystemAsset.Colors.gray200.swiftUIColor)
                                 .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                             
                             Text(updatedComment.content)
@@ -808,7 +823,7 @@ struct ChatInputView: View {
     let onDismiss: () -> Void
 
     @FocusState private var isTextFieldFocused: Bool
-
+    
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -854,9 +869,7 @@ struct ChatInputView: View {
         }
         .clipped()
         .onChange(of: isActive) { newValue in
-            if newValue {
-                isTextFieldFocused = true
-            } else {
+            if !newValue {
                 isTextFieldFocused = false
                 onDismiss()
             }
@@ -864,6 +877,7 @@ struct ChatInputView: View {
         .onTapGesture {
             
         }
+
     }
 
     private var hasText: Bool {

@@ -9,6 +9,7 @@ import DesignSystem
 import UIKit
 import Util
 
+import Storage
 import Then
 import SnapKit
 import RxSwift
@@ -66,6 +67,12 @@ public final class ProfileAlarmSettingViewController: BaseViewController<Profile
     
     public override func setupAttributes() {
         super.setupAttributes()
+        
+        communityAlarmSettingView.do {
+            let alarmFlag = UserDefaultsManager.shared.communityAlarm
+            print("alarm Flag 값 확인 : \(alarmFlag)")
+            $0.toggleSwitch.setOn(alarmFlag, animated: false)
+        }
         navigationBar.do {
             $0.setNavigationBarUI(
                 property: .leftWithCenterItem(

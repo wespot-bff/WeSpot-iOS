@@ -16,6 +16,7 @@ public struct UserProfileEntity: Identifiable {
     public let grade: Int
     public let classNumber: Int
     public let profile: UserProfileResponseEntity
+    public let needToAnnounceAboutPolicy: Bool
     
     public init(
         id: Int,
@@ -25,7 +26,8 @@ public struct UserProfileEntity: Identifiable {
         schoolName: String,
         grade: Int,
         classNumber: Int,
-        profile: UserProfileResponseEntity
+        profile: UserProfileResponseEntity,
+        needToAnnounceAboutPolicy: Bool
     ) {
         self.id = id
         self.name = name
@@ -35,6 +37,7 @@ public struct UserProfileEntity: Identifiable {
         self.grade = grade
         self.classNumber = classNumber
         self.profile = profile
+        self.needToAnnounceAboutPolicy = needToAnnounceAboutPolicy
     }
 }
 

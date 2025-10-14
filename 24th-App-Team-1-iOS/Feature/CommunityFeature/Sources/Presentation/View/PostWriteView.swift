@@ -154,7 +154,7 @@ struct PostWriteView: View {
         .sheet(isPresented: viewStore.binding(get: \.isShowingCategorySheet, send: { $0 ? .view(.didTappedCategoryButton) : .view(.dismissCategorySheet) })) {
             CategoryBottomSheetView(
                 sections: viewStore.chipDetails,
-                onSelect: { chip in viewStore.send(.view(.didSelectChip(chip))) }
+                onSelect: { chip in viewStore.send(.view(.didSelectChip(chip))) }, selectedCategoryId: nil
             )
             .presentationCornerRadius(25)
             .presentationDetents([.height(423)])
@@ -185,6 +185,7 @@ struct PostWriteView: View {
             .padding(.horizontal, 20)
             
             HStack {
+                let _ = print("상태값 확인 : \(viewStore.descriptionTooLong)")
                 if viewStore.descriptionTooLong {
                     Text("1200자 이내로 입력해 주세요.")
                         .font(DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 13))

@@ -8,13 +8,13 @@
 
 public struct UploadPostItemRequest: Equatable {
     public let categoryId: Int
-    public let title: String
+    public let title: String?
     public let description: String
     public let imagesRequest: [String]
     
     public init(
         categoryId: Int,
-        title: String,
+        title: String?,
         description: String,
         imagesRequest: [String]
     ) {

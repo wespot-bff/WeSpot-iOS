@@ -9,6 +9,7 @@ import ComposableArchitecture
 import CommunityDomain
 import Extensions
 import Foundation
+import UIKit
 
 @Reducer
 public struct FeedDetailFeature {
@@ -91,6 +92,7 @@ public struct FeedDetailFeature {
         case showDeleteAlert(Int)
         case cancelDeleteComment
         case onAppear
+        case hideToast
         case didTappedDeletePost(Int)
         case didTappedBlockPost(String)
         case didTappedLike(Int)
@@ -143,6 +145,10 @@ public struct FeedDetailFeature {
                 
             case .view(.cancelDeleteComment):
                 state.commentIdForDeleteAlert = nil
+            return .none
+                
+            case .view(.hideToast):
+                state.toast = nil
             return .none
                 
                 
@@ -255,6 +261,8 @@ public struct FeedDetailFeature {
                 }
                 
             case let .view(.didTappedCommentNotification(postId)):
+                
+                state.isNotification = !(state.originalNotificationState[postId] ?? false)
                 if var override = state.overrides[postId] {
                     let originalNotified = state.originalNotificationState[postId] ?? false
                     let currentNotified = override.isNotified ?? originalNotified
@@ -365,12 +373,10 @@ public struct FeedDetailFeature {
                 return .none
                 
             case .view(.dismissChatTextField):
-                state.isShowingChatTextField = false
                 state.chatInputText = ""
                 return .none
                 
             case let .view(.didTappedSendChat(postId, message)):
-                state.isShowingChatTextField = false
                 state.chatInputText = ""
 
                 print("댓글 답니다 : \(message) \(postId)")
@@ -389,6 +395,15 @@ public struct FeedDetailFeature {
                 state.pendingComments.append(pendingComment)
                 
                 return .run { send in
+                    await MainActor.run {
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder),
+                            to: nil,
+                            from: nil,
+                            for: nil
+                        )
+                    }
+                    
                     do {
                         let body = CreatePostCommentRequest(postId: postId, content: message)
                         let success = try await createPostCommentUseCase.execute(body: body)

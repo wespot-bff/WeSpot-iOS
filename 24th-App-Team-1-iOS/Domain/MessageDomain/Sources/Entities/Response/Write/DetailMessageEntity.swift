@@ -31,14 +31,14 @@ public struct MessageDetailEntity {
     public let id: Int
     public let createdAt: String // 날짜 계산 및 표시에 용이한 Date 타입
     public let content: String
-    public let direction: MessageDirection // 메시지 방향을 명확하게 표현
+    public let direction: MessageDirectionEnum // 메시지 방향을 명확하게 표현
     public let isRead: Bool
     public let isAbleToAnswer: Bool
     
     public init(id: Int,
                 createdAt: String,
                 content: String,
-                direction: MessageDirection,
+                direction: MessageDirectionEnum,
                 isRead: Bool, isAbleToAnswer: Bool) {
 
         self.id = id

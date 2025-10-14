@@ -219,6 +219,13 @@ public final class SignInViewController: BaseViewController<SignInViewReactor> {
             .bind(to: loadingIndicatorView.rx.isHidden)
             .disposed(by: disposeBag)
         
+        reactor.pulse(\.$isSuccess)
+            .filter { $0 }
+            .bind(with: self) { owner, _ in
+                owner.showWSToast(image: .check, message: "회원 탈퇴 완료")
+            }
+            .disposed(by: disposeBag)
+        
         reactor.pulse(\.$signUpToken)
             .compactMap { $0?.signUpToken }
             .map { SignUpUserRequest(signUpToken: $0) }

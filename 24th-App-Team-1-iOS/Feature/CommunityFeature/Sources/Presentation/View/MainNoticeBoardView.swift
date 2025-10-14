@@ -207,7 +207,8 @@ public struct MainNoticeBoardView: View {
                         viewStore.send(.view(.didSelectDetailChip(chip)))
                         selectedDetailChip = chip
                         showCategoryPost = true
-                    }
+                    },
+                    selectedCategoryId: nil
                 )
                 .presentationCornerRadius(25)
                 .presentationDetents([.height(423)])
@@ -232,7 +233,7 @@ struct CategorySelectorWithDropdown: View {
     var body: some View {
         ZStack {
             CategorySelectorView(chips: chips, selected: selected, onSelect: onSelect)
-                .padding(.trailing, 60)
+                .padding(.trailing, 80)
                 .frame(height: 43)
             HStack {
                 Spacer()

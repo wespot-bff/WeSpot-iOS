@@ -28,14 +28,24 @@ struct MyPostCategoryView: View {
                         ForEach(list.items, id: \.id) { element in
                             if case .post(let post) = element,
                                let content = post.content {
-                                PostView(content: content) {
-                                    
-                                } onTapLike: {
-                                    
-                                } onTapScrap: {
-                                    
+                                NavigationLink(
+                                    destination: FeedDetailView(
+                                        store: .init(
+                                            initialState: FeedDetailFeature.State(postId: String(post.id)),
+                                            reducer: { FeedDetailFeature() }
+                                        )
+                                    )
+                                ) {
+                                    PostView(content: content) {
+                                        
+                                    } onTapLike: {
+                                        
+                                    } onTapScrap: {
+
+                                    }
+                                    .padding(.horizontal, 20)
                                 }
-                                .padding(.horizontal, 20)
+                                
                             }
                             
                         }

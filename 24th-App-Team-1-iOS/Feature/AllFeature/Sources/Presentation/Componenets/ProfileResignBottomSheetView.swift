@@ -154,11 +154,31 @@ public final class ProfileResignBottomSheetView: BaseViewController<ProfileResig
             .bind(to: confirmButton.rx.isEnabled)
             .disposed(by: disposeBag)
         
+        
+        reactor.state
+            .map { $0.isSuccess }
+            .distinctUntilChanged()
+            .filter { $0 }
+            .bind { _ in
+                NotificationCenter.default.post(name: .showSignInViewController, object: nil)
+            }
+            .disposed(by: disposeBag)
+        
         confirmButton
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .map { Reactor.Action.didTappedResignConfirmButton }
-            .bind(to: reactor.action)
+            .bind(with: self, onNext: { owner, _ in
+                WSAlertBuilder(showViewController: owner)
+                    .setAlertType(type: .message)
+                    .setTitle(title: "정말 탈퇴하시나요", titleAlignment: .left)
+                    .setCancel(text: "탈퇴")
+                    .setConfirm(text: "닫기")
+                    .action(.cancel) { [weak self] in
+                        guard let self else { return }
+                        self.reactor?.action.onNext(.didTappedResignAlarmButton)
+                    }
+                    .show()
+            })
             .disposed(by: disposeBag)
     }
     

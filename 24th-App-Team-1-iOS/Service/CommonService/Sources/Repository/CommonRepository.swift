@@ -37,6 +37,17 @@ public final class CommonRepository: CommonRepositoryProtocol {
             .asSingle()
     }
     
+    public func updateAllowPollcyItems(query: CommonDomain.UpdateAllowPollcyQuery) -> Single<Bool> {
+        let query = UpdateAllowPolicyQueryDTO(policyType: query.policyType)
+        let endPoint = CommonEndPoint.allowPollcy(query)
+        
+        return networkService.requestWithStatusCode(endPoint: endPoint)
+            .asObservable()
+            .map { _ in true }
+            .catchAndReturn(false)
+            .logErrorIfDetected(category: Network.error)
+            .asSingle()
+    }
     
     
     public func updateUserProfileItem(body: UpdateUserProfileRequest) -> Single<Bool> {

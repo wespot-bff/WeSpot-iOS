@@ -38,6 +38,7 @@ public struct FilterChipView: View {
 struct CategoryBottomSheetView: View {
     let sections: [CategoryDetailEntity]
     let onSelect: (CategoryChipsEntity) -> Void
+    let selectedCategoryId: Int?
     @State private var selectedIDs: Set<Int> = []
     
     var body: some View {
@@ -64,6 +65,10 @@ struct CategoryBottomSheetView: View {
                             isSelected: selectedIDs.contains(chip.id)
                         )
                         .onTapGesture {
+                            if let selectedCategoryId = selectedCategoryId {
+                                selectedIDs.removeAll()
+                            }
+
                             if selectedIDs.contains(chip.id) {
                                 selectedIDs.remove(chip.id)
                             } else {
@@ -81,6 +86,11 @@ struct CategoryBottomSheetView: View {
         .frame(maxWidth: .infinity)
         .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
         .cornerRadius(16)
+        .onAppear {
+            if let selectedCategoryId = selectedCategoryId {
+                selectedIDs.insert(selectedCategoryId)
+            }
+        }
     }
 }
 
