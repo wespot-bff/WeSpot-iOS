@@ -10,6 +10,7 @@
 import ComposableArchitecture
 import SwiftUI
 import DesignSystem
+import Kingfisher
 
 @ViewAction(for: CategoryPostFeature.self)
 struct CategoryPostView: View {
@@ -173,6 +174,11 @@ struct CategoryPostView: View {
                                     viewStore.send(.view(.didTappedLike(post.id)))
                                 } onTapScrap: {
                                     viewStore.send(.view(.didTappedScrap(post.id)))
+                                }
+                                .onAppear {
+                                    if element.id == list.items.last?.id {
+                                        viewStore.send(.view(.loadNextPage))
+                                    }
                                 }
                                 .padding(.horizontal, 20)
                             }

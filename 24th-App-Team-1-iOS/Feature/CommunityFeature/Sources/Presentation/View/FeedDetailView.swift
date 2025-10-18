@@ -1115,6 +1115,7 @@ struct ImageViewerView: View {
     let imageUrls: [String]
     let initialIndex: Int
     @Binding var isPresented: Bool
+    @Environment(\.dismiss) private var dismiss
     
     init(imageUrls: [String], initialIndex: Int, isPresented: Binding<Bool>) {
         self.imageUrls = imageUrls
@@ -1130,10 +1131,13 @@ struct ImageViewerView: View {
                 HStack {
                     Spacer()
                     Button {
-                        isPresented = false
+                        dismiss()
+                        print("touch")
                     } label: {
                         DesignSystemAsset.Images.icCommunityXmarkFiled.swiftUIImage
                             .foregroundColor(.white)
+                            .frame(width: 24, height: 24)
+                            .padding(10)
                     }
                     .padding(.trailing, 16)
                     .padding(.top, 16)

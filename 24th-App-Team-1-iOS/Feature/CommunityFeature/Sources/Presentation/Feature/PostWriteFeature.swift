@@ -68,7 +68,6 @@ public struct PostWriteFeature {
                     self.selectedCategory = CategoryChipsEntity(id: Int(category.target) ?? 0, text: category.text)
                 }
                 self.imageURLs = post.content?.contentSection?.imageURLs ?? []
-                print("이미지 URL 확인합니다 : \(self.imageURLs)")
             }
         }
         

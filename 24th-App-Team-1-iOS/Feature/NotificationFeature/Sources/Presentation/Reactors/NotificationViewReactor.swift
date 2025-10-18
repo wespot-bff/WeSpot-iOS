@@ -82,6 +82,7 @@ public final class NotificationViewReactor: Reactor {
                         notificationSectionItem.append(
                             .userNotificationItem(
                                 NotificationCellReactor(
+                                    type: $0.type.rawValue,
                                     content: $0.content,
                                     date: $0.createdAt.toDate(with: .yyyyMMddTHHmmssSSSSSS).toCustomFormatRelative(),
                                     isNew: $0.isNew,
@@ -156,6 +157,7 @@ public final class NotificationViewReactor: Reactor {
                         originalSectionItem.append(
                             .userNotificationItem(
                                 NotificationCellReactor(
+                                    type: $0.type.rawValue,
                                     content: $0.content,
                                     date: $0.createdAt.toDate(with: .yyyyMMddTHHmmssSSSSSS).toCustomFormatRelative(),
                                     isNew: $0.isNew,

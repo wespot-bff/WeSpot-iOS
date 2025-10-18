@@ -120,6 +120,40 @@ public final class NotificationTableViewCell: UITableViewCell {
 extension NotificationTableViewCell: ReactorKit.View {
     
     public func bind(reactor: NotificationCellReactor) {
+        
+        reactor.state
+            .filter { $0.type.contains("VOTE")}
+            .map { _ in "투표 알림"}
+            .distinctUntilChanged()
+            .bind(to: titleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.type.contains("POST")}
+            .map { _ in "투표 알림"}
+            .distinctUntilChanged()
+            .bind(to: titleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.type.contains("VOTE")}
+            .map { _ in DesignSystemAsset.Images.icNotificationAlarmFiled.image}
+            .distinctUntilChanged()
+            .bind(to: alarmImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.type.contains("POST")}
+            .map { _ in DesignSystemAsset.Images.icPostAlarmImage.image}
+            .distinctUntilChanged()
+            .bind(to: alarmImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+
+        
+        
+        
+        
         reactor.state
             .map { $0.content }
             .distinctUntilChanged()
