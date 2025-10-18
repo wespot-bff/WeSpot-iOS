@@ -245,8 +245,7 @@ struct FeedDetailView: View {
                         Button {
                             showBottomSheet = false
                             if let postEntity = viewStore.postEntity {
-                                currentAlertType = .blockUser(userId: String(postEntity.id))
-                                showNormalAlert = true
+                                showPostReportView = true
                             }
                         } label: {
                             Text("신고하기")
@@ -646,7 +645,7 @@ struct FeedDetailView: View {
                                 showNormalAlert = true
                                 currentAlertType = .deleteComment(commentId: updatedComment.id)
                             } label: {
-                                Text("・ 삭제")
+                                Text("| 삭제")
                                     .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
                                     .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
                             }
