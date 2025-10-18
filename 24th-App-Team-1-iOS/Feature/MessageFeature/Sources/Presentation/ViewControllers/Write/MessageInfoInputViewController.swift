@@ -22,7 +22,7 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
     
     //MARK: - Properties
     
-    private let reciverLabel = WSLabel(wsFont: .Body01, text: "받는사람").then {
+    private let reciverLabel = WSLabel(wsFont: .Body03, text: "받는사람").then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
         $0.textAlignment = .left
     }
@@ -43,14 +43,14 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
         $0.spacing = 12
         $0.alignment = .fill
     }
-    private let contentLabel = WSLabel(wsFont: .Body01, text: "전달할 마음").then {
+    private let contentLabel = WSLabel(wsFont: .Body03, text: "전달할 내용").then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
         $0.textAlignment = .left
     }
     private let contentTextField = WSTextField(state: .default).then {
         $0.contentVerticalAlignment = .top
         $0.textAlignment = .left
-        $0.textColor = .white
+        $0.placeholderColor = DesignSystemAsset.Colors.gray100.color
         $0.isUserInteractionEnabled = false
         $0.snp.makeConstraints {
             $0.height.equalTo(170)
@@ -69,7 +69,7 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
         $0.axis = .vertical
         $0.alignment = .fill
     }
-    private let posterLabel = WSLabel(wsFont: .Body01, text: "보내는 사람").then {
+    private let posterLabel = WSLabel(wsFont: .Body03, text: "보내는 사람").then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
         $0.textAlignment = .left
     }
@@ -192,6 +192,7 @@ public final class MessageInfoInputViewController: BaseViewController<MessageWri
                                                                "닫기",
                                                         UIImage()))
             $0.setNavigationBarAutoLayout(property: .leftWithRightItem)
+            $0.navigationTitleLabel.isHidden = true
         }
         postButton.do {
             $0.isEnabled = true
@@ -262,7 +263,6 @@ extension MessageInfoInputViewController {
         reactor.state
             .map {$0.profileImage}
             .bind(with: self) {  this, img in
-                print("보내는 사람 이미지 URL: \(img)")
                 this.posterImageView.image = img ?? DesignSystemAsset.Images.icDefaultProfile.image
             }
             .disposed(by: disposeBag)
@@ -272,7 +272,12 @@ extension MessageInfoInputViewController {
             .map {$0.selectedUser}
             .compactMap {$0}
             .bind(with: self) {  this, reciver in
-                this.reciverName.text = reciver.name + "|" + reciver.schoolName 
+                
+                if reciver.schoolName.isEmpty {
+                    this.reciverName.text = reciver.name
+                } else {
+                    this.reciverName.text = reciver.name + " | " + reciver.schoolName
+                }
                 this.reciverImageView.kf.setImage(with: URL(string: reciver.profile.iconUrl))
             }
             .disposed(by: disposeBag)
@@ -284,21 +289,29 @@ extension MessageInfoInputViewController {
             }
             .disposed(by: disposeBag)
         
+        // 1. 메시지 전송 성공 바인딩
         reactor.pulse(\.$completeSendMessage)
+            .filter { $0 == true } // 성공했을 때만 이벤트 방출
             .observe(on: MainScheduler.instance)
-            .bind(with: self) {  this, complete in
-                if complete {
-                    this.navigationController?.popToRootViewController(animated: true)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        reactor.globalState.event.onNext(.showToast("전송 완료!", type: .check))
-                    }
-                } else {
-                    this.navigationController?.popToRootViewController(animated: true)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        reactor.globalState.event.onNext(.showToast("메시지 전송이 실패했어요 :(", type: .warning))
-                    }
+            .bind(with: self) { this, _ in
+                this.navigationController?.popToRootViewController(animated: true)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    reactor.globalState.event.onNext(.showToast("전송 완료!", type: .check))
                 }
-
+            }
+            .disposed(by: disposeBag)
+            
+        // 2. 메시지 전송 실패 바인딩 (서버 에러 메시지 사용)
+        reactor.pulse(\.$sendError)
+            .compactMap { $0 } // 에러 객체가 nil이 아닐 때만 이벤트 방출
+            .observe(on: MainScheduler.instance)
+            .bind(with: self) { this, error in
+                // 실패 시에도 화면은 이전으로 돌아가야 한다면 아래 코드 유지
+                 this.navigationController?.popToRootViewController(animated: true)
+                // 서버에서 받은 에러 메시지를 토스트로 표시
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    reactor.globalState.event.onNext(.showToast(error.errorDescription, type: .warning))
+                }
             }
             .disposed(by: disposeBag)
     }

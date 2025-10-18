@@ -47,9 +47,14 @@ final class FavoriteMessageView: UIView {
     
     private func layout() {
         self.addSubviews(messageCollectionView, emptyStackView)
-        [emptyImageView, emptyTitle, emptyDes].forEach {
+        [emptyImageView,
+         emptyTitle,
+         emptyDes].forEach {
              self.emptyStackView.addArrangedSubview($0)
          }
+        
+        self.emptyStackView.setCustomSpacing(24, after: emptyImageView)
+        self.emptyStackView.setCustomSpacing(8, after: emptyTitle)
         
         messageCollectionView.snp.makeConstraints {
             $0.top.equalToSuperview()

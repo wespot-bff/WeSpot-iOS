@@ -35,16 +35,23 @@ public final class WSTextField: UITextField {
     private let disposeBag = DisposeBag()
     public var placeholderText: String = "Placeholder" {
         didSet {
-            attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: [NSAttributedString.Key.foregroundColor: DesignSystemAsset.Colors.gray400.color])
+            updateAttributedPlaceholder()
         }
     }
+    
+    public var placeholderColor: UIColor = DesignSystemAsset.Colors.gray400.color {
+        didSet {
+            updateAttributedPlaceholder() // 색상이 변경되면 플레이스홀더 업데이트
+        }
+    }
+    
     
     public override var text: String? {
         didSet {
             if let text = text {
                 let attributes: [NSAttributedString.Key: Any] = [
-                    .font: WSFont.Body04.font(),
-                    .foregroundColor: DesignSystemAsset.Colors.gray100.color
+                    .font: self.font ?? WSFont.Body04.font(),
+                    .foregroundColor: self.textColor ?? DesignSystemAsset.Colors.gray100.color
                 ]
                 self.attributedText = NSAttributedString(string: text, attributes: attributes)
             } else {
@@ -98,11 +105,17 @@ public final class WSTextField: UITextField {
         layer.borderColor = UIColor.clear.cgColor
         layer.borderWidth = 1.0
         layer.cornerRadius = 12
-        placeholder = placeholderText
-        attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: [NSAttributedString.Key.foregroundColor: DesignSystemAsset.Colors.gray400.color])
         backgroundColor = DesignSystemAsset.Colors.gray700.color
     }
     
+    private func updateAttributedPlaceholder() {
+        self.attributedPlaceholder = NSAttributedString(
+            string: placeholderText,
+            attributes: [
+                .foregroundColor: self.placeholderColor
+            ]
+        )
+    }
     
     public func updateBorder() {
         if isEditing {

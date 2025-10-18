@@ -14,7 +14,8 @@ let project = Project
                 .feature(module: .MessageFeature),
                 .feature(module: .NotificationFeature),
                 .shared(module: .DesignSystem),
-                .SPM.firebaseMessaging
+                .SPM.firebaseMessaging,
+                .SPM.firebaseAnalytics
             ])
         ]
     )

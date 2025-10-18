@@ -104,19 +104,52 @@ public final class messageRepository: MessageRepositoryProtocol {
     }
     
     public func sendMessage(query: SendMessageRequest) -> RxSwift.Single<Bool> {
-        let query = SendMessageRequestDTO(content: query.content, receiverId: query.reciverId,
-                                          anonymousProfileName: query.anonymousProfileName, isAnonymous: query.isAnonymous, anonymousImageUrl: query.anonymousImageUrl)
-        let endPoint = MessageEndPoint.sendMessage(query)
+        let requestDTO = SendMessageRequestDTO(
+            content: query.content,
+            receiverId: query.reciverId,
+            anonymousProfileName: query.anonymousProfileName,
+            isAnonymous: query.isAnonymous,
+            anonymousImageUrl: query.anonymousImageUrl
+        )
+        let endPoint = MessageEndPoint.sendMessage(requestDTO)
+        
+        // networkService.requestWithStatusCode가 Single<(response: HTTPURLResponse, data: Data?)>를 반환한다고 가정
         return networkService.requestWithStatusCode(endPoint: endPoint)
             .flatMap { response -> Single<Bool> in
+                // 성공 케이스 (201 Created)
                 if response.statusCode == 201 {
                     return Single.just(true)
-                } else  {
-                    return Single.just(false)
+                }
+                // 실패 케이스 (201 이외의 모든 코드)
+                else {
+                    // MARK: - 수정된 부분
+                    // response.data가 nil이 아닌지 확인하고 안전하게 언래핑합니다.
+                    guard let errorData = response.data else {
+                        // 데이터가 없는 경우, 기본 에러를 생성하여 방출합니다.
+                        let emptyDataError = MessagePostError(
+                            errorDescription: "서버로부터 응답 데이터를 받지 못했습니다. (Code: \(response.statusCode))",
+                            errorView: .alert
+                        )
+                        return Single.error(emptyDataError)
+                    }
+                    
+                    // 이제 errorData는 nil이 아닌 'Data' 타입이므로 안전하게 사용할 수 있습니다.
+                    do {
+                        let networkError = try JSONDecoder().decode(MessageNetworkError.self, from: errorData)
+                        let domainError = networkError.toDomain()
+                        return Single.error(domainError)
+                    } catch {
+                        // 디코딩에 실패한 경우
+                        let decodingError = MessagePostError(
+                            errorDescription: "에러 응답을 처리하는 데 실패했습니다. (Code: \(response.statusCode))",
+                            errorView: .alert
+                        )
+                        return Single.error(decodingError)
+                    }
                 }
             }
     }
-    
+
     public func replyMessage(id: Int, content: String) -> RxSwift.Single<Bool> {
         let query = ReplyMessageRequestDTO(content: content)
         let endPoint = MessageEndPoint.replyMessage(id, query)

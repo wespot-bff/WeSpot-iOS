@@ -15,6 +15,7 @@ import RxKakaoSDKAuth
 import KakaoSDKCommon
 import KakaoSDKAuth
 import RxKakaoSDKCommon
+import FirebaseAnalytics
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {

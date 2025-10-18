@@ -82,9 +82,8 @@ public final class StudentSearchTableViewCell: UITableViewCell {
         }
         
         studentImageView.do {
-            $0.layer.cornerRadius = 56 / 2
+            $0.layer.cornerRadius = 20
             $0.clipsToBounds = true
-            //$0.image = DesignSystemAsset.Images.boyPinkBackground.image
         }
         
         studentCellView.do {

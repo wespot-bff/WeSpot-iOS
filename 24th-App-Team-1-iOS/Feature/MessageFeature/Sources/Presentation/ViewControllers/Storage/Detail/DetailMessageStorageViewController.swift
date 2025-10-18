@@ -123,7 +123,9 @@ public final class DetailMessageStorageViewController: BaseViewController<Messag
         reactor.state.map {$0.detailMessage}
             .observe(on: MainScheduler.instance)
             .bind(with: self) { this, detailMessage in
-                this.contentView.configureView(isSent: detailMessage?.isAbleToAnswer ?? false, message: detailMessage?.content ?? "")
+                this.contentView.configureView(isSent: detailMessage?.direction ?? .received,
+                                               message: detailMessage?.content ?? "",
+                                               canReply: detailMessage?.isAbleToAnswer ?? false)
             }
             .disposed(by: disposeBag)
         
