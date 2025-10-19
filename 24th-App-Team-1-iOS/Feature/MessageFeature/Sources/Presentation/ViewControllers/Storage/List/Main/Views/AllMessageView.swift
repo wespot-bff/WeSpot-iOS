@@ -56,7 +56,7 @@ final class AllMessageView: UIView {
                                opponentImageURL: item.receiverProfile.iconUrl,
                                date: item.latestChatTime,
                                isFavorite: item.isBookmarked,
-                               isAnonymous: item.senderProfile.isAnonymous,
+                               isAnonymous: item.receiverProfile.isAnonymous,
                                isRead: item.isExistsUnreadMessage)
 
                 cell.onMoreButtonTap = { [weak self] in
