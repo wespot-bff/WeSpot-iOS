@@ -119,12 +119,6 @@ extension SceneDelegate {
         NotificationCenter.default.addObserver(forName: .dismissProfileOnboardingView, object: nil, queue: .main) { [weak self]  _ in
             guard let self else { return }
             setupMainViewController()
-            
-            let rootViewController = self.window?.rootViewController?.topMostViewController()
-            
-            let profileOnboardingViewController = ProfileOnboardingHostingViewController(rootView: ProfileOnboardingView(viewModel: ProfileOnboardingViewModel()))
-            rootViewController?.navigationController?.pushViewController(profileOnboardingViewController, animated: false)
-            
         }
         
         NotificationCenter.default.addObserver(forName: .showProfileOnboardingView, object: nil, queue: .main) { _ in

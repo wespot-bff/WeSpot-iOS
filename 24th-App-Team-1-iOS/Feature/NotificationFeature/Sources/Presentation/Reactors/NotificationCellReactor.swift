@@ -16,13 +16,14 @@ public final class NotificationCellReactor: Reactor {
     public typealias Action = NoAction
     
     public struct State {
+        var type: String
         var content: String
         var date: String
         var isNew: Bool
         var isEnabled: Bool
     }
     
-    public init(content: String, date: String, isNew: Bool, isEnabled: Bool) {
-        self.initialState = State(content: content, date: date, isNew: isNew, isEnabled: isEnabled)
+    public init(type: String ,content: String, date: String, isNew: Bool, isEnabled: Bool) {
+        self.initialState = State(type: type, content: content, date: date, isNew: isNew, isEnabled: isEnabled)
     }
 }

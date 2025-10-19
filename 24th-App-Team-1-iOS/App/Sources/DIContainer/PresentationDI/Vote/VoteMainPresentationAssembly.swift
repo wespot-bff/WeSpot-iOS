@@ -17,6 +17,18 @@ import Swinject
 struct VoteMainPresentationAssembly: Assembly {
     func assemble(container: Container) {
         
+        container.register(TermsViewReactor.self) { resolver in
+            let updateAllowPolicyUseCase = resolver.resolve(UpdateAllowPolicyUseCaseProtocol.self)!
+            return TermsViewReactor(updateAllowPolicyUseCase: updateAllowPolicyUseCase)
+        }
+        
+        container.register(TermsViewController.self) { resolver in
+            let reactor = resolver.resolve(TermsViewReactor.self)!
+            
+            return TermsViewController(reactor: reactor)
+        }
+        
+        
         container.register(VoteMainViewReactor.self) { resolver in
             let fetchMinorAppVersionUseCase = resolver.resolve(FetchMinorAppVersionUseCaseProtocol.self)!
             return VoteMainViewReactor(fetchMinorAppVersionUseCase: fetchMinorAppVersionUseCase)

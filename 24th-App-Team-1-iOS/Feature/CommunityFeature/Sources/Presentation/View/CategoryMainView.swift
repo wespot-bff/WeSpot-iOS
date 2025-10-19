@@ -83,7 +83,8 @@ struct CategoryMainView: View {
                     onSelect: { chip in
                         let _ = print("데이터 확인 \(chip)")
                         viewStore.send(.view(.didSelectChip(chip)))
-                    }
+                    },
+                    selectedCategoryId: nil
                 )
                 .presentationCornerRadius(25)
                 .presentationDetents([.height(423)])

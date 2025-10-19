@@ -176,7 +176,10 @@ public final class VoteCompleteViewController: BaseViewController<VoteCompleteVi
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                owner.shareToInstagramStory(to: owner.completeCollectionView)
+                owner.completeCollectionView.layoutIfNeeded()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    owner.shareToInstagramStory(to: owner.completeCollectionView)
+                }
             }
             .disposed(by: disposeBag)
         

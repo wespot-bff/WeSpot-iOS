@@ -49,7 +49,7 @@ public enum ProfileEndPoint: WSNetworkEndPoint {
         case let .updateUserBlock(messageId):
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/messages/\(messageId)/unblock")
         case .updateUserResign:
-            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/users/revoke")
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/auth/revoke")
         case .editProfileImage:
             return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/image/update-profile")
         case .updatePostNotification:

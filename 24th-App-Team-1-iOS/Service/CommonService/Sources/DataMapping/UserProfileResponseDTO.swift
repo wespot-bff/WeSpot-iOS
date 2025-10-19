@@ -18,6 +18,7 @@ public struct UserProfileResponseDTO: Decodable {
     public let grade: Int
     public let classNumber: Int
     public let profile: UserProfileResponseItemDTO
+    public let needToAnnounceAboutPolicy: Bool
 }
 
 extension UserProfileResponseDTO {
@@ -36,7 +37,10 @@ extension UserProfileResponseDTO {
             gender: gender,
             introduction: introduction,
             schoolName: schoolName,
-            grade: grade, classNumber: classNumber, profile: profile.toDomain()
+            grade: grade,
+            classNumber: classNumber,
+            profile: profile.toDomain(),
+            needToAnnounceAboutPolicy: needToAnnounceAboutPolicy
         )
     }
 }

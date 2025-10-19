@@ -1,12 +1,12 @@
 //
-//  WSIntensityVisualEffectView.swift
-//  DesignSystem
+//  WSIntentsityVisualEffectView.swift
+//  Extensions
 //
-//  Created by Kim dohyun on 8/21/24.
+//  Created by 김도현 on 10/15/25.
 //
+
 
 import UIKit
-
 
 public final class WSIntensityVisualEffectView: UIVisualEffectView {
     private let theEffect: UIVisualEffect

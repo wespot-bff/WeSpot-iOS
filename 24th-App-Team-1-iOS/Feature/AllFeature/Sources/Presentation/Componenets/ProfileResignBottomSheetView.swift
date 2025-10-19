@@ -154,6 +154,16 @@ public final class ProfileResignBottomSheetView: BaseViewController<ProfileResig
             .bind(to: confirmButton.rx.isEnabled)
             .disposed(by: disposeBag)
         
+        
+        reactor.state
+            .map { $0.isSuccess }
+            .distinctUntilChanged()
+            .filter { $0 }
+            .bind { _ in
+                NotificationCenter.default.post(name: .showSignInViewController, object: nil)
+            }
+            .disposed(by: disposeBag)
+        
         confirmButton
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)

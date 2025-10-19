@@ -18,6 +18,7 @@ public enum CommonEndPoint: WSNetworkEndPoint {
         }
         return accessToken
     }
+    case allowPollcy(Encodable)
     
     case fetchUserProfile
     // 비속어 검색 API
@@ -35,6 +36,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
     
     public var spec: WSNetworkSpec {
         switch self {
+        case .allowPollcy:
+            return WSNetworkSpec(method: .post, url: "\(WSNetworkConfigure.baseURL)/users/allow/policy")
         case .fetchUserProfile:
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/me")
         case .createProfanityCheck:
@@ -52,46 +55,11 @@ public enum CommonEndPoint: WSNetworkEndPoint {
         }
     }
     
-    public var path: String {
-        switch self {
-        case .fetchUserProfile:
-            return "/users/me"
-        case .createProfanityCheck:
-            return "/check-profanity"
-        case .updateUserProfile:
-            return "/users/me"
-        case .fetchVoteOptions:
-            return "/votes/options"
-        case .fetchProfilePresignedURL:
-            return "/image/presigned-url"
-        case .uploadProfileImage:
-            return ""
-        case .fetchProfileOnboarding:
-            return "/update-modal"
-        }
-    }
-    
-    public var method: HTTPMethod {
-        switch self {
-        case .fetchUserProfile:
-            return .get
-        case .createProfanityCheck:
-            return .post
-        case .updateUserProfile:
-            return .put
-        case .fetchVoteOptions:
-            return .get
-        case .fetchProfilePresignedURL:
-            return .get
-        case .uploadProfileImage:
-            return .put
-        case .fetchProfileOnboarding:
-            return .get
-        }
-    }
     
     public var parameters: WSRequestParameters {
         switch self {
+        case let .allowPollcy(allowQuery):
+            return .requestQuery(allowQuery)
         case .createProfanityCheck(let messsage):
             return .requestBody(messsage)
         case let .updateUserProfile(body):

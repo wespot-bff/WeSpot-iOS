@@ -8,6 +8,7 @@
 import Foundation
 import Util
 import AllDomain
+import Storage
 
 import ReactorKit
 
@@ -133,6 +134,7 @@ public final class ProfileAlarmSettingViewReactor: Reactor {
                 .execute(body: body)
                 .asObservable()
                 .flatMap { isUpdate -> Observable<Mutation> in
+                    UserDefaultsManager.shared.communityAlarm = isOn
                     return .concat(
                         .just(.setLoading(false)),
                         .just(.setUpdateAlarm(isUpdate)),

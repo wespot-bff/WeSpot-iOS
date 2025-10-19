@@ -10,6 +10,7 @@ import Foundation
 import RxSwift
 
 public protocol CommonRepositoryProtocol {
+    func updateAllowPollcyItems(query: UpdateAllowPollcyQuery) -> Single<Bool>
     func fetchUserProfileItems() -> Single<UserProfileEntity?>
     func createCheckProfanity(body: CreateCheckProfanityRequest) -> Single<Bool>
     func updateUserProfileItem(body: UpdateUserProfileRequest) -> Single<Bool>

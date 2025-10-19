@@ -11,6 +11,7 @@ public enum NotificationType: String {
     case vote = "VOTE"
     case voteResults = "VOTE_RESULT"
     case voteRecevied = "VOTE_RECEIVED"
+    case postComment = "POST_COMMENT"
     case none
 }
 

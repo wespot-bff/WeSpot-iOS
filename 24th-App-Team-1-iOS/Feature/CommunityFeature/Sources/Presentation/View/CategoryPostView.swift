@@ -10,6 +10,7 @@
 import ComposableArchitecture
 import SwiftUI
 import DesignSystem
+import Kingfisher
 
 @ViewAction(for: CategoryPostFeature.self)
 struct CategoryPostView: View {
@@ -71,7 +72,8 @@ struct CategoryPostView: View {
                 onSelect: { chip in
                     let _ = print("데이터 확인 \(chip)")
                     viewStore.send(.view(.didSelectChip(chip)))
-                }
+                },
+                selectedCategoryId: viewStore.category.id
             )
             .presentationCornerRadius(25)
             .presentationDetents([.height(423)])
@@ -172,6 +174,11 @@ struct CategoryPostView: View {
                                     viewStore.send(.view(.didTappedLike(post.id)))
                                 } onTapScrap: {
                                     viewStore.send(.view(.didTappedScrap(post.id)))
+                                }
+                                .onAppear {
+                                    if element.id == list.items.last?.id {
+                                        viewStore.send(.view(.loadNextPage))
+                                    }
                                 }
                                 .padding(.horizontal, 20)
                             }

@@ -182,7 +182,10 @@ public final class VoteEffectViewController: BaseViewController<VoteEffectViewRe
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                owner.shareToInstagramStory(to: owner.effectCollectionView)
+                owner.effectCollectionView.layoutIfNeeded()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    owner.shareToInstagramStory(to: owner.effectCollectionView)
+                }
             }
             .disposed(by: disposeBag)
         

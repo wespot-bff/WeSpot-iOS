@@ -23,6 +23,8 @@ struct PostWriteView: View {
     @State private var showAlertView = false
     @State private var showCategoryMain = false
     @State private var isShowingWriteSheet = false
+    @State private var shouldShowCategorySheet = false
+    @State private var showCloseAlert = false
     @Environment(\.presentationMode) private var presentationMode
     
     public init(store: StoreOf<PostWriteFeature>) {
@@ -66,8 +68,8 @@ struct PostWriteView: View {
                     .onTapGesture { isTextFieldFocused = false }
                     .customAlert(
                         isPresented: $showAlertView,
-                        title: "게시글 수정을 중단할까요?",
-                        message: "작성한 내용이 사라져요.",
+                        title: "게시글 수정을 중단하시나요?",
+                        message: "작성 중인 내용은 삭제되고 되돌릴 수 없어요",
                         primaryButtonText: "네",
                         secondaryButtonText: "아니오",
                         style: .normal,
@@ -84,11 +86,7 @@ struct PostWriteView: View {
                         },
                         right: {
                             Button {
-                                if viewStore.isEditing == true {
-                                    showAlertView = true
-                                } else {
-                                    presentationMode.wrappedValue.dismiss()
-                                }
+                                showAlertView = true
                             } label: {
                                 DesignSystemAsset.Images.icCommunityXmarkFiled.swiftUIImage
                             }
@@ -98,12 +96,19 @@ struct PostWriteView: View {
                 .onChange(of: viewStore.didUploadSuccess) { success in
                     if success {
                         presentationMode.wrappedValue.dismiss()
-                        
+                        onWriteComplete()
                         NotificationCenter.default.post(name: .didFinishWritePost, object: nil)
                     }
                 }
-                .onAppear {                    
+                .onChange(of: shouldShowCategorySheet) { shouldShow in
+                    if shouldShow {
+                        viewStore.send(.view(.didTappedCategoryButton))
+                        shouldShowCategorySheet = false
+                    }
+                }
+                .onAppear {
                     NotificationCenter.default.post(name: .hideTabBar, object: nil)
+                    checkFirstTimeWrite()
                     if let urls = viewStore.editingPost?.content?.contentSection?.imageURLs, viewStore.uiImages.isEmpty {
                         Task {
                             var loadedImages: [UIImage] = []
@@ -112,7 +117,6 @@ struct PostWriteView: View {
                                     loadedImages.append(image)
                                 }
                             }
-                            checkFirstTimeWrite()
                             viewStore.send(.view(.setLoadedImages(loadedImages)))
                         }
                     }
@@ -145,16 +149,19 @@ struct PostWriteView: View {
         }
         .padding(.horizontal, 20)
         .sheet(isPresented: $isShowingWriteSheet, content: {
-            HealthyCommunicationView()
+            HealthyCommunicationView(onDismiss: {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    shouldShowCategorySheet = true
+                }
+            })
             .presentationCornerRadius(25)
             .presentationDetents([.height(423)])
             .interactiveDismissDisabled(true)
         })
-        
         .sheet(isPresented: viewStore.binding(get: \.isShowingCategorySheet, send: { $0 ? .view(.didTappedCategoryButton) : .view(.dismissCategorySheet) })) {
             CategoryBottomSheetView(
                 sections: viewStore.chipDetails,
-                onSelect: { chip in viewStore.send(.view(.didSelectChip(chip))) }
+                onSelect: { chip in viewStore.send(.view(.didSelectChip(chip))) }, selectedCategoryId: viewStore.selectedCategory?.id ?? 0
             )
             .presentationCornerRadius(25)
             .presentationDetents([.height(423)])
@@ -185,6 +192,7 @@ struct PostWriteView: View {
             .padding(.horizontal, 20)
             
             HStack {
+                let _ = print("상태값 확인 : \(viewStore.descriptionTooLong)")
                 if viewStore.descriptionTooLong {
                     Text("1200자 이내로 입력해 주세요.")
                         .font(DesignSystemFontFamily.Pretendard.regular.swiftUIFont(size: 13))
@@ -275,7 +283,6 @@ struct PostWriteView: View {
     private var submitSection: some View {
         Button(action: {
             viewStore.send(.view(.submitButtonTapped))
-            onWriteComplete()
         }) {
             Text("게시하기")
                 .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
@@ -346,7 +353,9 @@ struct LimitedTextEditor: View {
                 
                 TextEditor(text: $text)
                     .padding(8)
+                    .scrollContentBackground(.hidden)
                     .background(Color.clear)
+                    .foregroundColor(.white)
                     .onChange(of: text) { new in
                         if new.count > maxLength {
                             text = String(new.prefix(maxLength))
@@ -370,6 +379,7 @@ struct LimitedTextEditor: View {
 
 struct HealthyCommunicationView: View {
     @Environment(\.dismiss) private var dismiss
+    let onDismiss: () -> Void
     var body: some View {
         ZStack {
             DesignSystemAsset.Colors.gray600.swiftUIColor
@@ -408,6 +418,7 @@ struct HealthyCommunicationView: View {
                         
                         Button(action: {
                             dismiss()
+                            onDismiss()
                         }) {
                             Text("이해했어요")
                                 .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
@@ -451,9 +462,16 @@ struct GuidelineRow: View {
 extension PostWriteView {
     func checkFirstTimeWrite() {
         let hasWrittenBefore = KeychainManager.shared.getBool(type: .isFeedWrite)
+        print("작성한 플래그 값 확인합니다 : \(hasWrittenBefore)")
         
         if !hasWrittenBefore {
-            isShowingWriteSheet = true
+            DispatchQueue.main.async {
+                isShowingWriteSheet = true
+            }
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                shouldShowCategorySheet = true
+            }
         }
     }
 

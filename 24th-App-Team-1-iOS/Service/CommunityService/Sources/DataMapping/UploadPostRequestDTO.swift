@@ -8,7 +8,7 @@
 
 public struct UploadPostRequestDTO: Encodable {
     public let categoryId: Int
-    public let title: String
+    public let title: String?
     public let description: String
     public let imagesRequest: [String]
 }

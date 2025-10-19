@@ -18,9 +18,10 @@ public extension UIView {
     }
     
     func asImage() -> UIImage {
-        let render = UIGraphicsImageRenderer(bounds: bounds)
-        return render.image { renderContext in
-            layer.render(in: renderContext.cgContext)
+        let renderer = UIGraphicsImageRenderer(size: bounds.size)
+        return renderer.image { context in
+            layer.render(in: context.cgContext)
+            drawHierarchy(in: bounds, afterScreenUpdates: true)
         }
     }
 }

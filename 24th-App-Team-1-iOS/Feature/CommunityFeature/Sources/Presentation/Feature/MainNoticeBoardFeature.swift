@@ -74,7 +74,7 @@ public struct MainNoticeBoardFeature {
     
     public enum Inner {
         case filterChipsResponse(TaskResult<[FilterChipEntity]>)
-        case postListResponse( TaskResult<PostListEntity> )
+        case postListResponse( TaskResult<PostListEntity>,  isLoadMore: Bool)
         case detailsResponse(TaskResult<[CategoryDetailEntity]>)
     }
     
@@ -87,6 +87,13 @@ public struct MainNoticeBoardFeature {
         Reduce { state, action in
             switch action {
             case .view(.onAppear):
+                print("메인 화면 호출 appear")
+                state.nextCursor = nil
+                state.hasNext = false
+                state.rawPostListItems = nil
+                state.postListItems = nil
+                state.selectedChip = nil
+                
                 return .run { send in
                     let query = FetchPostAllItemRequestQuery(majorCategoryName: "", inquirySize: 10)
                     async let chips = fetchCategoryItemUseCase.execute()
@@ -94,10 +101,10 @@ public struct MainNoticeBoardFeature {
                     do {
                         let (chips, posts) = try await (chips, posts)
                         await send(.inner(.filterChipsResponse(.success(chips))))
-                        await send(.inner(.postListResponse(.success(posts))))
+                        await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
                     } catch {
                         await send(.inner(.filterChipsResponse(.failure(error))))
-                        await send(.inner(.postListResponse(.failure(error))))
+                        await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
                     }
                 }
                 
@@ -119,18 +126,23 @@ public struct MainNoticeBoardFeature {
                 return .none
                 
             case .view(.didSelectDetailChip(let chip)):
+                
                 state.selectedCategory = chip
                 state.isShowingCategorySheet = false
-
+                
+                state.nextCursor = nil
+                state.hasNext = false
+                state.rawPostListItems = nil
+                
                 return .run { send in
                     let query = FetchPostDetailItemRequestQuery(categoryId: chip.id, inquirySize: 10, cursorId: 10)
                     async let postsUsecase = fetchPostDetailListUseCase.execute(query: query)
 
                     do {
                         let posts = try await postsUsecase
-                        await send(.inner(.postListResponse(.success(posts))))
+                        await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
                     } catch {
-                        await send(.inner(.postListResponse(.failure(error))))
+                        await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
                     }
                 }
 
@@ -147,9 +159,9 @@ public struct MainNoticeBoardFeature {
                             let query = FetchPostAllItemRequestQuery(majorCategoryName: allCateogory.text, inquirySize: 20)
                             do {
                                 let posts = try await fetchPostItemListUseCase.execute(query: query)
-                                await send(.inner(.postListResponse(.success(posts))))
+                                await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
                             } catch {
-                                await send(.inner(.postListResponse(.failure(error))))
+                                await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
                             }
                         }
                     }
@@ -161,89 +173,50 @@ public struct MainNoticeBoardFeature {
                 
                 
                 
-            case .inner(.postListResponse(.success(let posts))):
+            case .inner(.postListResponse(.success(let posts), let isLoadMore)):
+                state.isLoadingPage = false
+                
                 state.nextCursor = posts.lastCursorId
                 state.hasNext = posts.hasNext
                 
-                if var raw = state.rawPostListItems {
-                    raw.items += posts.items
-                    state.rawPostListItems = raw
+                if isLoadMore {
+                    if var raw = state.rawPostListItems {
+                        raw.items += posts.items
+                        raw.lastCursorId = posts.lastCursorId
+                        raw.hasNext = posts.hasNext
+                        state.rawPostListItems = raw
+                    } else {
+                        state.rawPostListItems = posts
+                    }
                 } else {
                     state.rawPostListItems = posts
                 }
                 
-                var merged = posts
-                merged.items = merged.items.map { element in
-                    switch element {
-                    case .post(var post):
-                        guard let content = post.content else { return element }
-                        if let override = state.overrides[post.id] {
-                            var newFooter = content.footer
-                            
-                            if let isLiked = override.isLiked,
-                               let likeIdx = newFooter.reactions.firstIndex(where: { $0.type == "Like" }) {
-                                var like = newFooter.reactions[likeIdx]
-                                like.selected = isLiked
-                                if let baseCount = Int(like.count.text.replacingOccurrences(of: ",", with: "")) {
-                                    let final = baseCount + override.likeCountDelta
-                                    like.count = StyledText(
-                                        text: "\(max(0, final))",
-                                        color: like.count.color,
-                                        typography: like.count.typography,
-                                        maxLine: like.count.maxLine
-                                    )
-                                }
-                                newFooter.reactions[likeIdx] = like
-                            }
-                            
-                            // 스크랩 병합
-                            if let isScrapped = override.isScrapped {
-                                let old = newFooter.scrap
-                                newFooter.scrap = Scrap(
-                                    iconURL: old.iconURL,
-                                    iconColor: old.iconColor,
-                                    selected: isScrapped
-                                )
-                            }
-                            
-                            let newContent = PostContent(
-                                category: content.category,
-                                header: content.header,
-                                info: content.info,
-                                contentSection: content.contentSection,
-                                footer: newFooter,
-                                button: content.button
-                            )
-                            post = PostItem(id: post.id, type: post.type, content: newContent)
-                            return .post(post)
-                        }
-                        state.rawPostListItems = posts
-                        applyOverrides(to: &state)
-                        return .post(post)
-                    default:
-                        return element
-                    }
-                }
-                state.postListItems = merged
+                applyOverrides(to: &state)
                 return .none
                 
                 
-            case .inner(.postListResponse(.failure)):
+            case .inner(.postListResponse(.failure, _)):
                 
                 return .none
                 
             case .binding:
                 return .none
             case let .view(.didSelectChip(chip)):
+                state.selectedChip = chip
+                state.nextCursor = nil
+                state.hasNext = false
+                state.rawPostListItems = nil
+                state.postListItems = nil
                 
                 state.selectedChip = chip
                 return .run { send in
                     let query = FetchPostAllItemRequestQuery(majorCategoryName: chip.text, inquirySize: 10, cursorId: nil)
                     do {
                         let posts = try await fetchPostItemListUseCase.execute(query: query)
-                        await send(.inner(.postListResponse(.success(posts))))
+                        await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
                     } catch {
-                        await send(.inner(.postListResponse(.failure(error))))
+                        await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
                     }
                 }
             case .view(.scrapResponseFailure(let postId, _)):
@@ -320,8 +293,8 @@ public struct MainNoticeBoardFeature {
                 state.chipDetails = chipDetails
                 return .none
             case .view(.loadNextPage):
-              guard !state.isLoadingPage, state.hasNext else { return .none }
-              state.isLoadingPage = true
+                guard !state.isLoadingPage, state.hasNext else { return .none }
+                state.isLoadingPage = true
 
               let query = FetchPostAllItemRequestQuery(
                 majorCategoryName: state.selectedChip?.text ?? "",
@@ -332,9 +305,9 @@ public struct MainNoticeBoardFeature {
               return .run { send in
                 do {
                   let response = try await fetchPostItemListUseCase.execute(query: query)
-                  await send(.inner(.postListResponse(.success(response))))
+                    await send(.inner(.postListResponse(.success(response), isLoadMore: true)))
                 } catch {
-                  await send(.inner(.postListResponse(.failure(error))))
+                    await send(.inner(.postListResponse(.failure(error), isLoadMore: true)))
                 }
               }
             }

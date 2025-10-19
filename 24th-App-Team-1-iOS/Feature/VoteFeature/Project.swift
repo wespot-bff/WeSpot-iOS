@@ -18,6 +18,7 @@ let project = Project.makeProject(
                 .core(module: .Util),
                 .service(module: .VoteService),
                 .domain(module: .VoteDomain),
+                .feature(module: .AllFeature),
                 .shared(module: .ThirdPartyLib),
                 .shared(module: .DesignSystem)
             ]

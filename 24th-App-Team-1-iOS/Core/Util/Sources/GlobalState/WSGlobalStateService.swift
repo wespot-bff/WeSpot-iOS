@@ -24,6 +24,7 @@ public final class WSGlobalStateService: WSGlobalServiceProtocol {
 
 public enum WSGlobalStateType {
     case toggleStatus(_ type: VoteTypes)
+    case didTappedRevokeButton(_ isSelected: Bool)
     case didTappedAccountEditButton(_ isSelected: Bool)
     case didTappedIntroduceButton(_ isUpdate: Bool)
     case didTappedAccountConfirmButton(_ isSelected: Bool)

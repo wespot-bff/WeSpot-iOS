@@ -27,6 +27,7 @@ public class UserDefaultsManager {
         case voteStub
         case expiredDate
         case lastPromptedVersion
+        case communityAlarm
     }
     
     @UserDefaultsWrapper(key: Key.isAccessed.rawValue, defaultValue: false)
@@ -37,6 +38,9 @@ public class UserDefaultsManager {
     
     @UserDefaultsWrapper(key: Key.refreshToken.rawValue, defaultValue: "")
         public var refreshToken: String?
+    
+    @UserDefaultsWrapper(key: Key.communityAlarm.rawValue, defaultValue: true)
+        public var communityAlarm: Bool
     
     @UserDefaultsWrapper(key: Key.userName.rawValue, defaultValue: "")
         public var userName: String?

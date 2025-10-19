@@ -30,6 +30,12 @@ struct DomainAssembly: Assembly {
             return FetchMajorAppVersionUseCase(commonRepository: repository)
         }
         
+        container.register(UpdateAllowPolicyUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return UpdateAllowPolicyUseCase(commonRepository: repository)
+            
+        }
+        
         container.register(FetchMinorAppVersionUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
             return FetchMinorAppVersionUseCase(commonRepository: repository)

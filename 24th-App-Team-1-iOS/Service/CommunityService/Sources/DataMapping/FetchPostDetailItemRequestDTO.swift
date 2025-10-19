@@ -11,9 +11,9 @@ import Foundation
 public struct FetchPostDetailItemRequestDTO: Encodable {
     let categoryId: Int
     let inquirySize: Int
-    let cursorId: Int
+    let cursorId: Int?
     
-    public init(categoryId: Int, inquirySize: Int, cursorId: Int) {
+    public init(categoryId: Int, inquirySize: Int, cursorId: Int?) {
         self.categoryId = categoryId
         self.inquirySize = inquirySize
         self.cursorId = cursorId

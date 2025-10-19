@@ -22,24 +22,53 @@ public extension UIViewController {
     }
     
     func shareToInstagramStory(to view: UIView) {
-        guard let url = URL(string: "instagram-stories://share?source_application="+"123444") else { return }
+        guard let url = URL(string: "instagram-stories://share?source_application=123444") else { return }
 
-        view.setNeedsLayout()
-        let image = view.asImage()
-        var imageData = image.pngData()
-
-        let pastboardItems: [String: Any] = ["com.instagram.sharedSticker.stickerImage": imageData]
-        let pastboardOptions = [UIPasteboard.OptionsKey.expirationDate: Date().addingTimeInterval(300)]
-
-        UIPasteboard.general.setItems([pastboardItems], options: pastboardOptions)
-
-        if UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
-        } else {
-            guard let instagramURL = URL(string: "https://apps.apple.com/kr/app/instagram/id389801252") else {
-                return
+        view.subviews.forEach { subview in
+            if let effectView = subview as? WSIntensityVisualEffectView {
+                effectView.setNeedsDisplay()
+                effectView.layoutIfNeeded()
             }
-            UIApplication.shared.open(instagramURL)
+            findAndPrepareEffectViews(in: subview)
+        }
+        
+        view.layoutIfNeeded()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            let renderer = UIGraphicsImageRenderer(size: view.bounds.size)
+            let image = renderer.image { context in
+                view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+            }
+            
+            guard let imageData = image.pngData() else { return }
+
+            let pastboardItems: [String: Any] = [
+                "com.instagram.sharedSticker.stickerImage": imageData
+            ]
+            let pastboardOptions = [
+                UIPasteboard.OptionsKey.expirationDate: Date().addingTimeInterval(300)
+            ]
+
+            UIPasteboard.general.setItems([pastboardItems], options: pastboardOptions)
+
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            } else {
+                guard let instagramURL = URL(string: "https://apps.apple.com/kr/app/instagram/id389801252") else {
+                    return
+                }
+                UIApplication.shared.open(instagramURL)
+            }
+        }
+    }
+
+    private func findAndPrepareEffectViews(in view: UIView) {
+        view.subviews.forEach { subview in
+            if let effectView = subview as? WSIntensityVisualEffectView {
+                effectView.setNeedsDisplay()
+                effectView.layoutIfNeeded()
+            }
+            findAndPrepareEffectViews(in: subview)
         }
     }
     

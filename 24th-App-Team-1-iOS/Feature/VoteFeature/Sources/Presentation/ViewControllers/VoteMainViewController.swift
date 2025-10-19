@@ -35,6 +35,10 @@ public final class VoteMainViewController: BaseViewController<VoteMainViewReacto
     //MARK: - Configure
     public override func setupUI() {
         super.setupUI()
+        //TODO: 파베 연결 후 화면 띄우도록 수정
+//        let vc = DependencyContainer.shared.injector.resolve(TermsViewController.self)
+
+//        self.navigationController?.pushViewController(vc, animated: true)
         addChild(votePageViewController)
         view.addSubviews(voteToggleView, votePageViewController.view)
     }

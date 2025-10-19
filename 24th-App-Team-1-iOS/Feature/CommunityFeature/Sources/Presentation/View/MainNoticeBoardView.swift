@@ -11,6 +11,7 @@ import ComposableArchitecture
 import CommunityDomain
 import Extensions
 import Util
+import Kingfisher
 import NotificationFeature
 
 
@@ -69,6 +70,7 @@ public struct MainNoticeBoardView: View {
                                                     } onTapScrap: {
                                                         viewStore.send(.view(.didTappedScrap(post.id)))
                                                     }
+                                                    .id(post.id)
                                                     .onAppear {
                                                         guard element.id == list.items.last?.id else { return }
                                                         viewStore.send(.view(.loadNextPage))
@@ -207,7 +209,8 @@ public struct MainNoticeBoardView: View {
                         viewStore.send(.view(.didSelectDetailChip(chip)))
                         selectedDetailChip = chip
                         showCategoryPost = true
-                    }
+                    },
+                    selectedCategoryId: nil
                 )
                 .presentationCornerRadius(25)
                 .presentationDetents([.height(423)])
@@ -232,7 +235,7 @@ struct CategorySelectorWithDropdown: View {
     var body: some View {
         ZStack {
             CategorySelectorView(chips: chips, selected: selected, onSelect: onSelect)
-                .padding(.trailing, 60)
+                .padding(.trailing, 80)
                 .frame(height: 43)
             HStack {
                 Spacer()
@@ -309,7 +312,7 @@ private struct HotPostBannerView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 4) {
-                AsyncImage(url: URL(string: hotPostEntity.titleIconURL))
+                KFImage(URL(string: hotPostEntity.titleIconURL))
                 
                 Text(hotPostEntity.titleText.text)
                     .font(.typography(hotPostEntity.titleText.typography))
@@ -339,23 +342,20 @@ private struct HotPostInnerCardView: View {
         let profileHeight = CGFloat(inner.profileImageSizeHeight ?? 24)
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 6) {
-                AsyncImage(url: URL(string: inner.profileImageURL)) { phase in
-                    switch phase {
-                    case .empty:
+                KFImage(URL(string: inner.profileImageURL))
+                    .placeholder {
                         ProgressView()
-                            .frame(width: profileWidth, height: profileWidth)
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: profileWidth, height: profileHeight)
-                            .clipShape(Circle())
-                    default:
-                        Circle()
-                            .fill(.gray.opacity(0.3))
-                            .frame(width: profileWidth, height: profileHeight)
                     }
-                }
+                    .onFailure { error in
+
+                    }
+                    .resizable()
+                    .scaledToFill()
+                    .frame(
+                        width: CGFloat(profileWidth),
+                        height: CGFloat(profileHeight)
+                    )
+                    .clipShape(Circle())
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(inner.nickname.text)
@@ -426,7 +426,7 @@ private struct VoteBannerView: View {
                     Spacer()
                     
                     Button(action: {}) {
-                        AsyncImage(url: URL(string: voteEntity.actionIconURL))
+                        KFImage(URL(string: voteEntity.actionIconURL))
                             .frame(width: 36, height: 36)
                             .background(Circle().fill(Color.black.opacity(0.8)))
                     }
@@ -492,22 +492,22 @@ struct PostView: View {
             }
             
             HStack(alignment: .top, spacing: 12) {
-                AsyncImage(url: URL(string: content.header.profileImageURL)) { state in
-                    switch state {
-                    case .empty: ProgressView()
-                    case .success(let image): image.resizable()
-                    @unknown default: EmptyView()
+                KFImage(URL(string: content.header.profileImageURL))
+                    .placeholder {
+                        ProgressView()
                     }
-                }
-                .frame(width: CGFloat(content.header.profileImageWidth),
-                       height: CGFloat(content.header.profileImageHeight))
-                .clipShape(Circle())
-                let _ = print("프로필 이미지 값 \(content.header.profileImageWidth)")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(
+                        width: CGFloat(content.header.profileImageWidth),
+                        height: CGFloat(content.header.profileImageHeight)
+                    )
+                    .clipShape(Circle())
                 
                 VStack(alignment: .leading, spacing: 4) {
                     if let category = content.header.category {
                         
-                        let _ = print("카테고리 아이콘 이미지 : \(category.iconURL)")
+
                         HStack(spacing: 0) {
                             Text(category.text)
                                 .font(.typography(category.typography))
@@ -532,7 +532,7 @@ struct PostView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 if let contentTitle = content.info.title {
-                    let _ = print("데이터 확인합니다 : \(contentTitle.typography)")
+
                     Text(contentTitle.text)
                         .font(.typography(contentTitle.typography))
                         .foregroundColor(.token(contentTitle.color))
@@ -540,7 +540,7 @@ struct PostView: View {
                         .frame(maxWidth: .infinity, maxHeight: 21, alignment: .leading)
                 }
                 
-                let _ = print("데이터 확인합니다 : \(content.info.description.typography)")
+
                 Text(content.info.description.text)
                     .font(.typography(content.info.description.typography))
                     .foregroundColor(.token(content.info.description.color))
@@ -561,57 +561,43 @@ struct PostView: View {
                 switch section {
                 case .images(let images) where !images.isEmpty:
                     if images.count == 1 {
-                        AsyncImage(url: URL(string: images[0].url)) { phase in
-                            switch phase {
-                            case .empty:
-                                ProgressView()
-                                    .frame(width: 336, height: 155)
-                            case .success(let img):
-                                img
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 336, height: getImageHeight(for: images[0], maxWidth: 336))
-                                    .clipped()
-                                    .cornerRadius(12)
-                            case .failure:
-                                Color.gray
-                                    .frame(width: 336, height: 155)
-                                    .overlay(
-                                        Image(systemName: "photo")
-                                    )
-                                    .cornerRadius(12)
-                            @unknown default:
-                                EmptyView()
-                            }
-                        }
-                        .padding(.vertical, 8)
+                        KFImage(URL(string: images[0].url))
+                             .placeholder {
+                                 ProgressView()
+                                     .frame(width: 336, height: 155)
+                             }
+                             .onFailure { _ in
+                                 Color.gray
+                                     .frame(width: 336, height: 155)
+                                     .overlay(Image(systemName: "photo"))
+                                     .cornerRadius(12)
+                             }
+                             .resizable()
+                             .scaledToFill()
+                             .frame(width: 336, height: getImageHeight(for: images[0], maxWidth: 336))
+                             .clipped()
+                             .cornerRadius(12)
+                             .padding(.vertical, 8)
                     } else {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
                                 ForEach(Array(images.enumerated()), id: \.offset) { _, image in
-                                    AsyncImage(url: URL(string: image.url)) { phase in
-                                        switch phase {
-                                        case .empty:
+                                    KFImage(URL(string: image.url))
+                                        .placeholder {
                                             ProgressView()
                                                 .frame(width: 226, height: 226)
-                                        case .success(let img):
-                                            img
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 226, height: 226)
-                                                .clipped()
-                                                .cornerRadius(12)
-                                        case .failure:
+                                        }
+                                        .onFailure { _ in
                                             Color.gray
                                                 .frame(width: 226, height: 226)
-                                                .overlay(
-                                                    Image(systemName: "photo")
-                                                )
+                                                .overlay(Image(systemName: "photo"))
                                                 .cornerRadius(12)
-                                        @unknown default:
-                                            EmptyView()
                                         }
-                                    }
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 226, height: 226)
+                                        .clipped()
+                                        .cornerRadius(12)
                                 }
                             }
                             .padding(.vertical, 8)
@@ -633,22 +619,20 @@ struct PostView: View {
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            AsyncImage(url: URL(string: reaction.iconURL)) { state in
-                                switch state {
-                                case .empty:
+                            KFImage(URL(string: reaction.iconURL))
+                                .placeholder {
                                     ProgressView()
                                         .frame(width: 14, height: 14)
-                                case .success(let image):
-                                    image
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .foregroundColor(reaction.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor : .token(reaction.iconColor))
-                                @unknown default:
-                                    EmptyView()
                                 }
-                            }
-                            .frame(width: 14, height: 14)
+                                .resizable()
+                                .renderingMode(.template)
+                                .scaledToFit()
+                                .foregroundColor(
+                                    reaction.selected
+                                        ? DesignSystemAsset.Colors.primary300.swiftUIColor
+                                        : .token(reaction.iconColor)
+                                )
+                                .frame(width: 14, height: 14)
                             
                             if reaction.count.text != "0" {
                                 Text(reaction.count.text)
@@ -665,19 +649,20 @@ struct PostView: View {
                     onTapScrap()
                 }) {
                     HStack(spacing: 4) {
-                        AsyncImage(url: URL(string: content.footer.scrap.iconURL)) { state in
-                            switch state {
-                            case .empty:    ProgressView().frame(width: 16, height: 16)
-                            case .success(let image):
-                                image
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .foregroundColor(content.footer.scrap.selected ? DesignSystemAsset.Colors.primary300.swiftUIColor :  .token(content.footer.scrap.iconColor))
-                            @unknown default: EmptyView()
+                        KFImage(URL(string: content.footer.scrap.iconURL))
+                            .placeholder {
+                                ProgressView()
+                                    .frame(width: 16, height: 16)
                             }
-                        }
-                        .frame(width: 14, height: 14)
+                            .resizable()
+                            .renderingMode(.template)
+                            .scaledToFit()
+                            .foregroundColor(
+                                content.footer.scrap.selected
+                                    ? DesignSystemAsset.Colors.primary300.swiftUIColor
+                                    : .token(content.footer.scrap.iconColor)
+                            )
+                            .frame(width: 14, height: 14)
                         
                         Text("스크랩")
                             .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 12))

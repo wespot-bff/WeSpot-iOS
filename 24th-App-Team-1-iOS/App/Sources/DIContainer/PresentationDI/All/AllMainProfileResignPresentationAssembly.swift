@@ -14,8 +14,10 @@ import Swinject
 struct AllMainProfileResignPresentationAssembly: Assembly {
     
     func assemble(container: Container) {
-        container.register(ProfileResignBottomSheetVieReactor.self) { _ in
-            return ProfileResignBottomSheetVieReactor()
+        container.register(ProfileResignBottomSheetVieReactor.self) { resovler in
+            let createUserResignUseCaseProtocol = resovler.resolve(CreateUserResignUseCaseProtocol.self)!
+            
+            return ProfileResignBottomSheetVieReactor(createUserResignUseCase: createUserResignUseCaseProtocol)
         }
         
         container.register(ProfileResignBottomSheetView.self) { resolver in

@@ -29,6 +29,7 @@ public final class SignInViewReactor: Reactor {
         @Pulse var signUpToken: SignUpTokenEntity?
         @Pulse var isLoading: Bool
         @Pulse var isShow: Bool
+        @Pulse var isSuccess: Bool
     }
     
     public enum Action {
@@ -40,6 +41,7 @@ public final class SignInViewReactor: Reactor {
         case setSignUpToken(SignUpTokenEntity)
         case setLoginUser(LoginUserEntity)
         case setLoading(Bool)
+        case setRevoke(Bool)
         case setTransitionFlag(Bool)
     }
     
@@ -51,11 +53,27 @@ public final class SignInViewReactor: Reactor {
                                               identityToken: "",
                                               fcmToken: ""),
             isLoading: false,
-            isShow: false
+            isShow: false,
+            isSuccess: false
         )
     }
     
     //MARK: - Reactor Method
+    
+    public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let showToggleState = globalService.event
+            .flatMap { event -> Observable<Mutation> in
+                switch event {
+                case let .didTappedRevokeButton(isSuccess):
+                    print("탈퇴 뮤테이션 입니다 : \(isSuccess)")
+                    return .just(.setRevoke(isSuccess))
+                default:
+                    return .empty()
+                }
+                
+            }
+        return .merge(mutation, showToggleState)
+    }
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
@@ -102,6 +120,8 @@ public final class SignInViewReactor: Reactor {
                                        type: .refreshToken)
             
             NotificationCenter.default.post(name: .dismissProfileOnboardingView, object: nil)
+        case let .setRevoke(isSuccess):
+            newState.isSuccess = isSuccess
         }
         return newState
     }
