@@ -78,7 +78,7 @@ public struct HotPostItemDTO: Decodable {
             let title: StyledTextDTO?
             let description: StyledTextDTO?
         }
-
+        let targetId: Int
         let headerSection: HeaderSectionDTO
         let infoSection: InfoSectionDTO?
         let createdAt: StyledTextDTO
@@ -92,6 +92,8 @@ public struct HotPostItemDTO: Decodable {
             else { return nil }
             
             return HotPostInner(
+                id: targetId,  // ✅ targetId를 id로 사용
+                targetId: targetId,  // ✅ targetId 전달
                 profileImageURL: headerSection.profileImage.url,
                 profileImageSizeWidth: headerSection.profileImage.width ?? 0,
                 profileImageSizeHeight: headerSection.profileImage.height ?? 0,

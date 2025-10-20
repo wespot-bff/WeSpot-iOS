@@ -25,6 +25,9 @@ public struct MainNoticeBoardView: View {
     @State private var showCategoryPost = false
     @State private var showNotification = false
     @State private var selectedDetailChip: CategoryChipsEntity? = nil
+    @State private var showHotPostDetail = false
+    @State private var selectedHotPostId: String = ""
+    
     public init(store: StoreOf<MainNoticeBoardFeature>) {
         self.store = store
         self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
@@ -41,6 +44,19 @@ public struct MainNoticeBoardView: View {
                         VStack(spacing: 0) {
                             Color.clear
                                 .frame(height: navBarHeight - 10)
+                            NavigationLink(
+                                destination: FeedDetailView(
+                                    store: .init(
+                                        initialState: FeedDetailFeature.State(postId: selectedHotPostId),
+                                        reducer: { FeedDetailFeature() }
+                                    )
+                                ),
+                                isActive: $showHotPostDetail,
+                                label: { EmptyView() }
+                            )
+                            .hidden()
+                            
+                            
                             CategorySelectorWithDropdown(
                                 chips: viewStore.filterChips, selected: viewStore.selectedChip) { chip in
                                     viewStore.send(.view(.didSelectChip(chip)))
@@ -82,8 +98,15 @@ public struct MainNoticeBoardView: View {
                                             VoteBannerView(voteEntity: vote)
                                                 .padding(.horizontal, 20)
                                                 .padding(.top, 24)
+                                                .onTapGesture {
+                                                    NotificationCenter.default.post(name: .showVoteMainView, object: nil)
+                                                }
                                         case .hotPost(let hotpost):
-                                            HotPostBannerView(hotPostEntity: hotpost)
+                                            HotPostBannerView(hotPostEntity: hotpost) { selectedInner in
+                                                selectedHotPostId = String(selectedInner.targetId)
+                                                showHotPostDetail = true
+                                                
+                                            }
                                                 .padding(.top, 24)
                                         }
                                     }
@@ -197,6 +220,32 @@ public struct MainNoticeBoardView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarHidden(true)
             }
+            .sheet(isPresented: viewStore.binding(
+                get: \.isShowingRestrictionSheet,
+                send: { isShowing in
+                    if isShowing {
+                        return .view(.onAppear)
+                    } else {
+                        return .view(.dismissRestrictionSheet)
+                    }
+                }
+            )
+        ) {
+              GeometryReader { proxy in
+                  if let restriction = viewStore.restrictionEntity {
+                      RestrictionBottomSheetView(
+                        restriction: restriction,
+                        onDismiss: { viewStore.send(.view(.dismissRestrictionSheet)) },
+                        onContactSupport: { viewStore.send(.view(.contactSupport))  }
+                      )
+                      .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                      .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
+                  }
+              }
+              .presentationDetents([.height(400)])
+              .presentationDragIndicator(.hidden)
+              .presentationCornerRadius(20)
+            }
             .sheet(
                 isPresented: viewStore.binding(
                     get: \.isShowingCategorySheet,
@@ -272,6 +321,89 @@ struct CategorySelectorWithDropdown: View {
     }
 }
 
+struct RestrictionBottomSheetView: View {
+    let restriction: RestrictionsEntity
+    let onDismiss: () -> Void
+    let onContactSupport: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(restriction.restrictionTitle)
+                .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 18))
+                .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, 28)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(restriction.restrictionDetails, id: \.self) { detail in
+                    Text(detail)
+                        .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                        .foregroundColor(DesignSystemAsset.Colors.gray300.swiftUIColor)
+                        .multilineTextAlignment(.leading)
+                        .padding(.bottom, 10)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+
+            Spacer()
+            if restriction.showInquiryButton {
+                HStack(alignment: .bottom, spacing: 8) {
+                    Button(action: onDismiss) {
+                        Text("닫기")
+                            .font(DesignSystemFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                            .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(DesignSystemAsset.Colors.gray500.swiftUIColor)
+                            )
+                    }
+                    
+                    Button(action: onContactSupport) {
+                        Text("1:1 문의하기")
+                            .font(DesignSystemFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(DesignSystemAsset.Colors.primary300.swiftUIColor)
+                            )
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 20)
+            } else {
+                HStack(alignment: .bottom) {
+                    Button(action: onDismiss) {
+                        Text(restriction.confirmButtonText)
+                            .font(DesignSystemFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(DesignSystemAsset.Colors.primary300.swiftUIColor)
+                            )
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 20)
+            }
+        }
+        .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
+        .cornerRadius(20, corners: [.topLeft, .topRight])
+    }
+}
+
+
+
+
 private struct CategorySelectorView: View {
     let chips: [FilterChipEntity]
     let selected: FilterChipEntity?
@@ -308,6 +440,7 @@ private struct CategorySelectorView: View {
 
 private struct HotPostBannerView: View {
     let hotPostEntity: HotPostItem
+    let onTapPost: (HotPostInner) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -325,6 +458,9 @@ private struct HotPostBannerView: View {
                     let innerPosts = hotPostEntity.innerPosts.compactMap { $0 }
                     ForEach(innerPosts) { inner in
                         HotPostInnerCardView(inner: inner)
+                            .onTapGesture {
+                                onTapPost(inner)
+                            }
                     }
                 }
                 .padding(.horizontal, 4)

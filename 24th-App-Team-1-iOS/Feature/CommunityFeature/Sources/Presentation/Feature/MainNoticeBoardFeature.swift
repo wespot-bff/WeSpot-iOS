@@ -18,6 +18,8 @@ public struct MainNoticeBoardFeature {
     @Dependency(\.updatePostScrapUseCase) var updatePostScrapUseCase: UpdatePostScrapUseCaseProtocol
     @Dependency(\.updatePostLikeUseCase) var updatePostLikeUseCase: UpdatePostLikeUseCaseProtocol
     @Dependency(\.fetchCategoryDetailItemUseCase) var fetchCategoryDetailUseCase: FetchCategoryDetailItemUseCaseProtocol
+    @Dependency(\.fetchRestrictionsUseCase) var fetchRestrictionsUseCase: FetchRestrictionsUseCaseProtocol
+    
     
     
     
@@ -36,6 +38,8 @@ public struct MainNoticeBoardFeature {
         var isLoadingPage = false
         var nextCursor: Int? = nil
         var hasNext: Bool = false
+        var restrictionEntity: RestrictionsEntity? = nil
+        var isShowingRestrictionSheet: Bool = false
         
         public init(filterChips: [FilterChipEntity] = [], postListItems: PostListEntity? = nil) {
             self.filterChips = filterChips
@@ -64,6 +68,8 @@ public struct MainNoticeBoardFeature {
         case likeResponseFailure(postId: Int, errorMessage: String)
         case scrapResponseSuccess(postId: Int)
         case scrapResponseFailure(postId: Int, errorMessage: String)
+        case dismissRestrictionSheet
+        case contactSupport
         case onAppear
     }
     
@@ -76,6 +82,7 @@ public struct MainNoticeBoardFeature {
         case filterChipsResponse(TaskResult<[FilterChipEntity]>)
         case postListResponse( TaskResult<PostListEntity>,  isLoadMore: Bool)
         case detailsResponse(TaskResult<[CategoryDetailEntity]>)
+        case restrictionResponse(TaskResult<RestrictionsEntity>)
     }
     
     public init() {}
@@ -98,10 +105,12 @@ public struct MainNoticeBoardFeature {
                     let query = FetchPostAllItemRequestQuery(majorCategoryName: "", inquirySize: 10)
                     async let chips = fetchCategoryItemUseCase.execute()
                     async let posts = fetchPostItemListUseCase.execute(query:query)
+                    async let restrictions = fetchRestrictionsUseCase.execute()
                     do {
-                        let (chips, posts) = try await (chips, posts)
+                        let (chips, posts, restrictions) = try await (chips, posts, restrictions)
                         await send(.inner(.filterChipsResponse(.success(chips))))
                         await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
+                        await send(.inner(.restrictionResponse(.success(restrictions))))
                     } catch {
                         await send(.inner(.filterChipsResponse(.failure(error))))
                         await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
@@ -310,6 +319,22 @@ public struct MainNoticeBoardFeature {
                     await send(.inner(.postListResponse(.failure(error), isLoadMore: true)))
                 }
               }
+            case .inner(.restrictionResponse(.failure)):
+                return .none
+
+            case .view(.dismissRestrictionSheet):
+                state.isShowingRestrictionSheet = false
+                return .none
+
+            case .view(.contactSupport):
+                state.isShowingRestrictionSheet = false
+                return .none
+            case .inner(.restrictionResponse(.success(let restriction))):
+                state.restrictionEntity = restriction
+                if restriction.isRestricted {
+                    state.isShowingRestrictionSheet = true
+                }
+                return .none
             }
         }
     }

@@ -10,6 +10,7 @@ import Foundation
 
 
 public protocol CommunityRepositoryProtocol {
+    func fetchRestrictionsItems() async throws -> RestrictionsEntity
     func fetchCategoryItems() async throws -> [FilterChipEntity]
     func fetchCategoryDetailImtes() async throws -> [CategoryDetailEntity]
     func uploadPostItem(body: UploadPostItemRequest) async throws -> Bool

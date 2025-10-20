@@ -22,6 +22,7 @@ public final class WSTabBarViewController: UITabBarController {
     deinit {
         NotificationCenter.default.removeObserver(self, name: .hideTabBar, object: nil)
         NotificationCenter.default.removeObserver(self, name: .showTabBar, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .showVoteMainView, object: nil)
     }
     
     // MARK: - Functions
@@ -116,6 +117,13 @@ public final class WSTabBarViewController: UITabBarController {
     private func setupNotificationCenter() {
         NotificationCenter.default.addObserver(self, selector: #selector(hideTabBar), name: .hideTabBar, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(showTabBar), name: .showTabBar, object: nil)
+        NotificationCenter.default.addObserver(
+            forName: .showVoteMainView,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.selectedIndex = 1
+        }
     }
     
     @objc private func hideTabBar() {

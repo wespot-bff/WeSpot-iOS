@@ -13,6 +13,7 @@ let communityFeature = Project.makeProject(
                 .SPM.tca,
                 .domain(module: .CommunityDomain),
                 .service(module: .CommunityService),
+                .domain(module: .CommonDomain),
                 .shared(module: .DesignSystem),
                 .feature(module: .NotificationFeature),
                 .core(module: .Util)

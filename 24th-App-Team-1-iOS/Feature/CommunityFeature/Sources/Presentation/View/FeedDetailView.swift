@@ -127,32 +127,6 @@ struct FeedDetailView: View {
                     }
                 }
             }
-            .customAlert(
-                isPresented: $showNormalAlert,
-                title: currentAlertType?.title ?? "",
-                message: currentAlertType?.subtitle ?? "",
-                primaryButtonText: "네",
-                secondaryButtonText: "아니요",
-                style: .normal,
-                primaryAction: {
-                    switch currentAlertType {
-                    case .deleteComment(let id):
-                        viewStore.send(.view(.didTappedDeleteComment(id)))
-                        
-                    case .deletePost(let id):
-                        viewStore.send(.view(.didTappedDeletePost(id)))
-                        
-                    case .blockUser(let userId):
-                        showPostReportView = true
-                        
-                    case .none:
-                        break
-                    }
-                },
-                secondaryAction: {
-                    viewStore.send(.view(.cancelDeleteComment))
-                }
-            )
             .background(
                 Group {
                     NavigationLink(
@@ -282,6 +256,14 @@ struct FeedDetailView: View {
                 .presentationCornerRadius(25)
                 .interactiveDismissDisabled(false)
             }
+            if viewStore.showReportToast {
+                BBToastView(type: .success(""))
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.spring(), value: store.showReportToast)
+                    .zIndex(999)
+            }
+            
+            
             if let toast = viewStore.toast {
                 BBToastView(type: toast)
                     .padding(.top, (UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0) + 40)
@@ -335,6 +317,33 @@ struct FeedDetailView: View {
                 DesignSystemAsset.Images.icCommunityDotFiled.swiftUIImage
             }
         })
+        .customAlert(
+            isPresented: $showNormalAlert,
+            title: currentAlertType?.title ?? "",
+            message: currentAlertType?.subtitle ?? "",
+            primaryButtonText: "네",
+            secondaryButtonText: "아니요",
+            style: .normal,
+            primaryAction: {
+                switch currentAlertType {
+                case .deleteComment(let id):
+                    viewStore.send(.view(.didTappedDeleteComment(id)))
+                    
+                case .deletePost(let id):
+                    viewStore.send(.view(.didTappedDeletePost(id)))
+                    
+                case .blockUser(let userId):
+                    viewStore.send(.view(.didTappedBlockPost(userId)))
+                    
+                case .none:
+                    break
+                }
+            },
+            secondaryAction: {
+                viewStore.send(.view(.cancelDeleteComment))
+            }
+        )
+        
         .onAppear {
             NotificationCenter.default.post(name: .hideTabBar, object: nil)
             viewStore.send(.view(.onAppear))

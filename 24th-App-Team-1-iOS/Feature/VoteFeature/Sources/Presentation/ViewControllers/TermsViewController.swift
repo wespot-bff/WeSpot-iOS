@@ -27,11 +27,12 @@ public final class TermsViewController: BaseViewController<TermsViewReactor> {
     private let confirmButton: WSButton = WSButton(wsButtonType: .default(12))
     
     
-    
-    
+
     public override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
         setupAttributedContent()
+        setupAutoLayout()
     }
     
     public override func viewWillAppear(_ animated: Bool) {
