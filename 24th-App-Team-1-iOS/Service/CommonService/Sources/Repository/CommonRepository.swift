@@ -92,6 +92,13 @@ public final class CommonRepository: CommonRepositoryProtocol {
             .asSingle()
     }
     
+    
+    public func fetchRestrictionsItems() async throws -> RestrictionsEntity {
+        let endPoint = CommonEndPoint.fetchRestriction
+        let responseDTO: FetchRestrictionsResponseDTO = try await networkAsyncService.request(endPoint: endPoint)
+        return responseDTO.toDomain()
+    }
+    
     public func createProfilePresignedURL(query: CreateProfilePresignedURLQuery) -> Single<CreateProfilePresignedURLEntity?> {
         let query = CreateProfilePresignedURLRequestDTO(imageExtension: query.imageExtension)
         let endpoint = CommonEndPoint.fetchProfilePresignedURL(query)

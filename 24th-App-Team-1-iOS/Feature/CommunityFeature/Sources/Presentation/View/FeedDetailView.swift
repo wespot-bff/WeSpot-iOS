@@ -127,32 +127,6 @@ struct FeedDetailView: View {
                     }
                 }
             }
-            .customAlert(
-                isPresented: $showNormalAlert,
-                title: currentAlertType?.title ?? "",
-                message: currentAlertType?.subtitle ?? "",
-                primaryButtonText: "네",
-                secondaryButtonText: "아니요",
-                style: .normal,
-                primaryAction: {
-                    switch currentAlertType {
-                    case .deleteComment(let id):
-                        viewStore.send(.view(.didTappedDeleteComment(id)))
-                        
-                    case .deletePost(let id):
-                        viewStore.send(.view(.didTappedDeletePost(id)))
-                        
-                    case .blockUser(let userId):
-                        showPostReportView = true
-                        
-                    case .none:
-                        break
-                    }
-                },
-                secondaryAction: {
-                    viewStore.send(.view(.cancelDeleteComment))
-                }
-            )
             .background(
                 Group {
                     NavigationLink(
@@ -245,8 +219,7 @@ struct FeedDetailView: View {
                         Button {
                             showBottomSheet = false
                             if let postEntity = viewStore.postEntity {
-                                currentAlertType = .blockUser(userId: String(postEntity.id))
-                                showNormalAlert = true
+                                showPostReportView = true
                             }
                         } label: {
                             Text("신고하기")
@@ -283,6 +256,14 @@ struct FeedDetailView: View {
                 .presentationCornerRadius(25)
                 .interactiveDismissDisabled(false)
             }
+            if viewStore.showReportToast {
+                BBToastView(type: .success(""))
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.spring(), value: store.showReportToast)
+                    .zIndex(999)
+            }
+            
+            
             if let toast = viewStore.toast {
                 BBToastView(type: toast)
                     .padding(.top, (UIApplication.shared.windows.first?.safeAreaInsets.top ?? 0) + 40)
@@ -336,6 +317,33 @@ struct FeedDetailView: View {
                 DesignSystemAsset.Images.icCommunityDotFiled.swiftUIImage
             }
         })
+        .customAlert(
+            isPresented: $showNormalAlert,
+            title: currentAlertType?.title ?? "",
+            message: currentAlertType?.subtitle ?? "",
+            primaryButtonText: "네",
+            secondaryButtonText: "아니요",
+            style: .normal,
+            primaryAction: {
+                switch currentAlertType {
+                case .deleteComment(let id):
+                    viewStore.send(.view(.didTappedDeleteComment(id)))
+                    
+                case .deletePost(let id):
+                    viewStore.send(.view(.didTappedDeletePost(id)))
+                    
+                case .blockUser(let userId):
+                    viewStore.send(.view(.didTappedBlockPost(userId)))
+                    
+                case .none:
+                    break
+                }
+            },
+            secondaryAction: {
+                viewStore.send(.view(.cancelDeleteComment))
+            }
+        )
+        
         .onAppear {
             NotificationCenter.default.post(name: .hideTabBar, object: nil)
             viewStore.send(.view(.onAppear))
@@ -646,7 +654,7 @@ struct FeedDetailView: View {
                                 showNormalAlert = true
                                 currentAlertType = .deleteComment(commentId: updatedComment.id)
                             } label: {
-                                Text("・ 삭제")
+                                Text("| 삭제")
                                     .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 11))
                                     .foregroundColor(DesignSystemAsset.Colors.gray400.swiftUIColor)
                             }

@@ -149,12 +149,21 @@ private enum DeleteCommentUseCaseKey: DependencyKey {
     static let liveValue: DeleteCommentUseCaseProtocol = DeleteCommentUseCase(communityRepository: CommunityRepositoryKey.liveValue)
 }
 
+private enum FetchRestrictionsUseCaseKey: DependencyKey {
+    static let liveValue: FetchRestrictionsUseCaseProtocol = FetchRestrictionsUseCase(communityRepository: CommunityRepositoryKey.liveValue)
+}
+
 private enum EditPostItemUseCaseKey: DependencyKey {
     static let liveValue: EditPostItemUseCaseProtocol = EditPostItemUseCase(communityRepository: CommunityRepositoryKey.liveValue)
 }
 
 
 public extension DependencyValues {
+    
+    var fetchRestrictionsUseCase: FetchRestrictionsUseCaseProtocol {
+        get { self[FetchRestrictionsUseCaseKey.self] }
+        set { self[FetchRestrictionsUseCaseKey.self] = newValue }
+    }
     
     var fetchReportReasonItemUseCase: FetchReportReasonItemUseCaseProtocol {
         get { self[FetchReportReasonItemUseCaseKey.self] }
@@ -322,6 +331,11 @@ public final class CommunityRepository: CommunityRepositoryProtocol {
         return response.toDomain()
     }
     
+    public func fetchRestrictionsItems() async throws -> RestrictionsEntity {
+        let endPoint = CommonEndPoint.fetchRestriction
+        let responseDTO: FetchRestrictionsResponseDTO = try await networkService.request(endPoint: endPoint)
+        return responseDTO.toDomain()
+    }
     
     public func updateCommentReport(_ commentId: String, body: ReportReasonRequest) async throws -> Bool {
         var requestItemDTO: [CreateReportReasonRequesItemtDTO] = []

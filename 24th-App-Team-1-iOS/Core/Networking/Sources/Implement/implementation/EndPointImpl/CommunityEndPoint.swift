@@ -43,6 +43,7 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
     case editPostItem(postId: Int, body: Encodable)
     case deletePostItem(Int)
     case fetchReportItem
+    case fetchRestriction
     
     
     public var spec: WSNetworkSpec {
@@ -97,6 +98,8 @@ public enum CommunityEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .put, url: "\(WSNetworkConfigure.baseURL)/post/\(postId)")
         case .fetchReportItem:
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/reports")
+        case .fetchRestriction:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/restrictions/me" )
         }
     }
     

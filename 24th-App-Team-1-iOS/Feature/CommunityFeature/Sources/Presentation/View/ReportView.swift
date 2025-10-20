@@ -19,6 +19,7 @@ struct ReportReasonView: View {
     @FocusState private var isTextFieldFocused: Bool
     @State private var shouldNavigate = false
     @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.dismiss) private var dismiss
 
     public init(store: StoreOf<ReportFeature>) {
         self.store = store
@@ -36,13 +37,6 @@ struct ReportReasonView: View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
                 DesignSystemAsset.Colors.gray900.swiftUIColor.ignoresSafeArea()
-
-                NavigationLink(
-                    destination: MainNoticeBoardView(store: .init(initialState: MainNoticeBoardFeature.State(), reducer: { MainNoticeBoardFeature()})), // ← 실제 이동할 뷰
-                    isActive: $shouldNavigate,
-                    label: { EmptyView() }
-                )
-                .hidden()
                 
                 VStack(spacing: 0) {
                     customNavigationBar
@@ -64,6 +58,11 @@ struct ReportReasonView: View {
 
                     bottomConfirmButton
                 }
+            }
+        }
+        .onChange(of: viewStore.shouldDismiss) { newValue in
+            if newValue {
+                dismiss()
             }
         }
         .onAppear {
@@ -262,11 +261,6 @@ struct ReportReasonView: View {
             .disabled(viewStore.selectedReasonIds.isEmpty)
             .padding(.horizontal, 20)
             .padding(.bottom, 30)
-            .onChange(of: viewStore.shouldDismiss) { newValue in
-                if newValue {
-                    shouldNavigate = true
-                }
-            }
 
             if isTextFieldFocused {
                 Color.clear.frame(height: 0)

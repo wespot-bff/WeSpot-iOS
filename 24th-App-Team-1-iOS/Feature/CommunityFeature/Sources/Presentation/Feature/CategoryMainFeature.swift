@@ -30,6 +30,9 @@ public struct CategoryMainFeature {
         var isScrap: Bool = false
         var isLike: Bool = false
         var isEditable: Bool
+        var isLoadingPage = false
+        var nextCursor: Int? = nil
+        var hasNext: Bool = false
         
         public init(category: CategoryChipsEntity? = nil, isEditable: Bool = false) {
             self.category = category
@@ -57,12 +60,13 @@ public struct CategoryMainFeature {
         case likeResponseFailure(postId: Int, errorMessage: String)
         case scrapResponseSuccess(postId: Int)
         case scrapResponseFailure(postId: Int, errorMessage: String)
+        case loadNextPage
     }
     
     public enum Internal {}
     
     public enum Inner {
-        case postListResponse(TaskResult<PostListEntity>)
+        case postListResponse(TaskResult<PostListEntity>, isLoadMore: Bool)
         case detailsResponse(TaskResult<[CategoryDetailEntity]>)
     }
 
@@ -75,73 +79,47 @@ public struct CategoryMainFeature {
             switch action {
             case .view(.onAppear):
                 let categoryId = state.category?.id
+                state.nextCursor = nil
+                state.hasNext = false
+                state.rawPostListItems = nil
+                state.postListEntity = nil
+                
                 return .run { send in
-                    let query = FetchPostDetailItemRequestQuery(categoryId: categoryId ?? 0, inquirySize: 10, cursorId: 10)
+                    let query = FetchPostDetailItemRequestQuery(categoryId: categoryId ?? 0, inquirySize: 20, cursorId: nil)
                     do {
                         let posts = try await fetchPostDetailListUseCase.execute(query: query)
-                        await send(.inner(.postListResponse(.success(posts))))
+                        await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
                     } catch {
-                        await send(.inner(.postListResponse(.failure(error))))
+                        await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
                     }
                 }
-            case .inner(.postListResponse(.success(let posts))):
-                var merged = posts
-                print("데이터를 확인합니다 : \(posts)")
-                merged.items = merged.items.map { element in
-                    switch element {
-                    case .post(var post):
-                        guard let content = post.content else { return element }
-                        if let override = state.overrides[post.id] {
-                            var newFooter = content.footer
-                            
-                            if let isLiked = override.isLiked,
-                               let likeIdx = newFooter.reactions.firstIndex(where: { $0.type == "Like" }) {
-                                var like = newFooter.reactions[likeIdx]
-                                like.selected = isLiked
-                                if let baseCount = Int(like.count.text.replacingOccurrences(of: ",", with: "")) {
-                                    let final = baseCount + override.likeCountDelta
-                                    like.count = StyledText(
-                                        text: "\(max(0, final))",
-                                        color: like.count.color,
-                                        typography: like.count.typography,
-                                        maxLine: like.count.maxLine
-                                    )
-                                }
-                                newFooter.reactions[likeIdx] = like
-                            }
-                            
-                            if let isScrapped = override.isScrapped {
-                                let old = newFooter.scrap
-                                newFooter.scrap = Scrap(
-                                    iconURL: old.iconURL,
-                                    iconColor: old.iconColor,
-                                    selected: isScrapped
-                                )
-                            }
-                            
-                            let newContent = PostContent(
-                                category: content.category,
-                                header: content.header,
-                                info: content.info,
-                                contentSection: content.contentSection,
-                                footer: newFooter,
-                                button: content.button
-                            )
-                            post = PostItem(id: post.id, type: post.type, content: newContent)
-                            return .post(post)
-                        }
+            case .inner(.postListResponse(.success(let posts),  let isLoadMore)):
+                state.isLoadingPage = false
+                state.nextCursor = posts.lastCursorId
+                state.hasNext = posts.hasNext
+                
+                if isLoadMore {
+                    if var raw = state.rawPostListItems {
+                        let beforeCount = raw.items.count
+                        raw.items.append(contentsOf: posts.items)
+                        raw.lastCursorId = posts.lastCursorId
+                        raw.hasNext = posts.hasNext
+                        state.rawPostListItems = raw
+                    } else {
                         state.rawPostListItems = posts
-                        applyOverrides(to: &state)
-                        return .post(post)
-                    default:
-                        return element
                     }
+                } else {
+                    state.rawPostListItems = posts
                 }
-                state.postListEntity = merged
+                
+                applyOverrides(to: &state)
+
+             
                 return .none
             case .view(.binding):
                 return .none
-            case .inner(.postListResponse(.failure(_))):
+            case .inner(.postListResponse(.failure, _)):
+                state.isLoadingPage = false
                 return .none
             case .binding:
                 return .none
@@ -233,16 +211,41 @@ public struct CategoryMainFeature {
             case .view(.didSelectChip(let chip)):
                 state.category = chip
                 state.isShowingCategorySheet = false
+                state.nextCursor = nil
+                state.hasNext = false
+                state.rawPostListItems = nil
+                state.postListEntity = nil
+                
                 
                 return .run { send in
-                    let query = FetchPostDetailItemRequestQuery(categoryId: chip.id, inquirySize: 10, cursorId: 10)
+                    let query = FetchPostDetailItemRequestQuery(categoryId: chip.id, inquirySize: 20, cursorId: nil)
                     async let postsUsecase = fetchPostDetailListUseCase.execute(query: query)
 
                     do {
                         let posts = try await postsUsecase
-                        await send(.inner(.postListResponse(.success(posts))))
+                        await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
                     } catch {
-                        await send(.inner(.postListResponse(.failure(error))))
+                        await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))         }
+                }
+            case .view(.loadNextPage):
+                guard !state.isLoadingPage, state.hasNext else {
+                    return .none
+                }
+                
+                state.isLoadingPage = true
+                let categoryId = state.category?.id
+                let query = FetchPostDetailItemRequestQuery(
+                    categoryId: categoryId ?? 0,
+                    inquirySize: 20,
+                    cursorId: state.nextCursor
+                )
+                
+                return .run { send in
+                    do {
+                        let response = try await fetchPostDetailListUseCase.execute(query: query)
+                        await send(.inner(.postListResponse(.success(response), isLoadMore: true)))
+                    } catch {
+                        await send(.inner(.postListResponse(.failure(error), isLoadMore: true)))
                     }
                 }
             }

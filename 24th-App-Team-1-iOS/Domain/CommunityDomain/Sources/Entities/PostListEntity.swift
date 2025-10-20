@@ -87,7 +87,8 @@ public struct HotPostItem: Identifiable, Equatable {
 
 
 public struct HotPostInner: Identifiable ,Equatable {
-    public let id: String
+    public let id: Int
+    public let targetId: Int
     public let profileImageURL: String
     public let profileImageSizeWidth: Int?
     public let profileImageSizeHeight: Int?
@@ -100,7 +101,8 @@ public struct HotPostInner: Identifiable ,Equatable {
     public let gradationAngle: Int
     
     public init(
-        id: String = UUID().uuidString,
+        id: Int,
+        targetId: Int,
         profileImageURL: String,
         profileImageSizeWidth: Int?,
         profileImageSizeHeight: Int?,
@@ -113,6 +115,7 @@ public struct HotPostInner: Identifiable ,Equatable {
         gradationAngle: Int
     ) {
         self.id = id
+        self.targetId = targetId
         self.profileImageURL = profileImageURL
         self.profileImageSizeWidth = profileImageSizeWidth
         self.profileImageSizeHeight = profileImageSizeHeight

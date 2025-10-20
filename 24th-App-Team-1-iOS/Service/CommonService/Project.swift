@@ -13,6 +13,8 @@ let loginService = Project.makeProject(
     targets: [
         .service(module: .CommonService, dependencies: [
             .core(module: .Networking),
+            .domain(module: .CommonDomain),
+            .service(module: .CommunityService),
             .shared(module: .ThirdPartyLib),
             .core(module: .Util),
             .SPM.firebaseRemoteConfig

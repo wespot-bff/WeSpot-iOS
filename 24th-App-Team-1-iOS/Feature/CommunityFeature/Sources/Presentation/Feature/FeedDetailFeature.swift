@@ -72,6 +72,8 @@ public struct FeedDetailFeature {
         var isLoke: Bool = false
         var isNotification: Bool = false
         var chatInputText: String = ""
+        var showReportToast: Bool = false
+        @Presents var report: ReportFeature.State?
         
         public init(postId: String) {
             self.postId = postId
@@ -82,6 +84,7 @@ public struct FeedDetailFeature {
         case view(View)
         case inner(Inner)
         case binding(BindingAction<State>)
+        case report(PresentationAction<ReportFeature.Action>)
     }
     
     @CasePathable
@@ -118,7 +121,8 @@ public struct FeedDetailFeature {
         case scrapResponseFailure(postId: Int, errorMessage: String)
         case commentNotificationSuccess(postId: Int)
         case commentNotificationFailure(postId: Int, errorMessage: String)
-        
+        case didTapReport(String)
+        case hideReportToast
     }
     
     public enum Inner: Equatable {
@@ -133,6 +137,10 @@ public struct FeedDetailFeature {
         
         Reduce { state, action in
             switch action {
+            case .view(.didTapReport(let id)):
+                state.report = ReportFeature.State(postId: state.postId)
+                return .none
+                
             case .binding:
                 
                 return .none
@@ -539,7 +547,21 @@ public struct FeedDetailFeature {
             case .view(.updatePostBlockResponseFailure(postId: let postId, errorMessage: let errorMessage)):
                 state.shouldDismiss = false
                 return .none
+            case .report(.presented(.inner(.reportResponseSuccess))):
+                state.showReportToast = true
+                state.report = nil
+                return .run { send in
+                    try await Task.sleep(for: .seconds(2))
+                    await send(.view(.hideReportToast))
+                }
+                
+            case .report(.presented(.inner(.reportResponseFailure(let message)))):
+                return .none
+            default:
+                return .none
             }
+        }.ifLet(\.$report, action: \.report) {
+            ReportFeature()
         }
     }
 }

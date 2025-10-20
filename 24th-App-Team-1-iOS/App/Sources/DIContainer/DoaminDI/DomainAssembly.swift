@@ -160,6 +160,12 @@ struct DomainAssembly: Assembly {
 
         
         // Profile
+        container.register(FetchRestrictionsUseCaseProtocol.self) { resolver in
+            let repository = resolver.resolve(CommonRepositoryProtocol.self)!
+            return FetchRestrictionsUseCase(commonRepository: repository)
+        }
+        
+        
         container.register(FetchUserProfileUseCaseProtocol.self) { resolver in
             let repository = resolver.resolve(CommonRepositoryProtocol.self)!
             return FetchUserProfileUseCase(commonRepository: repository)

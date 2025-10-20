@@ -31,7 +31,8 @@ struct VoteMainPresentationAssembly: Assembly {
         
         container.register(VoteMainViewReactor.self) { resolver in
             let fetchMinorAppVersionUseCase = resolver.resolve(FetchMinorAppVersionUseCaseProtocol.self)!
-            return VoteMainViewReactor(fetchMinorAppVersionUseCase: fetchMinorAppVersionUseCase)
+            let fetchRestrictionsUseCaseProtocol = resolver.resolve(FetchRestrictionsUseCaseProtocol.self)!
+            return VoteMainViewReactor(fetchMinorAppVersionUseCase: fetchMinorAppVersionUseCase, fetchRestrictionsUseCase: fetchRestrictionsUseCaseProtocol)
         }
         
         container.register(VoteMainViewController.self) { resolver in

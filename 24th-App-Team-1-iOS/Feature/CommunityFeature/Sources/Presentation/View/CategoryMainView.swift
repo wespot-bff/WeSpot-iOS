@@ -65,6 +65,11 @@ struct CategoryMainView: View {
                                 } onTapScrap: {
                                     
                                 }
+                                .onAppear {
+                                    if element.id == list.items.last?.id {
+                                        viewStore.send(.view(.loadNextPage))
+                                    }
+                                }
                                 .padding(.horizontal, 20)
                             }
                             

@@ -33,6 +33,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
     case uploadProfileImage(String)
     
     case fetchProfileOnboarding(Encodable)
+    /// 사용자 제한 계정 확인 API
+    case fetchRestriction
     
     public var spec: WSNetworkSpec {
         switch self {
@@ -52,6 +54,8 @@ public enum CommonEndPoint: WSNetworkEndPoint {
             return WSNetworkSpec(method: .put, url: presignedURL)
         case let .fetchProfileOnboarding(pushType):
             return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/update-modal")
+        case .fetchRestriction:
+            return WSNetworkSpec(method: .get, url: "\(WSNetworkConfigure.baseURL)/users/restrictions/me" )
         }
     }
     

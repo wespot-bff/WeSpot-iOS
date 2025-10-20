@@ -9,6 +9,9 @@ import ComposableArchitecture
 import Foundation
 import CommunityDomain
 
+public struct ReportSuccess: Equatable {
+    public init() {}
+}
 
 @Reducer
 public struct ReportFeature {
@@ -25,7 +28,7 @@ public struct ReportFeature {
         var selectedReasonIds: Set<Int> = []
         var etcText: String = ""
         var commentId: String?
-        
+        var didReportSuccess: Bool = false
         var isEtcSelected: Bool {
             let etcReasonId = reportEntity.first { $0.isEditable }?.id
             return etcReasonId.map { selectedReasonIds.contains($0) } ?? false
@@ -59,12 +62,15 @@ public struct ReportFeature {
         case didTapReason(Int)
         case didTapSubmit
         case updateEtcText(String)
+        case dismissView
     }
     
     public enum Inner: Equatable {
         case didFetchReportReasons([ReportReason])
         case fetchReportFailed(String)
         case didFinishReporting
+        case reportResponseSuccess
+        case reportResponseFailure(String)
     }
     
     public var body: some ReducerOf<Self> {
@@ -120,7 +126,12 @@ public struct ReportFeature {
                     
 
                     return .run { [postId = state.postId] send in
-                        _ = try await updatePostReportUseCase.execute(postId ?? "", body: request)
+                        do {
+                            try await updatePostReportUseCase.execute(postId ?? "", body: request)
+                            await send(.inner(.reportResponseSuccess))
+                        } catch {
+                            await send(.inner(.reportResponseFailure(error.localizedDescription)))
+                        }
                     }
                 } else {
                     let selectedReasons = state.reportEntity.filter {
@@ -141,7 +152,19 @@ public struct ReportFeature {
                     }
                 }
                 
+            case .inner(.reportResponseSuccess):
+                state.didReportSuccess = true
+                return .run { send in
+                    try await Task.sleep(for: .milliseconds(200))
+                    await send(.inner(.didFinishReporting))
+                }
                 
+            case .inner(.reportResponseFailure(let message)):
+                return .none
+                
+            case .view(.dismissView):
+                state.shouldDismiss = false
+                return .none
                 
             case .inner(.didFinishReporting):
                 state.shouldDismiss = true
@@ -152,6 +175,4 @@ public struct ReportFeature {
             }
         }
     }
-    
-    
 }

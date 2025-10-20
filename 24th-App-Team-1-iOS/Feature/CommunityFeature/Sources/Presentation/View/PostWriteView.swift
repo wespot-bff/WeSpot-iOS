@@ -66,17 +66,6 @@ struct PostWriteView: View {
                         }
                     }
                     .onTapGesture { isTextFieldFocused = false }
-                    .customAlert(
-                        isPresented: $showAlertView,
-                        title: "게시글 수정을 중단하시나요?",
-                        message: "작성 중인 내용은 삭제되고 되돌릴 수 없어요",
-                        primaryButtonText: "네",
-                        secondaryButtonText: "아니오",
-                        style: .normal,
-                        primaryAction: {
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                    )
                     .wsNavigationBar(
                         left: { EmptyView() },
                         title: {
@@ -93,6 +82,17 @@ struct PostWriteView: View {
                         }
                     )
                 }
+                .customAlert(
+                    isPresented: $showAlertView,
+                    title: "게시글 수정을 중단하시나요?",
+                    message: "작성 중인 내용은 삭제되고 되돌릴 수 없어요",
+                    primaryButtonText: "네",
+                    secondaryButtonText: "아니오",
+                    style: .normal,
+                    primaryAction: {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                )
                 .onChange(of: viewStore.didUploadSuccess) { success in
                     if success {
                         presentationMode.wrappedValue.dismiss()
@@ -132,7 +132,7 @@ struct PostWriteView: View {
     
     private var categorySection: some View {
         Button(action: { viewStore.send(.view(.didTappedCategoryButton)) }) {
-            HStack(spacing: 12) {
+            HStack(spacing: 24) {
                 Text(viewStore.selectedCategory?.text ?? "카테고리 선택")
                     .font(DesignSystemFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(DesignSystemAsset.Colors.gray200.swiftUIColor)

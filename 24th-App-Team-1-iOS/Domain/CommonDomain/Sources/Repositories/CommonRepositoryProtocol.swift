@@ -19,4 +19,5 @@ public protocol CommonRepositoryProtocol {
     func uploadUserProfileImage(_ image: Data, presigendURL: String) -> Single<Bool>
     func fetchAppVersionItem() async throws -> WSVersionEntity
     func fetchProfileOnbardingItem(query: ProfileOnboardingQuery) async throws -> ProfileOnboardingEntity
+    func fetchRestrictionsItems() async throws -> RestrictionsEntity
 }

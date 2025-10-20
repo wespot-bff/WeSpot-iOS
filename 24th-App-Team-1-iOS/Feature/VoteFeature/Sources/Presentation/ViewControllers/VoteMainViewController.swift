@@ -74,6 +74,21 @@ public final class VoteMainViewController: BaseViewController<VoteMainViewReacto
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        reactor.state.map { $0.showRestrictionAlert }
+            .distinctUntilChanged()
+            .compactMap { [weak self] _ in
+                self?.reactor?.currentState.restrictionEntity
+            }
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] restrictionEntity in
+                let reactor = RestrictionBottomSheetViewReactor(restrictionEntity: restrictionEntity)
+                let bottomSheet = RestrictionBottomSheetViewController(reactor: reactor)
+                bottomSheet.modalPresentationStyle = .overFullScreen
+                bottomSheet.modalTransitionStyle = .crossDissolve
+                self?.present(bottomSheet, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
         reactor.pulse(\.$updateType)
             .observe(on: MainScheduler.instance)
             .bind(with: self) { owner, updateType in
