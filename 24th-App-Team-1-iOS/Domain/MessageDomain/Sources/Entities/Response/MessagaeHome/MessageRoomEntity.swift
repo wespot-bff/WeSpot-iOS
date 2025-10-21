@@ -43,7 +43,7 @@ public struct MessageRoomEntity {
     }
 }
 extension MessageRoomEntity {
-    public struct ProfileEntity {
+    public struct ProfileEntity: Equatable {
         public let isAnonymous: Bool
         public let iconUrl: String
         public let name: String
@@ -77,10 +77,13 @@ extension MessageRoomEntity: IdentifiableType, Equatable {
 
     // Equatable
     public static func == (lhs: MessageRoomEntity, rhs: MessageRoomEntity) -> Bool {
-        // 애니메이션 비교를 위해 아이덴티티와(필요하다면) 실제 값까지 비교
-        return lhs.id == rhs.id
-            && lhs.isExistsUnreadMessage == rhs.isExistsUnreadMessage
-            && lhs.latestChatTime == rhs.latestChatTime
-
+        // RxDataSources가 "내용"이 바뀌었는지 감지하기 위해 비교합니다.
+        // UI에 영향을 주는 모든 값을 비교해야 합니다.
+        return lhs.id == rhs.id &&
+               lhs.isBookmarked == rhs.isBookmarked &&
+               lhs.isExistsUnreadMessage == rhs.isExistsUnreadMessage &&
+               lhs.latestChatTime == rhs.latestChatTime &&
+               lhs.senderProfile == rhs.senderProfile &&
+               lhs.receiverProfile == rhs.receiverProfile
     }
 }

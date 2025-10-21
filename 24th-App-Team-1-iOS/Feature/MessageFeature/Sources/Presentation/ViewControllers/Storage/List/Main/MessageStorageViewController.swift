@@ -205,14 +205,14 @@ public final class MessageStorageViewController: BaseViewController<MessageStora
             .disposed(by: disposeBag)
         
         reactor.pulse(\.$roomList)
-            .filter{ $0.count > 0 }
             .bind(with: self) { this, messages in
+                print("allMessage list: \(messages)")
+
                 this.allMessageView.loadMessages(newMessages: messages)
             }
             .disposed(by: disposeBag)
         
         reactor.pulse(\.$favoriteMessageList)
-            .filter{ $0.count > 0 }
             .bind(with: self) { this, messages in
                 print("favorite message list: \(messages)")
                 this.favoriteMessageView.loadMessages(newMessages: messages)
@@ -262,5 +262,3 @@ extension MessageStorageViewController {
         self.present(bottomSheetVC, animated: true)
     }
 }
-
-

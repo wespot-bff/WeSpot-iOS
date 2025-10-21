@@ -7,6 +7,7 @@
 
 import UIKit
 import MessageDomain
+import Storage
 
 import SnapKit
 import RxSwift
@@ -50,7 +51,7 @@ final class AllMessageView: UIView {
         let dataSource = RxCollectionViewSectionedAnimatedDataSource<MessageSection>(
             configureCell: { dataSource, collectionView, indexPath, item in
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String.MessageTexts.Identifier.messageCollectionViewCell, for: indexPath) as! MessageCollectionViewCell
-                cell.configure(myNickname: item.senderProfile.name,
+                cell.configure(myNickname: UserDefaultsManager.shared.userName ?? item.senderProfile.name,
                                opponentNickname: item.receiverProfile.name,
                                myImaURL: item.senderProfile.iconUrl,
                                opponentImageURL: item.receiverProfile.iconUrl,
