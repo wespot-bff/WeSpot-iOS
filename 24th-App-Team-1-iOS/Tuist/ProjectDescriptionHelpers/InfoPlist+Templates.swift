@@ -61,6 +61,7 @@ extension InfoPlist {
                 .string("Pretendard-SemiBold.otf")
             ]),
             "BASE_URL": .string("https://wespot.kro.kr/api/v1"),
+            "BASE_URL_V2": .string("https://wespot.kro.kr/api/v2"),
             "NSAppleIDUsageDescription": .string("로그인에 Apple ID를 사용합니다."),
             "aps-environment": .string("development") 
         ]

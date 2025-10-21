@@ -13,7 +13,8 @@ let project = Project.makeProject(
     targets: [
         .share(module: .DesignSystem, dependencies: [
             .shared(module: .ThirdPartyLib),
-            .core(module: .Extensions)
+            .core(module: .Extensions),
+            .domain(module: .CommonDomain)
         ])
     ],
     resourceSynthesizers: [
