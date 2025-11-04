@@ -16,7 +16,7 @@ public final class SelectGradeBottomSheetView: UIView {
 
     //MARK: - Properties
     private let titleLabel = WSLabel(wsFont: .Body01, text: "현재 학년을 선택해주세요")
-    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "만 14세 미만 학생은 가입이 어려워요")
+    private let subTitleLabel = WSLabel(wsFont: .Body06, text: "회원가입 이후에는 변경이 어려워요")
     public let firstGradeButton = SelectGradeView(grade: .first)
     public let secondGradeButton = SelectGradeView(grade: .second)
     public let thirdGradeButton = SelectGradeView(grade: .third)

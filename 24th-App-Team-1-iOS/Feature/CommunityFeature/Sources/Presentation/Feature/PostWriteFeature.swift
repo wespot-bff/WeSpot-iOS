@@ -222,7 +222,7 @@ public struct PostWriteFeature {
             case .view(.submitButtonTapped):
                 guard let category = state.selectedCategory else { return .none }
                 let categoryId = category.id
-                let title = state.postTitle
+                let title = state.postTitle.isEmpty ? nil : state.postTitle
                 let description = state.postDescription
 
                 if state.isEditing {
@@ -249,26 +249,14 @@ public struct PostWriteFeature {
                             let newImageNames = newPresignedList.map { $0.imageName }
 
                             let allImageNames = existingImageNames + newImageNames
-                            let body: UploadPostItemRequest
-                            if title.isEmpty {
-                                let body = UploadPostItemRequest(
-                                    categoryId: categoryId,
-                                    title: nil,
-                                    description: description,
-                                    imagesRequest: allImageNames
-                                )
-                                let success = try await editPostItemUseCase.execute(postId: postId, body: body)
-                                await send(.internal(.postUploadResponse(success)))
-                            } else {
-                                let body = UploadPostItemRequest(
-                                    categoryId: categoryId,
-                                    title: title,
-                                    description: description,
-                                    imagesRequest: allImageNames
-                                )
-                                let success = try await editPostItemUseCase.execute(postId: postId, body: body)
-                                await send(.internal(.postUploadResponse(success)))
-                            }
+                            let body = UploadPostItemRequest(
+                                categoryId: categoryId,
+                                title: title,
+                                description: description,
+                                imagesRequest: allImageNames
+                            )
+                            let success = try await editPostItemUseCase.execute(postId: postId, body: body)
+                            await send(.internal(.postUploadResponse(success)))
                         
                         } catch {
                             await send(.internal(.postUploadResponse(false)))
@@ -290,7 +278,7 @@ public struct PostWriteFeature {
                             }
 
                             let imageNames = presignedList.map { $0.imageName }
-
+                            
                             let body = UploadPostItemRequest(
                                 categoryId: categoryId,
                                 title: title,

@@ -21,8 +21,11 @@ public struct KeyboardAwareModifier: ViewModifier {
                     queue: .main
                 ) { notification in
                     if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                        keyboardHeight = keyboardFrame.height
-                    }
+                          let safeAreaBottom = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+                          withAnimation(.easeOut(duration: 0.25)) {
+                              keyboardHeight = keyboardFrame.height - safeAreaBottom
+                          }
+                      }
                 }
 
                 NotificationCenter.default.addObserver(

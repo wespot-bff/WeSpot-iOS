@@ -22,6 +22,7 @@ public final class PolicyAgreementBottomSheetViewController: BaseViewController<
     }
     private let subView = UIView()
     private let allAggreementButton = SelectPolicyAgreementView(text: "전체 동의하기", font: .Body04, isHiddenDetailButton: true)
+    private let ageAgreementButton = SelectPolicyAgreementView(text: "(필수) 만 14세 이상입니다.")
     private let serviceAgreementButton = SelectPolicyAgreementView(text: "(필수) 서비스 이용약관")
     private let privacyAgreementButton = SelectPolicyAgreementView(text: "(필수) 개인정보 수집 및 이용 안내")
     public let marketingAgreementButton = SelectPolicyAgreementView(text: "(선택) 이벤트 및 마케팅 수신 동의")
@@ -34,7 +35,7 @@ public final class PolicyAgreementBottomSheetViewController: BaseViewController<
     
     public override func setupUI() {
         super.setupUI()
-        containerView.addSubviews(titleLabel, subView, allAggreementButton, serviceAgreementButton, privacyAgreementButton, marketingAgreementButton, confirmButton)
+        containerView.addSubviews(titleLabel, subView, allAggreementButton, ageAgreementButton, serviceAgreementButton, privacyAgreementButton, marketingAgreementButton, confirmButton)
         view.addSubview(containerView)
     }
     
@@ -64,15 +65,25 @@ public final class PolicyAgreementBottomSheetViewController: BaseViewController<
             $0.top.equalTo(titleLabel.snp.bottom).offset(18)
             $0.height.equalTo(60)
         }
+        
+        
         allAggreementButton.snp.makeConstraints {
             $0.leading.equalTo(subView).offset(15)
             $0.centerY.equalTo(subView)
         }
-        serviceAgreementButton.snp.makeConstraints {
+        
+        ageAgreementButton.snp.makeConstraints {
             $0.top.equalTo(subView.snp.bottom).offset(4)
             $0.leading.equalToSuperview().offset(28)
             $0.trailing.equalToSuperview().offset(36)
         }
+        
+        serviceAgreementButton.snp.makeConstraints {
+            $0.top.equalTo(ageAgreementButton.snp.bottom).offset(4)
+            $0.leading.equalToSuperview().offset(28)
+            $0.trailing.equalToSuperview().offset(36)
+        }
+        
         privacyAgreementButton.snp.makeConstraints {
             $0.top.equalTo(serviceAgreementButton.snp.bottom).offset(4)
             $0.leading.equalToSuperview().offset(28)

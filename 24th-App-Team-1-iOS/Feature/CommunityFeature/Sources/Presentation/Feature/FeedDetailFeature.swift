@@ -536,6 +536,7 @@ public struct FeedDetailFeature {
                     }
                 }
             case .view(.postDeleteResponseSuccess(postId: let postId)):
+                NotificationCenter.default.post(name: .postDeleted, object: nil)
                 state.shouldDismiss = true
                 return .none
             case .view(.postDeleteResponseFailure(postId: let postId, errorMessage: let errorMessage)):

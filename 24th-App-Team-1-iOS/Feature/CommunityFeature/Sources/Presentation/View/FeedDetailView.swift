@@ -852,7 +852,7 @@ struct ChatInputView: View {
                             sendMessage()
                             
                         } label: {
-                            Image(systemName: "arrow.up")
+                            DesignSystemAsset.Images.icCommunityUpArrowFiled.swiftUIImage
                                 .foregroundColor(.black)
                                 .font(.system(size: 16, weight: .medium))
                                 .frame(width: 24, height: 24)
@@ -871,7 +871,6 @@ struct ChatInputView: View {
                     )
                 }
                 .padding(.horizontal, 16)
-                .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
                 .animation(.easeInOut(duration: 0.2), value: isActive)
             }
         }

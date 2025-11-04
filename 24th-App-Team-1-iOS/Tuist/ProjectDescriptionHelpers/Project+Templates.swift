@@ -24,7 +24,10 @@ extension Project {
         packages: [Package] = [],
         schemes: [Scheme] = [],
         settings: Settings? = .settings(
-            base: ["OTHER_LDFLAGS": "$(inherited) -ObjC"]
+            base: [
+                "OTHER_LDFLAGS": ["$(inherited)", "-ObjC", "-all_load"],
+                "LIBRARY_SEARCH_PATHS": ["$(inherited)"]
+            ]
         ),
         fileHeaderTemplate: FileHeaderTemplate? = nil,
         additionalFiles: [FileElement] = [],

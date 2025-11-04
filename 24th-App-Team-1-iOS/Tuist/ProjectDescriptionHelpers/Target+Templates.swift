@@ -37,7 +37,7 @@ struct TargetConfig {
         product: Product = .staticLibrary,
         productName: String? = nil,
         bundleId: String? = "",
-        deploymentTargets: DeploymentTargets = .iOS("15.0"),
+        deploymentTargets: DeploymentTargets = .iOS("16.0"),
         infoPlist: InfoPlist? = nil,
         sources: SourceFilesList? = nil,
         resources: ResourceFileElements? = nil,

@@ -28,6 +28,11 @@ public struct MainNoticeBoardView: View {
     @State private var showHotPostDetail = false
     @State private var selectedHotPostId: String = ""
     
+    @State private var selectedPostId: String? = nil
+    @State private var scrollPosition: String? = nil
+    @State private var isFirstAppear = true
+    @State private var isReturningFromWrite = false
+    
     public init(store: StoreOf<MainNoticeBoardFeature>) {
         self.store = store
         self._viewStore = StateObject(wrappedValue: ViewStore(store, observe: \.self))
@@ -40,93 +45,124 @@ public struct MainNoticeBoardView: View {
             
             NavigationView {
                 ZStack(alignment: .top) {
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            Color.clear
-                                .frame(height: navBarHeight - 10)
-                            NavigationLink(
-                                destination: FeedDetailView(
-                                    store: .init(
-                                        initialState: FeedDetailFeature.State(postId: selectedHotPostId),
-                                        reducer: { FeedDetailFeature() }
-                                    )
-                                ),
-                                isActive: $showHotPostDetail,
-                                label: { EmptyView() }
-                            )
-                            .hidden()
-                            
-                            
-                            CategorySelectorWithDropdown(
-                                chips: viewStore.filterChips, selected: viewStore.selectedChip) { chip in
+                    ScrollViewReader { proxy in
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 0) {
+                                Color.clear
+                                    .frame(height: navBarHeight - 10)
+                                    .id("top")
+                                
+                                CategorySelectorWithDropdown(
+                                    chips: viewStore.filterChips,
+                                    selected: viewStore.selectedChip
+                                ) { chip in
                                     viewStore.send(.view(.didSelectChip(chip)))
                                 } onDropdownTap: {
                                     viewStore.send(.view(.didTappedCategoryButton))
                                 }
                                 .padding(.horizontal, 20)
-                            
-                            LazyVStack(alignment: .leading, spacing: 0) {
-                                if let list = viewStore.postListItems {
-                                    ForEach(list.items, id: \.id) { element in
-                                        switch element {
-                                        case .post(let post):
-                                            if let content = post.content {
-                                                NavigationLink(
-                                                    destination: FeedDetailView(
-                                                        store: .init(
-                                                            initialState: FeedDetailFeature.State(postId: String(post.id)),
-                                                            reducer: { FeedDetailFeature() }
-                                                        )
-                                                    )
-                                                ) {
-                                                    PostView(content: content, postId: post.id) {
-                                                        
-                                                    } onTapLike: {
-                                                        viewStore.send(.view(.didTappedLike(post.id)))
-                                                    } onTapScrap: {
-                                                        viewStore.send(.view(.didTappedScrap(post.id)))
+                                
+                                LazyVStack(alignment: .leading, spacing: 0) {
+                                    if let list = viewStore.postListItems {
+                                        ForEach(list.items, id: \.id) { element in
+                                            switch element {
+                                            case .post(let post):
+                                                if let content = post.content {
+                                                    Button(action: {
+                                                        selectedPostId = "post-\(post.id)"
+                                                        selectedHotPostId = String(post.id)
+                                                        viewStore.send(.view(.willNavigateToFeedDetail))
+                                                        showHotPostDetail = true
+                                                    }) {
+                                                        PostView(content: content, postId: post.id) {
+                                                            
+                                                        } onTapLike: {
+                                                            viewStore.send(.view(.didTappedLike(post.id)))
+                                                        } onTapScrap: {
+                                                            viewStore.send(.view(.didTappedScrap(post.id)))
+                                                        }
+                                                        .id("post-\(post.id)")
+                                                        .onAppear {
+                                                            guard element.id == list.items.last?.id else { return }
+                                                            viewStore.send(.view(.loadNextPage))
+                                                        }
+                                                        .padding(.horizontal, 20)
                                                     }
-                                                    .id(post.id)
-                                                    .onAppear {
-                                                        guard element.id == list.items.last?.id else { return }
-                                                        viewStore.send(.view(.loadNextPage))
-                                                    }
+                                                    .buttonStyle(PlainButtonStyle())
+                                                }
+                                            case .vote(let vote):
+                                                VoteBannerView(voteEntity: vote)
+                                                    .id("vote-\(vote.id)")
                                                     .padding(.horizontal, 20)
+                                                    .padding(.top, 24)
+                                                    .onTapGesture {
+                                                        NotificationCenter.default.post(name: .showVoteMainView, object: nil)
+                                                    }
+                                            case .hotPost(let hotpost):
+                                                HotPostBannerView(hotPostEntity: hotpost) { selectedInner in
+                                                    selectedPostId = "hotpost-\(hotpost.id)"
+                                                    selectedHotPostId = String(selectedInner.targetId)
+                                                    viewStore.send(.view(.willNavigateToFeedDetail))
+                                                    showHotPostDetail = true
                                                 }
-                                            }
-                                        case .vote(let vote):
-                                            VoteBannerView(voteEntity: vote)
-                                                .padding(.horizontal, 20)
+                                                .id("hotpost-\(hotpost.id)")
                                                 .padding(.top, 24)
-                                                .onTapGesture {
-                                                    NotificationCenter.default.post(name: .showVoteMainView, object: nil)
-                                                }
-                                        case .hotPost(let hotpost):
-                                            HotPostBannerView(hotPostEntity: hotpost) { selectedInner in
-                                                selectedHotPostId = String(selectedInner.targetId)
-                                                showHotPostDetail = true
-                                                
                                             }
-                                                .padding(.top, 24)
                                         }
                                     }
                                 }
+                                .padding(.vertical, 16)
+                                .safeAreaInset(edge: .bottom) {
+                                    Color.clear.frame(height: 80)
+                                }
                             }
-                            
-                            .padding(.vertical, 16)
-                            .safeAreaInset(edge: .bottom) {
-                                Color.clear.frame(height: 80)
+                        }
+                        .coordinateSpace(name: "scrollView")
+                        .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
+                        .ignoresSafeArea()
+                        .onChange(of: showHotPostDetail) { isShowing in
+                            if isShowing {
+                                scrollPosition = selectedPostId
+                            } else {
+                                let returnSource = viewStore.returnSource
+                                
+                                switch returnSource {
+                                case .feedDetail(let needsRefresh):
+                                    if !needsRefresh, let position = scrollPosition {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            withAnimation(.easeOut(duration: 0.2)) {
+                                                proxy.scrollTo(position, anchor: .center)
+                                            }
+                                        }
+                                    } else {
+                                        scrollPosition = nil
+                                    }
+                                default:
+                                    break
+                                }
                             }
                         }
                     }
-                    .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
-                    .ignoresSafeArea()
+                    NavigationLink(
+                        destination: FeedDetailView(
+                            store: .init(
+                                initialState: FeedDetailFeature.State(postId: selectedHotPostId),
+                                reducer: { FeedDetailFeature() }
+                            )
+                        ),
+                        isActive: $showHotPostDetail,
+                        label: { EmptyView() }
+                    )
+                    .hidden()
                     
                     VStack {
                         Spacer()
                         HStack {
                             Spacer()
-                            Button(action: { showWrite = true }) {
+                            Button(action: {
+                                viewStore.send(.view(.willNavigateToPostWrite))
+                                showWrite = true
+                            }) {
                                 DesignSystemAsset.Images.icCommunityPencilFiled.swiftUIImage
                                     .resizable()
                                     .scaledToFit()
@@ -144,12 +180,12 @@ public struct MainNoticeBoardView: View {
                             .padding(.trailing, 24)
                         }
                     }
+                    
                     NavigationLink(
                         destination: NotificationViewWrapper()
                             .ignoresSafeArea()
                             .navigationBarBackButtonHidden()
-                            .navigationBarHidden(true)
-                        ,
+                            .navigationBarHidden(true),
                         isActive: $showNotification
                     ) {
                         EmptyView()
@@ -158,7 +194,7 @@ public struct MainNoticeBoardView: View {
                     NavigationLink(
                         destination: Group {
                             if let chip = selectedDetailChip {
-                                CategoryPostView(store: .init(initialState: CategoryPostFeature.State(category: chip) , reducer: { CategoryPostFeature()}))
+                                CategoryPostView(store: .init(initialState: CategoryPostFeature.State(category: chip), reducer: { CategoryPostFeature()}))
                             } else {
                                 EmptyView()
                             }
@@ -175,7 +211,6 @@ public struct MainNoticeBoardView: View {
                     )
                     .hidden()
                     
-                    
                     NavigationLink(
                         destination: NoticeSearchView(store: .init(initialState: NoticeSearchFeature.State(), reducer: {NoticeSearchFeature()})),
                         isActive: $showSearch,
@@ -184,14 +219,37 @@ public struct MainNoticeBoardView: View {
                     .hidden()
                     
                     NavigationLink(
-                        destination: PostWriteView(store: .init(initialState: PostWriteFeature.State(), reducer: {PostWriteFeature()})),
+                        destination: PostWriteView(
+                            store: .init(
+                                initialState: PostWriteFeature.State(),
+                                reducer: {PostWriteFeature()}
+                            )
+                        ),
                         isActive: $showWrite,
                         label: { EmptyView()}
                     )
+                    .hidden()
+                    .onChange(of: showWrite) { isShowing in
+                        if !isShowing && isReturningFromWrite {
+                            store.send(.view(.onAppearWithRefresh))
+                            isReturningFromWrite = false
+                            scrollPosition = nil
+                        } else if isShowing {
+                            isReturningFromWrite = true
+                        }
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .postDeleted)) { _ in
+                    store.send(.view(.onAppearWithRefresh))
                 }
                 .onAppear {
                     NotificationCenter.default.post(name: .showTabBar, object: nil)
-                    store.send(.view(.onAppear))
+                    if isFirstAppear {
+                        store.send(.view(.onAppear))
+                        isFirstAppear = false
+                    } else {
+                        store.send(.view(.onAppear))
+                    }
                 }
                 .wsNavigationBar(
                     left:  { EmptyView() },
@@ -229,22 +287,21 @@ public struct MainNoticeBoardView: View {
                         return .view(.dismissRestrictionSheet)
                     }
                 }
-            )
-        ) {
-              GeometryReader { proxy in
-                  if let restriction = viewStore.restrictionEntity {
-                      RestrictionBottomSheetView(
-                        restriction: restriction,
-                        onDismiss: { viewStore.send(.view(.dismissRestrictionSheet)) },
-                        onContactSupport: { viewStore.send(.view(.contactSupport))  }
-                      )
-                      .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
-                      .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
-                  }
-              }
-              .presentationDetents([.height(400)])
-              .presentationDragIndicator(.hidden)
-              .presentationCornerRadius(20)
+            )) {
+                GeometryReader { proxy in
+                    if let restriction = viewStore.restrictionEntity {
+                        RestrictionBottomSheetView(
+                            restriction: restriction,
+                            onDismiss: { viewStore.send(.view(.dismissRestrictionSheet)) },
+                            onContactSupport: { viewStore.send(.view(.contactSupport))  }
+                        )
+                        .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                        .background(DesignSystemAsset.Colors.gray600.swiftUIColor)
+                    }
+                }
+                .presentationDetents([.height(400)])
+                .presentationDragIndicator(.hidden)
+                .presentationCornerRadius(20)
             }
             .sheet(
                 isPresented: viewStore.binding(
