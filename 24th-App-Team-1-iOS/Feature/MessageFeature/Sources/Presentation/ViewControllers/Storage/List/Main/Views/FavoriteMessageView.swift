@@ -8,6 +8,7 @@
 import UIKit
 import MessageDomain
 import DesignSystem
+import Storage
 
 import RxDataSources
 import SnapKit
@@ -26,7 +27,7 @@ final class FavoriteMessageView: UIView {
         $0.showsVerticalScrollIndicator = false
     }
     private let emptyImageView = UIImageView().then {
-        $0.image = DesignSystemAsset.Images.imgEmptyFriendFiled.image
+        $0.image = DesignSystemAsset.Images.emptyMessage.image
         $0.contentMode = .scaleAspectFit
     }
     private let emptyTitle = WSLabel(wsFont: .Body03, text: "아직 즐겨찾기에 추가된 쪽지가 없어요").then {
@@ -80,7 +81,7 @@ final class FavoriteMessageView: UIView {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String.MessageTexts.Identifier.messageCollectionViewCell,
                                                               for: indexPath) as! MessageCollectionViewCell
                 
-                cell.configure(myNickname: item.senderProfile.name,
+                cell.configure(myNickname: UserDefaultsManager.shared.userName ?? item.senderProfile.name,
                                opponentNickname: item.receiverProfile.name,
                                myImaURL: item.senderProfile.iconUrl,
                                opponentImageURL: item.receiverProfile.iconUrl,

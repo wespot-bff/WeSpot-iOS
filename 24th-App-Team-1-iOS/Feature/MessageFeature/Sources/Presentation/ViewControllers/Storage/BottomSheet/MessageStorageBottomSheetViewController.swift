@@ -97,7 +97,7 @@ public final class MessageStorageBottomSheetViewController: BaseViewController<M
                 case .block:
                     reactor.action.onNext(.blockMessage(self.message!))
                 case .unFavorite:
-                    reactor.action.onNext(.bookMarked(self.message!))
+                    reactor.action.onNext(.unBookMarked(self.message!))
                 case .favorite:
                     reactor.action.onNext(.bookMarked(self.message!))
                 }

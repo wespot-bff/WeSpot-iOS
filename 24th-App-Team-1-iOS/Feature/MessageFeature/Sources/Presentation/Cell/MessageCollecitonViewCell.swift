@@ -48,6 +48,14 @@ final class MessageCollectionViewCell: UICollectionViewCell {
     private let nameLabel = WSLabel(wsFont: .Body09, text: "실명").then {
         $0.textColor = DesignSystemAsset.Colors.gray100.color
     }
+    
+    // --- 1. nameStackView 정의 ---
+    private let nameStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 3.5 // 기존 trailing.equalTo(nameLabel.snp.leading).offset(-3.5) 값
+        $0.alignment = .center
+    }
+    
     private let nameView = UIView().then {
         $0.backgroundColor = DesignSystemAsset.Colors.gray600.color
         $0.layer.cornerRadius = 8
@@ -88,14 +96,20 @@ final class MessageCollectionViewCell: UICollectionViewCell {
                                      switchImage,
                                      redDot,
                                      meView,
-                                     nameView,
+                                     nameView, // nameView (스택뷰의 컨테이너)
                                      myNameLabel,
                                      unBlockButton,
                                      opponentNameLabel,
                                      dateLabel)
         
         self.meView.addSubview(meLabel)
-        self.nameView.addSubviews(nameLabel, favoriteImage)
+        
+        // --- 2. nameView에 nameLabel과 favoriteImage 대신 nameStackView를 추가 ---
+        self.nameView.addSubview(nameStackView)
+        
+        // --- 3. nameStackView에 arrangedSubviews 추가 ---
+        nameStackView.addArrangedSubview(favoriteImage)
+        nameStackView.addArrangedSubview(nameLabel)
         
         profileImageView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(22)
@@ -132,7 +146,6 @@ final class MessageCollectionViewCell: UICollectionViewCell {
             $0.top.equalTo(switchImage.snp.bottom).offset(8)
             $0.leading.equalTo(opponentImageView.snp.trailing).offset(16)
             $0.height.equalTo(20)
-            $0.width.equalTo(39)
         }
         myNameLabel.snp.makeConstraints {
             $0.top.equalTo(meView.snp.bottom).offset(4)
@@ -142,14 +155,15 @@ final class MessageCollectionViewCell: UICollectionViewCell {
             $0.top.equalTo(nameView.snp.bottom).offset(4)
             $0.leading.equalTo(opponentImageView.snp.trailing).offset(16)
         }
-        nameLabel.snp.makeConstraints {
-            $0.center.equalToSuperview()
-        }
         
         favoriteImage.snp.makeConstraints {
-            $0.size.equalTo(10)
+            $0.height.equalTo(10)
+        }
+        
+        nameStackView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.trailing.equalTo(nameLabel.snp.leading).offset(-3.5)
+            $0.leading.equalToSuperview().offset(8)
+            $0.trailing.equalToSuperview().inset(8)
         }
         
         moreButton.snp.makeConstraints {
@@ -186,17 +200,13 @@ final class MessageCollectionViewCell: UICollectionViewCell {
         self.redDot.isHidden = !isRead
         self.myNameLabel.text = myNickname
         self.opponentNameLabel.text = opponentNickname
+        
         if isFavorite {
             self.favoriteImage.isHidden = false
-            self.nameView.snp.updateConstraints {
-                $0.width.equalTo(51)
-            }
         } else {
             self.favoriteImage.isHidden = true
-            self.nameView.snp.updateConstraints {
-                $0.width.equalTo(39)
-            }
         }
+        
         if isBlocked {
             unBlockButton.isHidden = false
             moreButton.isHidden = true
@@ -222,6 +232,9 @@ final class MessageCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        // --- 9. disposeBag 초기화 ---
+        // 셀이 재사용될 때마다 이전의 바인딩을 제거합니다.
+        disposeBag = DisposeBag()
     }
     
     override init(frame: CGRect) {

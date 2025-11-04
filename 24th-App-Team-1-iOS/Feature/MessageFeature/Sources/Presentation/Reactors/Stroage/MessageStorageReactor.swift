@@ -199,17 +199,34 @@ public final class MessageStorageReactor: Reactor {
             
         case let .setBookMarkMessage(message, isBookMark):
             newState.disMissBottomSheet = true // 바텀 시트 닫기
-            
+   
             if isBookMark {
                 // 즐겨찾기 추가 (이미 목록에 없으면 추가)
+                print("DEBUG: Bookmarking message with ID: \(message.id)")
                 if !newState.favoriteMessageList.contains(where: { $0.id == message.id }) {
                     newState.favoriteMessageList.append(message)
                 }
-                newState.toastMessage = message // 즐겨찾기 추가 토스트
+                if let index = newState.roomList.firstIndex(where: { $0.id == message.id }) {
+                    newState.roomList[index] = message
+                }
             } else {
+                let updatedMessage = MessageRoomEntity(
+                    id: message.id,
+                    senderProfile: message.senderProfile,
+                    isMeMessageRoomOwner: message.isMeMessageRoomOwner,
+                    isExistsUnreadMessage: message.isExistsUnreadMessage,
+                    latestChatTime: message.latestChatTime,
+                    receiverProfile: message.receiverProfile,
+                    isBookmarked: false, 
+                    isBlocked: message.isBlocked,
+                    isEver: message.isEver
+                )
+                if let index = newState.roomList.firstIndex(where: { $0.id == updatedMessage.id }) {
+                    newState.roomList[index] = updatedMessage
+                }
+                print("DEBUG: Unbookmarking message with ID: \(message.id)")
                 // 즐겨찾기 해제 (목록에서 제거)
                 newState.favoriteMessageList.removeAll { $0.id == message.id }
-                newState.toastMessage = message // 즐겨찾기 해제 토스트
             }
             
         case let .setUnBlockMessage(message):
@@ -385,4 +402,3 @@ extension MessageStorageReactor {
         // 이 함수는 사용되지 않으므로 제거하거나 ReporterRouter 같은 것으로 대체하는 것이 좋습니다.
     }
 }
-
