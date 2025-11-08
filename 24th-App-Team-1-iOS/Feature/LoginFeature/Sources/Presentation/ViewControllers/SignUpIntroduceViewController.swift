@@ -138,8 +138,6 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
         }
         
         introduceLabel.do {
-            guard let name = UserDefaultsManager.shared.userName else { return }
-            $0.text = "친구들에게 \(name)님을 소개하는\n한 줄을 작성해 주세요"
             $0.textColor = DesignSystemAsset.Colors.gray100.color
         }
         
@@ -194,6 +192,12 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
                     owner.scrollView.transform = CGAffineTransform(translationX: 0, y: -(additionalOffset))
                 }
             }
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap { $0.accountReqeust.name }
+            .map {"친구들에게 \($0)님을 소개하는\n한 줄을 작성해 주세요"}
+            .bind(to: introduceLabel.rx.text)
             .disposed(by: disposeBag)
         
         containerView

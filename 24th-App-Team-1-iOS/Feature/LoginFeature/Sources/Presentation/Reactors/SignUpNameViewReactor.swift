@@ -96,7 +96,6 @@ public final class SignUpNameViewReactor: Reactor {
         case .setName(let name):
             newState.name = name
             newState.accountRequest.name = name
-            
         case .setErrorMessage(let errorMessage):
             newState.errorMessage = errorMessage
             
