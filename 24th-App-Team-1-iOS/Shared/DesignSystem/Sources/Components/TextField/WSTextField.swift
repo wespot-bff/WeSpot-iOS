@@ -36,6 +36,7 @@ public final class WSTextField: UITextField {
     public var placeholderText: String = "Placeholder" {
         didSet {
             updateAttributedPlaceholder()
+            print("플레이스 홀더 설정 합니다 : \(placeholderText)")
         }
     }
     
@@ -81,6 +82,7 @@ public final class WSTextField: UITextField {
         self.titleText = title
         self.placeholderText = placeholder
         setupUI()
+        updateAttributedPlaceholder()
     }
     
     required init?(coder: NSCoder) {
@@ -109,6 +111,7 @@ public final class WSTextField: UITextField {
     }
     
     private func updateAttributedPlaceholder() {
+        print("플레이스 홀더 값 확인합니다 : \(placeholderText)")
         self.attributedPlaceholder = NSAttributedString(
             string: placeholderText,
             attributes: [

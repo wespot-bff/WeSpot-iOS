@@ -143,7 +143,7 @@ public final class SignUpGradeViewController: BaseViewController<SignUpGradeView
         bottomSheetView.firstGradeButton.checkButton.rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .bind(with: self) { owner, _ in
-                owner.showWSToast(image: .warning, message: "회원가입 이후에는 변경이 어려워요")
+                owner.showWSToast(image: .warning, message: "만 14세 미만은 가입이 불가합니다")
             }
             .disposed(by: disposeBag)
         

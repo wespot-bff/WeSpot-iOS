@@ -53,12 +53,13 @@ public final class PolicyAgreementBottomSheetViewController: BaseViewController<
         containerView.snp.makeConstraints {
             $0.bottom.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(412)
+            $0.height.equalTo(454)
         }
         
         titleLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(28)
             $0.horizontalEdges.equalToSuperview().inset(28)
+            $0.height.equalTo(54)
         }
         subView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(20)
@@ -156,6 +157,13 @@ public final class PolicyAgreementBottomSheetViewController: BaseViewController<
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        ageAgreementButton
+            .rx.tap
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { Reactor.Action.didTappedAgeAgreement }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         marketingAgreementButton
             .rx.tap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
@@ -175,9 +183,18 @@ public final class PolicyAgreementBottomSheetViewController: BaseViewController<
             .distinctUntilChanged()
             .bind(with: self) { owner, isChecked in
                 owner.allAggreementButton.isChecked = isChecked
+                owner.ageAgreementButton.isChecked = isChecked
                 owner.serviceAgreementButton.isChecked = isChecked
                 owner.privacyAgreementButton.isChecked = isChecked
                 owner.marketingAgreementButton.isChecked = isChecked
+            }
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.isAgeAgreement }
+            .distinctUntilChanged()
+            .bind(with: self) { owner, isChecked in
+                owner.ageAgreementButton.isChecked = isChecked
             }
             .disposed(by: disposeBag)
         

@@ -73,7 +73,7 @@ public final class SignUpIntroduceViewController: BaseViewController<SignUpIntro
             $0.height.equalTo(scrollView.frameLayoutGuide).priority(.low)
         }
         introduceLabel.snp.makeConstraints {
-            $0.top.equalToSuperview()
+            $0.top.equalTo(navigationBar.snp.bottom)
             $0.horizontalEdges.equalToSuperview().inset(30)
             $0.height.equalTo(60)
         }

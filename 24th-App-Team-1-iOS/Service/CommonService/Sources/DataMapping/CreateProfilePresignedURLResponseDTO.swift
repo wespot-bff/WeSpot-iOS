@@ -16,7 +16,7 @@ public struct CreateProfilePresignedURLResponseDTO: Decodable {
     
     private enum CodingKeys: String, CodingKey {
         case presignedURL = "url"
-        case imageURL = "imageUrl"
+        case imageURL = "imageName"
     }
 }
 

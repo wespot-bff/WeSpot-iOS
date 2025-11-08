@@ -75,7 +75,7 @@ public struct MainNoticeBoardView: View {
                                                         showHotPostDetail = true
                                                     }) {
                                                         PostView(content: content, postId: post.id) {
-                                                            
+                                                            let _ = print("클릭 이벤트 확인합니다 : \(post.id)")
                                                         } onTapLike: {
                                                             viewStore.send(.view(.didTappedLike(post.id)))
                                                         } onTapScrap: {
@@ -203,6 +203,13 @@ public struct MainNoticeBoardView: View {
                         label: { EmptyView() }
                     )
                     .hidden()
+                    .onChange(of: showCategoryPost) { isShowing in
+                        if isShowing {
+                            viewStore.send(.view(.willNavigateToCategoryPost))
+                        } else {
+                            viewStore.send(.view(.didReturnFromCategoryPost))
+                        }
+                    }
                     
                     NavigationLink(
                         destination: MyCategoryPostView(),

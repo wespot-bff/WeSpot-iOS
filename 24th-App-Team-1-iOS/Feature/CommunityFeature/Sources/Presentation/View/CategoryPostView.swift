@@ -21,7 +21,12 @@ struct CategoryPostView: View {
     private let circleDiameter: CGFloat = 56
     private var circleRadius: CGFloat   { circleDiameter / 2 }
     @State private var showPostWriteView = false
+    @State private var selectedPostId: String? = nil
     @State private var showSearchView = false
+    @State private var scrollPosition: String? = nil
+    @State private var isFirstAppear = true
+    @State private var isReturningFromWrite = false
+    @State private var showFeedDetail = false
     
     public init(store: StoreOf<CategoryPostFeature>) {
         self.store = store
@@ -35,10 +40,54 @@ struct CategoryPostView: View {
             let topInset = geo.safeAreaInsets.top
             
             NavigationLink(
+                 destination: FeedDetailView(
+                     store: .init(
+                         initialState: FeedDetailFeature.State(postId: selectedPostId ?? ""),
+                         reducer: { FeedDetailFeature() }
+                     )
+                 ),
+                 isActive: $showFeedDetail
+             ) {
+                 EmptyView()
+             }
+             .hidden()
+             .onChange(of: showFeedDetail) { isShowing in
+                 if isShowing {
+                     scrollPosition = "post-\(selectedPostId ?? "")"
+                 } else {
+                     let returnSource = viewStore.returnSource
+                     
+                     switch returnSource {
+                     case .feedDetail(let needsRefresh):
+                         if !needsRefresh, let position = scrollPosition {
+                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                 // 스크롤 복원 로직은 ScrollViewReader에서 처리
+                             }
+                         } else {
+                             scrollPosition = nil
+                         }
+                     default:
+                         break
+                     }
+                 }
+             }
+            
+            NavigationLink(
                 destination: PostWriteView(store: .init(initialState: PostWriteFeature.State(selectedCategory: viewStore.category, isMain: false), reducer: {PostWriteFeature()})),
                 isActive: $showPostWriteView,
                 label: { EmptyView()}
             )
+            .hidden()
+            .onChange(of: showPostWriteView) { isShowing in
+                 if !isShowing && isReturningFromWrite {
+                     viewStore.send(.view(.onAppearWithRefresh))
+                     isReturningFromWrite = false
+                     scrollPosition = nil
+                 } else if isShowing {
+                     isReturningFromWrite = true
+                     viewStore.send(.view(.willNavigateToPostWrite))
+                 }
+             }
             
             
             NavigationLink(
@@ -57,8 +106,16 @@ struct CategoryPostView: View {
                 
                 floatingWriteButton()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .postDeleted)) { _ in
+                viewStore.send(.view(.onAppearWithRefresh))
+            }
             .onAppear {
-                viewStore.send(.view(.onAppear))
+                if isFirstAppear {
+                    viewStore.send(.view(.onAppear))
+                    isFirstAppear = false
+                } else {
+                    viewStore.send(.view(.onAppear))
+                }
             }
         }
         .sheet(
@@ -137,58 +194,87 @@ struct CategoryPostView: View {
     }
     
     private func contentScrollView(topInset: CGFloat) -> some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
-                ZStack(alignment: .bottomLeading) {
-                    headerView(topInset: topInset)
-                        .frame(height: 250)
-
-                    profileCircle()
-                        .offset(y: circleRadius - 70)
-                        .padding(.leading, 20)
-                }
-                .padding(.bottom, circleRadius - 40)
-
-                HStack(spacing: 8) {
-                    Text(viewStore.category.text)
-                        .font(DesignSystemFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                        .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
-
-                    DesignSystemAsset.Images.icCommuntyCategoryChipFiled.swiftUIImage
-                        .onTapGesture {
-                            viewStore.send(.view(.didTappedCategoryButton))
-                        }
-
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-
-                LazyVStack(spacing: 16) {
-                    if let list = viewStore.postListEntity {
-                        ForEach(list.items, id: \.id) { element in
-                            if case .post(let post) = element,
-                               let content = post.content {
-                                PostView(content: content) {
-                                } onTapLike: {
-                                    viewStore.send(.view(.didTappedLike(post.id)))
-                                } onTapScrap: {
-                                    viewStore.send(.view(.didTappedScrap(post.id)))
-                                }
-                                .onAppear {
-                                    if element.id == list.items.last?.id {
-                                        viewStore.send(.view(.loadNextPage))
+        ScrollViewReader { proxy in
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    ZStack(alignment: .bottomLeading) {
+                        headerView(topInset: topInset)
+                            .frame(height: 250)
+                        
+                        profileCircle()
+                            .offset(y: circleRadius - 70)
+                            .padding(.leading, 20)
+                    }
+                    .padding(.bottom, circleRadius - 40)
+                    
+                    HStack(spacing: 8) {
+                        Text(viewStore.category.text)
+                            .font(DesignSystemFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
+                            .foregroundColor(DesignSystemAsset.Colors.gray100.swiftUIColor)
+                        
+                        DesignSystemAsset.Images.icCommuntyCategoryChipFiled.swiftUIImage
+                            .onTapGesture {
+                                viewStore.send(.view(.didTappedCategoryButton))
+                            }
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    
+                    LazyVStack(spacing: 16) {
+                        if let list = viewStore.postListEntity {
+                            ForEach(list.items, id: \.id) { element in
+                                if case .post(let post) = element,
+                                   let content = post.content {
+                                    Button(action: {
+                                        selectedPostId = String(post.id)
+                                        viewStore.send(.view(.willNavigateToFeedDetail))
+                                        showFeedDetail = true
+                                    }) {
+                                        PostView(content: content,  postId: post.id) {
+                                            
+                                        } onTapLike: {
+                                            viewStore.send(.view(.didTappedLike(post.id)))
+                                        } onTapScrap: {
+                                            viewStore.send(.view(.didTappedScrap(post.id)))
+                                        }
+                                        .id("post-\(post.id)")
                                     }
+                                    .buttonStyle(PlainButtonStyle())
+                                    .onAppear {
+                                        if element.id == list.items.last?.id {
+                                            viewStore.send(.view(.loadNextPage))
+                                        }
+                                    }
+                                    .padding(.horizontal, 20)
                                 }
-                                .padding(.horizontal, 20)
                             }
                         }
                     }
+                    .padding(.top, 16)
                 }
-                .padding(.top, 16)
+            }
+            .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
+            .onChange(of: showFeedDetail) { isShowing in
+                if !isShowing, let position = scrollPosition {
+                    let returnSource = viewStore.returnSource
+                    
+                    switch returnSource {
+                    case .feedDetail(let needsRefresh):
+                        if !needsRefresh {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    proxy.scrollTo(position, anchor: .center)
+                                }
+                            }
+                        }
+                    default:
+                        break
+                    }
+                }
             }
         }
-        .background(DesignSystemAsset.Colors.gray900.swiftUIColor)
     }
 
 

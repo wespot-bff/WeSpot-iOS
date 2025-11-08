@@ -19,12 +19,14 @@ public final class PolicyAgreementBottomSheetViewReactor: Reactor {
         case didTappedPrivacyAgreement
         case didTappedServiceAgreement
         case didTappedMarketingAgreement
+        case didTappedAgeAgreement
         case didTappedConfirmButton
     }
     
     public enum Mutation {
         case setupAllAgreement(Bool)
         case setupServiceAgreement(Bool)
+        case setupAgeAgreement(Bool)
         case setupPrivacyAgreement(Bool)
         case setupMarketingAgreement(Bool)
         case setupConfirmButton(Bool)
@@ -34,6 +36,7 @@ public final class PolicyAgreementBottomSheetViewReactor: Reactor {
         var isAllAgreement: Bool
         var isServiceAgreement: Bool
         var isPrivacyAgreement: Bool
+        var isAgeAgreement: Bool
         var isMarketingAgreement: Bool
         var isEnabled: Bool
     }
@@ -43,6 +46,7 @@ public final class PolicyAgreementBottomSheetViewReactor: Reactor {
             isAllAgreement: false,
             isServiceAgreement: false,
             isPrivacyAgreement: false,
+            isAgeAgreement: false,
             isMarketingAgreement: false,
             isEnabled: false
         )
@@ -53,10 +57,18 @@ public final class PolicyAgreementBottomSheetViewReactor: Reactor {
         case .didTappedAllAgreement:
             return .concat(
                 .just(.setupServiceAgreement(!currentState.isAllAgreement)),
+                .just(.setupAgeAgreement(!currentState.isAgeAgreement)),
                 .just(.setupAllAgreement(!currentState.isAllAgreement)),
                 .just(.setupConfirmButton(!currentState.isAllAgreement)),
                 .just(.setupMarketingAgreement(!currentState.isAllAgreement)),
                 .just(.setupPrivacyAgreement(!currentState.isAllAgreement))
+            )
+        case .didTappedAgeAgreement:
+            let isEnabled = !currentState.isAgeAgreement == true && currentState.isServiceAgreement == true ? true : false
+            print("만 14세 이상 동의 체크값 입니다 : \(isEnabled)")
+            return .concat(
+                .just(.setupAgeAgreement(!currentState.isAgeAgreement)),
+                .just(.setupConfirmButton(isEnabled))
             )
             
         case .didTappedPrivacyAgreement:
@@ -82,6 +94,8 @@ public final class PolicyAgreementBottomSheetViewReactor: Reactor {
     public func reduce(state: State, mutation: Mutation) -> State {
         var newState = state
         switch mutation {
+        case let .setupAgeAgreement(isAgeagreement):
+            newState.isAgeAgreement = isAgeagreement
         case let .setupAllAgreement(isAllAgreement):
             newState.isAllAgreement = isAllAgreement
         case let .setupServiceAgreement(isServiceAgreement):

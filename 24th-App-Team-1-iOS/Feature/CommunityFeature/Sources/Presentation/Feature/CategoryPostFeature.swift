@@ -8,6 +8,13 @@
 import ComposableArchitecture
 import CommunityDomain
 
+public enum ReturnSource: Equatable {
+    case none
+    case feedDetail(needsRefresh: Bool)
+    case postWrite
+}
+
+
 
 @Reducer
 public struct CategoryPostFeature {
@@ -30,6 +37,7 @@ public struct CategoryPostFeature {
         var isLoadingPage = false
         var nextCursor: Int? = nil
         var hasNext: Bool = false
+        var returnSource: ReturnSource = .none
     }
 
     public enum Action: ViewAction {
@@ -43,6 +51,7 @@ public struct CategoryPostFeature {
     public enum View: BindableAction, Equatable {
         case binding(BindingAction<State>)
         case onAppear
+        case onAppearWithRefresh
         case didSelectChip(CategoryChipsEntity)
         case didTappedCategoryButton
         case dismissCategorySheet
@@ -53,6 +62,10 @@ public struct CategoryPostFeature {
         case scrapResponseSuccess(postId: Int)
         case scrapResponseFailure(postId: Int, errorMessage: String)
         case loadNextPage
+        case willNavigateToFeedDetail
+        case didReturnFromFeedDetail(needsRefresh: Bool)
+        case willNavigateToPostWrite
+        case didReturnFromPostWrite
     }
     
     public enum Internal {}
@@ -69,26 +82,48 @@ public struct CategoryPostFeature {
         
         Reduce { state, action in
             switch action {
-            case .view(.onAppear):
-                state.nextCursor = nil
-                state.hasNext = false
-                state.rawPostListItems = nil
-                state.postListEntity = nil
+            case .view(.willNavigateToFeedDetail):
+                state.returnSource = .feedDetail(needsRefresh: false)
+                return .none
+            
+            case .view(.didReturnFromFeedDetail(let needsRefresh)):
+                state.returnSource = .feedDetail(needsRefresh: needsRefresh)
+                return .none
+            
+            case .view(.willNavigateToPostWrite):
+                state.returnSource = .postWrite
+                return .none
+            
+            case .view(.didReturnFromPostWrite):
+                state.returnSource = .postWrite
+                return .none
                 
-                let categoryId = state.category.id
-                return .run { send in
-                    let query = FetchPostDetailItemRequestQuery(
-                        categoryId: categoryId,
-                        inquirySize: 20,
-                        cursorId: nil
-                    )
-                    do {
-                        let posts = try await fetchPostDetailListUseCase.execute(query: query)
-                        await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
-                    } catch {
-                        await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
+            case .view(.onAppear):
+                
+                switch state.returnSource {
+                case .none:
+                    // 최초 진입
+                    guard state.postListEntity == nil else {
+                        return .none
                     }
+                    return loadInitialData(state: &state)
+                    
+                case .feedDetail(let needsRefresh):
+                    state.returnSource = .none
+                    if needsRefresh {
+                        return loadInitialData(state: &state)
+                    } else {
+                        // 스크롤 위치 유지
+                        return .none
+                    }
+                    
+                case .postWrite:
+                    state.returnSource = .none
+                    return loadInitialData(state: &state)
                 }
+                
+            case .view(.onAppearWithRefresh):
+                return loadInitialData(state: &state)
                 
             case .inner(.postListResponse(.success(let posts), let isLoadMore)):
                 state.isLoadingPage = false
@@ -317,5 +352,30 @@ extension CategoryPostFeature {
             }
         }
         state.postListEntity = merged
+    }
+}
+
+
+extension CategoryPostFeature {
+    private func loadInitialData(state: inout State) -> Effect<Action> {
+        state.nextCursor = nil
+        state.hasNext = false
+        state.rawPostListItems = nil
+        state.postListEntity = nil
+        
+        let categoryId = state.category.id
+        return .run { send in
+            let query = FetchPostDetailItemRequestQuery(
+                categoryId: categoryId,
+                inquirySize: 20,
+                cursorId: nil
+            )
+            do {
+                let posts = try await fetchPostDetailListUseCase.execute(query: query)
+                await send(.inner(.postListResponse(.success(posts), isLoadMore: false)))
+            } catch {
+                await send(.inner(.postListResponse(.failure(error), isLoadMore: false)))
+            }
+        }
     }
 }

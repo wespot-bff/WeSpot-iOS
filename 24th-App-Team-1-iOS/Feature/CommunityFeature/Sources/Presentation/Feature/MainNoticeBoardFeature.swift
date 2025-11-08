@@ -24,6 +24,7 @@ public struct MainNoticeBoardFeature {
         case none
         case feedDetail(needsRefresh: Bool)
         case postWrite
+        case categoryPost
     }
     
     @ObservableState
@@ -78,6 +79,8 @@ public struct MainNoticeBoardFeature {
         case didReturnFromFeedDetail(needsRefresh: Bool)
         case willNavigateToPostWrite
         case didReturnFromPostWrite
+        case willNavigateToCategoryPost
+        case didReturnFromCategoryPost
         case contactSupport
         case onAppear
     }
@@ -101,6 +104,14 @@ public struct MainNoticeBoardFeature {
         
         Reduce { state, action in
             switch action {
+            case .view(.willNavigateToCategoryPost):
+                state.returnSource = .categoryPost
+                return .none
+
+            case .view(.didReturnFromCategoryPost):
+                state.returnSource = .categoryPost
+                return .none
+                
             case .view(.willNavigateToFeedDetail):
                 state.returnSource = .feedDetail(needsRefresh: false)
                 return .none
@@ -147,6 +158,10 @@ public struct MainNoticeBoardFeature {
                     }
                     
                 case .postWrite:
+                    state.returnSource = .none
+                    return loadInitialData(state: &state)
+                    
+                case .categoryPost:
                     state.returnSource = .none
                     return loadInitialData(state: &state)
                 }

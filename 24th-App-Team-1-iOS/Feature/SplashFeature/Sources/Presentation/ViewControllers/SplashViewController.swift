@@ -15,8 +15,8 @@ import ReactorKit
 
 
 public final class SplashViewController: BaseViewController<SplashViewReactor> {
-    private let logoImageView: UIImageView = UIImageView()
-    private let descrptionLabel: WSLabel = WSLabel(wsFont: .Body02, textAlignment: .center)
+    private let mainImageView: UIImageView = UIImageView()
+//    private let descrptionLabel: WSLabel = WSLabel(wsFont: .Body02, textAlignment: .center)
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,37 +24,24 @@ public final class SplashViewController: BaseViewController<SplashViewReactor> {
     
     public override func setupUI() {
         super.setupUI()
-        view.addSubviews(logoImageView, descrptionLabel)
+        view.addSubviews(mainImageView)
     }
     
     public override func setupAutoLayout() {
         super.setupAutoLayout()
-        logoImageView.snp.makeConstraints {
-            $0.width.equalTo(183)
-            $0.height.equalTo(51)
-            $0.center.equalToSuperview()
-        }
-        
-        descrptionLabel.snp.makeConstraints {
-            $0.top.equalTo(logoImageView.snp.bottom).offset(12)
-            $0.width.equalTo(149)
-            $0.height.equalTo(27)
-            $0.centerX.equalToSuperview()
+        mainImageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
     
     public override func setupAttributes() {
         super.setupAttributes()
         
-        logoImageView.do {
-            $0.image = DesignSystemAsset.Images.logoLarge.image
+        mainImageView.do {
+            $0.image = DesignSystemAsset.Images.splashImg.image
             $0.contentMode = .scaleToFill
         }
-        
-        descrptionLabel.do {
-            $0.text = "우리가 연결되는 공간"
-            $0.textColor = DesignSystemAsset.Colors.white.color
-        }
+
     }
     
     public override func bind(reactor: SplashViewReactor) {
