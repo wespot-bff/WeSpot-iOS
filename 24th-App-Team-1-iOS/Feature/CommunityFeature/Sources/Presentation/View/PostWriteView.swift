@@ -286,7 +286,6 @@ struct PostWriteView: View {
         }) {
             if viewStore.isSubmitting {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: DesignSystemAsset.Colors.gray900.swiftUIColor))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 Text("게시하기")
