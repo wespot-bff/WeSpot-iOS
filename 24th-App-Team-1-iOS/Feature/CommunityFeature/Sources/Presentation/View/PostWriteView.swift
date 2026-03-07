@@ -284,10 +284,15 @@ struct PostWriteView: View {
         Button(action: {
             viewStore.send(.view(.submitButtonTapped))
         }) {
-            Text("게시하기")
-                .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
-                .foregroundColor(viewStore.canSubmit ? DesignSystemAsset.Colors.gray900.swiftUIColor : DesignSystemAsset.Colors.gray300.swiftUIColor)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if viewStore.isSubmitting {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Text("게시하기")
+                    .font(DesignSystemFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                    .foregroundColor(viewStore.canSubmit ? DesignSystemAsset.Colors.gray900.swiftUIColor : DesignSystemAsset.Colors.gray300.swiftUIColor)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
         .frame(height: 52)
         .background(viewStore.canSubmit ? DesignSystemAsset.Colors.primary300.swiftUIColor : DesignSystemAsset.Colors.gray500.swiftUIColor)
