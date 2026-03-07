@@ -224,13 +224,13 @@ public struct PostWriteFeature {
             case .view(.submitButtonTapped):
                 guard !state.isSubmitting else { return .none }
                 guard let category = state.selectedCategory else { return .none }
-                state.isSubmitting = true
                 let categoryId = category.id
                 let title = state.postTitle
                 let description = state.postDescription
 
                 if state.isEditing {
                     guard let editingPost = state.editingPost else { return .none }
+                    state.isSubmitting = true
                     let postId = editingPost.id
 
                     let newPresignedList = state.preSignedURLEntity
@@ -280,6 +280,7 @@ public struct PostWriteFeature {
                     }
 
                 } else {
+                    state.isSubmitting = true
                     let presignedList = state.preSignedURLEntity
                     let imageDataList = state.photoImageData
 
