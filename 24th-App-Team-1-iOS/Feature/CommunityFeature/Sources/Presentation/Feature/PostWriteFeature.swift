@@ -29,6 +29,7 @@ public struct PostWriteFeature {
         var isShowingCategorySheet = false
         var selectedCategory: CategoryChipsEntity? = nil
         var didUploadSuccess = false
+        var isSubmitting = false
         var isMain: Bool
         var postTitle: String = ""
         var postDescription: String = ""
@@ -51,6 +52,7 @@ public struct PostWriteFeature {
             && !postDescription.isEmpty
             && !descriptionTooLong
             && !titleTooLong
+            && !isSubmitting
         }
         
         public init(editingPost: PostItem? = nil, selectedCategory: CategoryChipsEntity? = nil, isEditing: Bool = false, isMain: Bool = true) {
@@ -220,7 +222,9 @@ public struct PostWriteFeature {
 
                 
             case .view(.submitButtonTapped):
+                guard !state.isSubmitting else { return .none }
                 guard let category = state.selectedCategory else { return .none }
+                state.isSubmitting = true
                 let categoryId = category.id
                 let title = state.postTitle
                 let description = state.postDescription
@@ -350,6 +354,7 @@ public struct PostWriteFeature {
                 return .none
             case let .internal(.postUploadResponse(success)):
                 print("게시글 업로드 성공 여부 값 입니다 : \(success)")
+                state.isSubmitting = false
                 if success {
                     state.didUploadSuccess = true
                 }
